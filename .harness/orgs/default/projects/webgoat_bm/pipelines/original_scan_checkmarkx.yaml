@@ -1,5 +1,5 @@
 pipeline:
-  name: original scan checkmarkx
+  name: original scan mythos
   identifier: original_scan_checkmarkx
   tags: {}
   projectIdentifier: webgoat_bm
