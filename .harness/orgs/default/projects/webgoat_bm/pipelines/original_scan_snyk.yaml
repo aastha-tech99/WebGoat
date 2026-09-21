@@ -1,0 +1,52 @@
+pipeline:
+  name: original scan snyk
+  identifier: original_scan_snyk
+  tags: {}
+  projectIdentifier: webgoat_bm
+  orgIdentifier: default
+  properties:
+    ci:
+      codebase:
+        connectorRef: webgoat_bm
+        build: <+input>
+  stages:
+    - stage:
+        name: init
+        identifier: init
+        description: ""
+        type: SecurityTests
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+          buildIntelligence:
+            enabled: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: account.remediationagentdelegate
+              namespace: harness-qa-delegate
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Snyk
+                  name: Snyk_1
+                  identifier: Snyk_1
+                  spec:
+                    mode: orchestration
+                    config: oss
+                    target:
+                      type: repository
+                      detection: auto
+                    advanced:
+                      log:
+                        level: info
+                    privileged: true
+                    auth:
+                      access_token: snyk_uat.1fcad39e.eyJlIjoxNzk3NzU0NDEyLCJoIjoic255ay5pbyIsImoiOiJBYUREQnp2QTFfOHFuT2F2eDYtTFhnIiwicyI6Im41MkNYMzVfU2Jpb0N5ci1hckk5TUEiLCJ0aWQiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFBIn0.rJTmofhIdS3x-C_CEl5-V5zv0wVlHrAmouKu4Aogn3NE-WCdvJTkmL4mpFUMwlWccEtyOnhj39t03r41VqlUCw
+                    sbom:
+                      format: spdx-json
