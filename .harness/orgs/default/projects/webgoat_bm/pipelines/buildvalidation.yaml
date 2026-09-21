@@ -1,0 +1,229 @@
+pipeline:
+  name: buildvalidation
+  identifier: buildvalidation
+  tags: {}
+  projectIdentifier: webgoat_bm
+  orgIdentifier: default
+  properties:
+    ci:
+      codebase:
+        connectorRef: webgoat_benchmark
+        build: <+input>
+        sparseCheckout: []
+  stages:
+    - stage:
+        identifier: init
+        type: CI
+        name: init
+        description: WebGoat build validation — spotless, build + smoke/E2E, unit + integration tests
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+          buildIntelligence:
+            enabled: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: account.remediationagentdelegate
+              namespace: harness-qa-delegate
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  identifier: Spotless_Check
+                  type: Run
+                  name: Spotless_Check
+                  timeout: 20m
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: eclipse-temurin:25-jdk-noble
+                    shell: Sh
+                    command: |-
+                      #!/bin/sh
+                      set -e
+                      WORKSPACE="${HARNESS_WORKSPACE:-.}"
+                      cd "$WORKSPACE"
+                      chmod +x ./mvnw
+
+                      echo "==> Spotless format check"
+                      ./mvnw -B --no-transfer-progress spotless:check
+
+                      echo "==> PASSED"
+                    resources:
+                      limits:
+                        memory: 4Gi
+                        cpu: "2"
+              - step:
+                  identifier: Build_and_E2E
+                  type: Run
+                  name: Build_and_E2E
+                  timeout: 60m
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: eclipse-temurin:25-jdk-noble
+                    shell: Sh
+                    command: |-
+                      #!/bin/sh
+                      set -e
+                      WORKSPACE="${HARNESS_WORKSPACE:-.}"
+                      WEBGOAT_PORT="${WEBGOAT_PORT:-8080}"
+                      WEBWOLF_PORT="${WEBWOLF_PORT:-9090}"
+                      WEBGOAT_URL="http://127.0.0.1:${WEBGOAT_PORT}/WebGoat"
+                      WEBWOLF_URL="http://127.0.0.1:${WEBWOLF_PORT}/WebWolf"
+                      APP_PID=""
+                      COOKIE_JAR="/tmp/webgoat-cookies.txt"
+
+                      cleanup() {
+                        [ -n "$APP_PID" ] && kill "$APP_PID" 2>/dev/null || true
+                      }
+                      trap cleanup EXIT INT TERM
+
+                      assert_status() {
+                        _label="$1" _exp="$2" _got="$3"
+                        if [ "$_got" != "$_exp" ]; then
+                          echo "FAIL [$_label]: expected HTTP $_exp, got HTTP $_got"
+                          exit 1
+                        fi
+                        echo "PASS [$_label]: HTTP $_got"
+                      }
+
+                      echo "==> Install curl"
+                      apt-get update -qq
+                      DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl ca-certificates >/dev/null
+
+                      cd "$WORKSPACE"
+                      chmod +x ./mvnw
+
+                      echo "==> Build WebGoat (skip tests)"
+                      ./mvnw -B --no-transfer-progress package -DskipTests -DskipITs
+                      WEBGOAT_JAR="$(ls -1 target/webgoat-*.jar | grep -v 'sources\|javadoc\|original' | head -1)"
+                      test -f "$WEBGOAT_JAR"
+                      echo "Using jar: $WEBGOAT_JAR"
+
+                      echo "==> Start WebGoat + WebWolf"
+                      mkdir -p /tmp/webgoat-home
+                      java \
+                        -Dfile.encoding=UTF-8 \
+                        -Duser.home=/tmp/webgoat-home \
+                        -Dwebgoat.server.directory=/tmp/webgoat-data \
+                        -Dwebgoat.user.directory=/tmp/webgoat-data \
+                        --add-opens java.base/java.lang=ALL-UNNAMED \
+                        --add-opens java.base/java.util=ALL-UNNAMED \
+                        --add-opens java.base/java.lang.reflect=ALL-UNNAMED \
+                        --add-opens java.base/java.text=ALL-UNNAMED \
+                        --add-opens java.desktop/java.beans=ALL-UNNAMED \
+                        --add-opens java.desktop/java.awt.font=ALL-UNNAMED \
+                        --add-opens java.base/sun.nio.ch=ALL-UNNAMED \
+                        --add-opens java.base/java.io=ALL-UNNAMED \
+                        --enable-native-access=ALL-UNNAMED \
+                        -jar "$WEBGOAT_JAR" \
+                        --server.address=127.0.0.1 \
+                        >/tmp/webgoat.log 2>&1 &
+                      APP_PID=$!
+
+                      for i in $(seq 1 90); do
+                        curl -fsS "$WEBGOAT_URL/login" >/dev/null 2>&1 && break
+                        kill -0 "$APP_PID" 2>/dev/null || {
+                          echo "WebGoat exited early"
+                          tail -n 100 /tmp/webgoat.log || true
+                          exit 1
+                        }
+                        sleep 3
+                      done
+                      curl -fsS "$WEBGOAT_URL/login" >/dev/null
+
+                      echo "==> Runtime smoke / API regression"
+                      assert_status "webgoat login page" 200 "$(curl -s -o /dev/null -w '%{http_code}' "$WEBGOAT_URL/login")"
+                      assert_status "webgoat health" 200 "$(curl -s -o /dev/null -w '%{http_code}' "$WEBGOAT_URL/actuator/health")"
+                      assert_status "webgoat registration page" 200 "$(curl -s -o /dev/null -w '%{http_code}' "$WEBGOAT_URL/registration")"
+                      assert_status "webwolf login page" 200 "$(curl -s -o /dev/null -w '%{http_code}' "$WEBWOLF_URL/login")"
+
+                      # Username: lowercase letters/digits/hyphen, length 6-45 (UserForm constraints)
+                      CI_USER="ciuser$(date +%s | tr -cd '0-9' | tail -c 8)"
+                      CI_PASS="pass1234"
+                      rm -f "$COOKIE_JAR"
+
+                      REG_CODE=$(curl -s -o /dev/null -w '%{http_code}' -c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+                        -X POST "$WEBGOAT_URL/register.mvc" \
+                        -H 'Content-Type: application/x-www-form-urlencoded' \
+                        --data-urlencode "username=$CI_USER" \
+                        --data-urlencode "password=$CI_PASS" \
+                        --data-urlencode "matchingPassword=$CI_PASS" \
+                        --data-urlencode "agree=agree")
+                      # Spring redirects to /attack after successful register+login
+                      assert_status "register+login" 302 "$REG_CODE"
+
+                      # Authenticated /attack and /welcome.mvc redirect to /start.mvc
+                      ATK_CODE=$(curl -s -o /dev/null -w '%{http_code}' -b "$COOKIE_JAR" "$WEBGOAT_URL/attack")
+                      assert_status "attack redirects to start" 302 "$ATK_CODE"
+                      ATK_LOC=$(curl -s -o /dev/null -D - -b "$COOKIE_JAR" "$WEBGOAT_URL/attack" \
+                        | awk 'BEGIN{IGNORECASE=1} /^Location:/ {print $2}' | tr -d '\r')
+                      case "$ATK_LOC" in
+                        *start.mvc*) echo "PASS [attack Location]: $ATK_LOC" ;;
+                        *) echo "FAIL [attack Location]: expected start.mvc, got: $ATK_LOC"; exit 1 ;;
+                      esac
+
+                      assert_status "start.mvc lesson UI" 200 "$(curl -s -o /dev/null -w '%{http_code}' \
+                        -b "$COOKIE_JAR" "$WEBGOAT_URL/start.mvc")"
+
+                      HEALTH_BODY=$(curl -fsS "$WEBGOAT_URL/actuator/health")
+                      printf '%s' "$HEALTH_BODY" | grep -qi '"status"[[:space:]]*:[[:space:]]*"UP"' \
+                        || { echo "FAIL [health body]: expected status UP, got: $HEALTH_BODY"; exit 1; }
+                      echo "PASS [health body]: status UP"
+
+                      echo "==> Build + E2E PASSED"
+                    envVariables:
+                      WEBGOAT_PORT: "8080"
+                      WEBWOLF_PORT: "9090"
+                      TZ: Europe/Amsterdam
+                    resources:
+                      limits:
+                        memory: 8Gi
+                        cpu: "3"
+              - step:
+                  identifier: Unit_Tests
+                  type: Run
+                  name: Unit_Tests
+                  timeout: 60m
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: eclipse-temurin:25-jdk-noble
+                    shell: Sh
+                    command: |-
+                      #!/bin/sh
+                      set -e
+                      WORKSPACE="${HARNESS_WORKSPACE:-.}"
+
+                      echo "==> Install curl (failsafe health checks)"
+                      apt-get update -qq
+                      DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl ca-certificates >/dev/null
+
+                      cd "$WORKSPACE"
+                      chmod +x ./mvnw
+
+                      # Wipe prior WebGoat runtime dirs so stale lesson data cannot fail ITs
+                      echo "==> Clean prior WebGoat runtime data"
+                      ./mvnw -B --no-transfer-progress -q clean -Pcleanall || true
+                      rm -rf "${HOME}/.webgoat-"* /tmp/webgoat_* 2>/dev/null || true
+
+                      # Single verify: Surefire unit tests + Failsafe ITs.
+                      # Match upstream failsafe includes (*Test under integration/) and exclude
+                      # Playwright UI tests. Do NOT use -DskipTests (it also skips Failsafe).
+                      # start-server profile (activeByDefault) boots the jar for ITs.
+                      echo "==> Unit + integration tests (Failsafe, no Playwright)"
+                      ./mvnw -B --no-transfer-progress verify \
+                        -Dit.test='org.owasp.webgoat.integration.*Test'
+
+                      echo "==> All unit + integration tests PASSED"
+                    envVariables:
+                      TZ: Europe/Amsterdam
+                      WEBGOAT_HOST: 127.0.0.1
+                      WEBWOLF_HOST: 127.0.0.1
+                    resources:
+                      limits:
+                        memory: 8Gi
+                        cpu: "3"
