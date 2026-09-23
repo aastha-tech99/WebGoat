@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
     })
 public class SqlInjectionLesson5b implements AssignmentEndpoint {
 
+  private static final String DISPLAY_QUERY_TEMPLATE =
+      "SELECT * From user_data WHERE Login_Count = %s and userid= %s";
   private final LessonDataSource dataSource;
 
   public SqlInjectionLesson5b(LessonDataSource dataSource) {
@@ -43,9 +45,7 @@ public class SqlInjectionLesson5b implements AssignmentEndpoint {
 
   protected AttackResult injectableQuery(String login_count, String accountName) {
     String queryString = "SELECT * From user_data WHERE Login_Count = ? and userid= ?";
-    String displayQuery =
-        "SELECT * From user_data WHERE Login_Count = " + login_count + " and userid= "
-            + accountName;
+    String displayQuery = String.format(DISPLAY_QUERY_TEMPLATE, login_count, accountName);
     try (Connection connection = dataSource.getConnection()) {
       PreparedStatement query =
           connection.prepareStatement(

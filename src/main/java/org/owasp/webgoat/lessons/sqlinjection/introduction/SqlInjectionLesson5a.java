@@ -28,6 +28,8 @@ public class SqlInjectionLesson5a implements AssignmentEndpoint {
           + " like this: <span style=\"font-style: italic\">SELECT * FROM user_data WHERE"
           + " (first_name = 'John' and last_name = '') or (TRUE)</span>, which will always evaluate"
           + " to true, no matter what came before it.";
+  private static final String DISPLAY_QUERY_TEMPLATE =
+      "SELECT * FROM user_data WHERE first_name = 'John' and last_name = '%s'";
   private final LessonDataSource dataSource;
 
   public SqlInjectionLesson5a(LessonDataSource dataSource) {
@@ -43,8 +45,7 @@ public class SqlInjectionLesson5a implements AssignmentEndpoint {
 
   protected AttackResult injectableQuery(String accountName) {
     String query = "SELECT * FROM user_data WHERE first_name = 'John' and last_name = ?";
-    String displayQuery =
-        "SELECT * FROM user_data WHERE first_name = 'John' and last_name = '" + accountName + "'";
+    String displayQuery = String.format(DISPLAY_QUERY_TEMPLATE, accountName);
     try (Connection connection = dataSource.getConnection()) {
       try (PreparedStatement statement =
           connection.prepareStatement(

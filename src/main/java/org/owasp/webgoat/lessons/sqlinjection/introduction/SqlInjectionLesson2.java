@@ -40,14 +40,14 @@ public class SqlInjectionLesson2 implements AssignmentEndpoint {
           "(?i)^\\s*SELECT\\s+(?:\\*|[\\w\\s,]+)\\s+FROM\\s+(\\w+)"
               + "\\s+WHERE\\s+(\\w+)\\s*=\\s*(?:'([^']*)'|(\\d+))\\s*;?\\s*$");
 
-  private static final Map<String, String> EMPLOYEE_COLUMNS =
+  private static final Map<String, String> EMPLOYEE_QUERIES =
       Map.of(
-          "userid", "userid",
-          "first_name", "first_name",
-          "last_name", "last_name",
-          "department", "department",
-          "salary", "salary",
-          "auth_tan", "auth_tan");
+          "userid", "SELECT * FROM employees WHERE userid = ?",
+          "first_name", "SELECT * FROM employees WHERE first_name = ?",
+          "last_name", "SELECT * FROM employees WHERE last_name = ?",
+          "department", "SELECT * FROM employees WHERE department = ?",
+          "salary", "SELECT * FROM employees WHERE salary = ?",
+          "auth_tan", "SELECT * FROM employees WHERE auth_tan = ?");
 
   private final LessonDataSource dataSource;
 
@@ -72,8 +72,8 @@ public class SqlInjectionLesson2 implements AssignmentEndpoint {
         return failed(this).feedback("sql-injection.2.failed").build();
       }
       String column = matcher.group(2);
-      String safeColumn = EMPLOYEE_COLUMNS.get(column.toLowerCase());
-      if (safeColumn == null) {
+      String querySql = EMPLOYEE_QUERIES.get(column.toLowerCase());
+      if (querySql == null) {
         return failed(this).feedback("sql-injection.2.failed").build();
       }
       String stringValue = matcher.group(3);
@@ -82,7 +82,7 @@ public class SqlInjectionLesson2 implements AssignmentEndpoint {
 
       PreparedStatement statement =
           connection.prepareStatement(
-              "SELECT * FROM employees WHERE " + safeColumn + " = ?",
+              querySql,
               TYPE_SCROLL_INSENSITIVE,
               CONCUR_READ_ONLY);
       statement.setString(1, value);

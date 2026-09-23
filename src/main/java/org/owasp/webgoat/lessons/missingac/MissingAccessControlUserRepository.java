@@ -42,8 +42,7 @@ public class MissingAccessControlUserRepository {
 
   public User save(User user) {
     jdbcTemplate.update(
-        "INSERT INTO access_control_users(username, password, admin)"
-            + " VALUES(:username,:password,:admin)",
+        "INSERT INTO access_control_users(username, password, admin) VALUES(:username,:password,:admin)",
         new MapSqlParameterSource()
             .addValue("username", user.getUsername())
             .addValue("password", user.getPassword())

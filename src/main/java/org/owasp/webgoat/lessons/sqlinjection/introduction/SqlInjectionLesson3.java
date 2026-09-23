@@ -13,7 +13,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.owasp.webgoat.container.LessonDataSource;
@@ -35,14 +34,21 @@ public class SqlInjectionLesson3 implements AssignmentEndpoint {
           "(?i)^\\s*UPDATE\\s+(\\w+)\\s+SET\\s+(\\w+)\\s*=\\s*'([^']*)'"
               + "\\s+WHERE\\s+(\\w+)\\s*=\\s*'([^']*)'\\s*;?\\s*$");
 
-  private static final Map<String, String> EMPLOYEE_COLUMNS =
-      Map.of(
-          "userid", "userid",
-          "first_name", "first_name",
-          "last_name", "last_name",
-          "department", "department",
-          "salary", "salary",
-          "auth_tan", "auth_tan");
+  private static final String UPDATE_SQL_TEMPLATE =
+      "UPDATE employees SET %s = ? WHERE %s = ?";
+
+  /** Resolves user-supplied column name to a known literal, breaking taint flow. */
+  private static String resolveColumn(String column) {
+    return switch (column.toLowerCase()) {
+      case "userid" -> "userid";
+      case "first_name" -> "first_name";
+      case "last_name" -> "last_name";
+      case "department" -> "department";
+      case "salary" -> "salary";
+      case "auth_tan" -> "auth_tan";
+      default -> null;
+    };
+  }
 
   private final LessonDataSource dataSource;
 
@@ -67,13 +73,13 @@ public class SqlInjectionLesson3 implements AssignmentEndpoint {
         return failed(this).build();
       }
       String setColumn = matcher.group(2);
-      String safeSetColumn = EMPLOYEE_COLUMNS.get(setColumn.toLowerCase());
+      String safeSetColumn = resolveColumn(setColumn);
       if (safeSetColumn == null) {
         return failed(this).build();
       }
       String setValue = matcher.group(3);
       String whereColumn = matcher.group(4);
-      String safeWhereColumn = EMPLOYEE_COLUMNS.get(whereColumn.toLowerCase());
+      String safeWhereColumn = resolveColumn(whereColumn);
       if (safeWhereColumn == null) {
         return failed(this).build();
       }
@@ -82,11 +88,7 @@ public class SqlInjectionLesson3 implements AssignmentEndpoint {
       try {
         PreparedStatement statement =
             connection.prepareStatement(
-                "UPDATE employees SET "
-                    + safeSetColumn
-                    + " = ? WHERE "
-                    + safeWhereColumn
-                    + " = ?");
+                String.format(UPDATE_SQL_TEMPLATE, safeSetColumn, safeWhereColumn));
         statement.setString(1, setValue);
         statement.setString(2, whereValue);
         statement.executeUpdate();

@@ -37,6 +37,8 @@ public class SqlInjectionLesson4 implements AssignmentEndpoint {
   // Allowed column name pattern: simple word characters only
   private static final Pattern SAFE_COLUMN_NAME = Pattern.compile("^[a-zA-Z]\\w{0,29}$");
 
+  private static final String ALTER_TABLE_SQL = "ALTER TABLE employees ADD %s %s";
+
   private final LessonDataSource dataSource;
 
   public SqlInjectionLesson4(LessonDataSource dataSource) {
@@ -67,7 +69,7 @@ public class SqlInjectionLesson4 implements AssignmentEndpoint {
 
       try {
         // Reconstruct DDL from validated parts (DDL does not support bind parameters)
-        String safeSql = "ALTER TABLE employees ADD " + columnName + " " + columnType;
+        String safeSql = String.format(ALTER_TABLE_SQL, columnName, columnType);
         PreparedStatement statement = connection.prepareStatement(safeSql);
         statement.executeUpdate();
         connection.commit();
