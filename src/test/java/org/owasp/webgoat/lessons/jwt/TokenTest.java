@@ -54,10 +54,13 @@ public class TokenTest {
     claims.setExpiration(Date.from(now.minus(Duration.ofDays(9))));
     claims.put("admin", "false");
     claims.put("user", "Tom");
+    // JWT secret loaded from environment or test default; must match server config
+    String jwtSecret =
+        System.getenv().getOrDefault("WEBGOAT_JWT_REFRESH_SECRET", "test-jwt-secret-key");
     String token =
         Jwts.builder()
             .setClaims(claims)
-            .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, "bm5n3SkxCX4kKRy4")
+            .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, jwtSecret)
             .compact();
     log.debug(token);
   }

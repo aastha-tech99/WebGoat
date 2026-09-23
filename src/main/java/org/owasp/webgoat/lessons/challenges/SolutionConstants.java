@@ -6,6 +6,8 @@ package org.owasp.webgoat.lessons.challenges;
 
 public interface SolutionConstants {
 
-  // TODO should be random generated when starting the server
-  String PASSWORD = "!!webgoat_admin_1234!!";
+  // Credential loaded from environment variable; generated randomly per server start when not set
+  String PASSWORD =
+      System.getenv().getOrDefault(
+          "WEBGOAT_CHALLENGE_PASSWORD", java.util.UUID.randomUUID().toString());
 }

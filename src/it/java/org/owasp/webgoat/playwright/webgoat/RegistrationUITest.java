@@ -24,7 +24,7 @@ public class RegistrationUITest extends PlaywrightTest {
     loginPage.login(Authentication.getTweety().name(), Authentication.getTweety().password());
 
     var newUsername = "newuser" + System.currentTimeMillis();
-    var password = "password123";
+    var password = "password123"; // placeholder test-only credential for ephemeral registration
     var registrationPage = new RegistrationPage(page);
     registrationPage.open();
     registrationPage.register(newUsername, password);
@@ -40,7 +40,7 @@ public class RegistrationUITest extends PlaywrightTest {
     registrationPage.open();
 
     var newUsername = "newuser" + System.currentTimeMillis();
-    var password = "password123";
+    var password = "password123"; // placeholder test-only credential for ephemeral registration
     registrationPage.register(newUsername, password);
 
     assertThat(page.content()).contains(newUsername);

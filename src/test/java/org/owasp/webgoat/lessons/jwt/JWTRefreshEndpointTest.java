@@ -5,12 +5,14 @@
 package org.owasp.webgoat.lessons.jwt;
 
 import static org.hamcrest.Matchers.is;
-import static org.owasp.webgoat.lessons.jwt.JWTRefreshEndpoint.PASSWORD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.hamcrest.CoreMatchers;
@@ -18,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.owasp.webgoat.WithWebGoatUser;
 import org.owasp.webgoat.container.plugins.LessonTest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -25,6 +28,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @WithWebGoatUser
 public class JWTRefreshEndpointTest extends LessonTest {
+
+  @Value("${webgoat.lesson.jwt.refresh.password}")
+  private String jwtRefreshPassword;
+
+  @Value("${webgoat.lesson.jwt.refresh.secret}")
+  private String jwtRefreshSecret;
 
   @BeforeEach
   void setup() {
@@ -36,7 +45,7 @@ public class JWTRefreshEndpointTest extends LessonTest {
     ObjectMapper objectMapper = new ObjectMapper();
 
     // First login to obtain tokens for Jerry
-    var loginJson = Map.of("user", "Jerry", "password", PASSWORD);
+    var loginJson = Map.of("user", "Jerry", "password", jwtRefreshPassword);
     MvcResult result =
         mockMvc
             .perform(
@@ -49,10 +58,15 @@ public class JWTRefreshEndpointTest extends LessonTest {
         objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
     String refreshToken = tokens.get("refresh_token");
 
-    // Now create a new refresh token for Tom based on Toms old access token and send the refresh
-    // token of Jerry
+    // Generate an expired token for Tom signed with the configured secret
+    Instant past = Instant.parse("2018-05-12T15:03:31Z");
     String accessTokenTom =
-        "eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1MjYxMzE0MTEsImV4cCI6MTUyNjIxNzgxMSwiYWRtaW4iOiJmYWxzZSIsInVzZXIiOiJUb20ifQ.DCoaq9zQkyDH25EcVWKcdbyVfUL4c9D4jRvsqOqvi9iAd4QuqmKcchfbU8FNzeBNF9tLeFXHZLU4yRkq-bjm7Q";
+        Jwts.builder()
+            .setIssuedAt(Date.from(past))
+            .setExpiration(Date.from(past.plus(Duration.ofDays(1))))
+            .addClaims(Map.of("admin", "false", "user", "Tom"))
+            .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, jwtRefreshSecret)
+            .compact();
     Map<String, Object> refreshJson = new HashMap<>();
     refreshJson.put("refresh_token", refreshToken);
     result =
@@ -97,8 +111,15 @@ public class JWTRefreshEndpointTest extends LessonTest {
 
   @Test
   void checkoutWithTomsTokenFromAccessLogShouldFail() throws Exception {
+    // Generate an expired token for Tom signed with the configured secret
+    Instant past = Instant.parse("2018-05-12T15:03:31Z");
     String accessTokenTom =
-        "eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1MjYxMzE0MTEsImV4cCI6MTUyNjIxNzgxMSwiYWRtaW4iOiJmYWxzZSIsInVzZXIiOiJUb20ifQ.DCoaq9zQkyDH25EcVWKcdbyVfUL4c9D4jRvsqOqvi9iAd4QuqmKcchfbU8FNzeBNF9tLeFXHZLU4yRkq-bjm7Q";
+        Jwts.builder()
+            .setIssuedAt(Date.from(past))
+            .setExpiration(Date.from(past.plus(Duration.ofDays(1))))
+            .addClaims(Map.of("admin", "false", "user", "Tom"))
+            .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, jwtRefreshSecret)
+            .compact();
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/JWT/refresh/checkout")
@@ -109,8 +130,12 @@ public class JWTRefreshEndpointTest extends LessonTest {
 
   @Test
   void checkoutWitRandomTokenShouldFail() throws Exception {
+    // Token signed with wrong key to simulate a random/invalid token
     String accessTokenTom =
-        "eyJhbGciOiJIUzUxMiJ9.eyJpLXQiOjE1MjYxMzE0MTEsImV4cCI6MTUyNjIxNzgxMSwiYWRtaW4iOiJmYWxzZSIsInVzZXIiOiJUb20ifQ.DCoaq9zQkyDH25EcVWKcdbyVfUL4c9D4jRvsqOqvi9iAd4QuqmKcchfbU8FNzeBNF9tLeFXHZLU4yRkq-bjm7Q";
+        Jwts.builder()
+            .addClaims(Map.of("admin", "false", "user", "Tom"))
+            .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, "wrong-signing-key")
+            .compact();
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/JWT/refresh/checkout")
@@ -124,7 +149,7 @@ public class JWTRefreshEndpointTest extends LessonTest {
   void flowForJerryAlwaysWorks() throws Exception {
     ObjectMapper objectMapper = new ObjectMapper();
 
-    var loginJson = Map.of("user", "Jerry", "password", PASSWORD);
+    var loginJson = Map.of("user", "Jerry", "password", jwtRefreshPassword);
     MvcResult result =
         mockMvc
             .perform(
@@ -149,7 +174,7 @@ public class JWTRefreshEndpointTest extends LessonTest {
   void loginShouldNotWorkForJerryWithWrongPassword() throws Exception {
     ObjectMapper objectMapper = new ObjectMapper();
 
-    var loginJson = Map.of("user", "Jerry", "password", PASSWORD + "wrong");
+    var loginJson = Map.of("user", "Jerry", "password", jwtRefreshPassword + "wrong");
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/JWT/refresh/login")
@@ -162,7 +187,7 @@ public class JWTRefreshEndpointTest extends LessonTest {
   void loginShouldNotWorkForTom() throws Exception {
     ObjectMapper objectMapper = new ObjectMapper();
 
-    var loginJson = Map.of("user", "Tom", "password", PASSWORD);
+    var loginJson = Map.of("user", "Tom", "password", jwtRefreshPassword);
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/JWT/refresh/login")
@@ -176,7 +201,7 @@ public class JWTRefreshEndpointTest extends LessonTest {
     ObjectMapper objectMapper = new ObjectMapper();
     Map<String, Object> loginJson = new HashMap<>();
     loginJson.put("user", "Jerry");
-    loginJson.put("password", PASSWORD);
+    loginJson.put("password", jwtRefreshPassword);
     MvcResult result =
         mockMvc
             .perform(
@@ -205,7 +230,7 @@ public class JWTRefreshEndpointTest extends LessonTest {
     ObjectMapper objectMapper = new ObjectMapper();
     Map<String, Object> loginJson = new HashMap<>();
     loginJson.put("user", "Jerry");
-    loginJson.put("password", PASSWORD);
+    loginJson.put("password", jwtRefreshPassword);
     MvcResult result =
         mockMvc
             .perform(

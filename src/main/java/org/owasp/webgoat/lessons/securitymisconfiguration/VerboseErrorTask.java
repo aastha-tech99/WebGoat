@@ -10,6 +10,7 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.succes
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
 import org.owasp.webgoat.container.assignments.AttackResult;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class VerboseErrorTask implements AssignmentEndpoint {
 
-  static final String LEAKED_TOKEN = "STAGING-TOKEN-42";
+  final String leakedToken;
+
+  public VerboseErrorTask(
+      @Value("${webgoat.lesson.verbose-error.leaked-token}") String leakedToken) {
+    this.leakedToken = leakedToken;
+  }
 
   @GetMapping(value = "/SecurityMisconfiguration/task2/trigger", produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> triggerError() {
@@ -41,14 +47,14 @@ public class VerboseErrorTask implements AssignmentEndpoint {
             + "DB_USER=staging_user\n"
             + "DB_PASSWORD=staging_password123\n"
             + "SYSTEM_API_TOKEN="
-            + LEAKED_TOKEN
+            + leakedToken
             + "\n";
     return ResponseEntity.ok(stackTrace);
   }
 
   @GetMapping(value = "/SecurityMisconfiguration/task2/config", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> fetchConfig(@RequestParam(value = "token", required = false) String token) {
-    if (LEAKED_TOKEN.equals(token)) {
+    if (leakedToken.equals(token)) {
       String json =
           "{\n"
               + "  \"feature\": \"debug\",\n"
@@ -64,7 +70,7 @@ public class VerboseErrorTask implements AssignmentEndpoint {
       value = "/SecurityMisconfiguration/task2",
       consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   public AttackResult submitToken(@RequestParam("token") String token) {
-    if (LEAKED_TOKEN.equals(token)) {
+    if (leakedToken.equals(token)) {
       return success(this)
           .feedback("securitymisconfiguration.task2.success")
           .output("Debug mode disabled. Stack traces are now safe for users.")

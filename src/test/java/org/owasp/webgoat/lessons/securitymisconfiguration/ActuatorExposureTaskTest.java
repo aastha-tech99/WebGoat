@@ -13,17 +13,18 @@ import org.owasp.webgoat.container.assignments.AttackResult;
 
 class ActuatorExposureTaskTest {
 
+  private static final String TEST_API_KEY = "test-api-key";
   private ActuatorExposureTask task;
 
   @BeforeEach
   void setUp() {
-    task = new ActuatorExposureTask();
+    task = new ActuatorExposureTask(TEST_API_KEY);
   }
 
   @Test
   void envShouldExposeApiKey() {
     Map<String, Object> response = task.actuatorEnv();
-    assertThat(response.get("systemApiKey")).isEqualTo(ActuatorExposureTask.LEAKED_API_KEY);
+    assertThat(response.get("systemApiKey")).isEqualTo(TEST_API_KEY);
   }
 
   @Test
@@ -48,7 +49,7 @@ class ActuatorExposureTaskTest {
 
   @Test
   void submitShouldSucceedWithLeakedKey() {
-    AttackResult result = task.submitApiKey(ActuatorExposureTask.LEAKED_API_KEY);
+    AttackResult result = task.submitApiKey(TEST_API_KEY);
     assertThat(result.assignmentSolved()).isTrue();
     assertThat(result.getFeedback()).isEqualTo("securitymisconfiguration.task3.success");
   }

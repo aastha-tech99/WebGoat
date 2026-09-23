@@ -13,11 +13,12 @@ import org.springframework.http.ResponseEntity;
 
 class VerboseErrorTaskTest {
 
+  private static final String TEST_TOKEN = "test-leaked-token";
   private VerboseErrorTask task;
 
   @BeforeEach
   void setUp() {
-    task = new VerboseErrorTask();
+    task = new VerboseErrorTask(TEST_TOKEN);
   }
 
   @Test
@@ -25,7 +26,7 @@ class VerboseErrorTaskTest {
     ResponseEntity<String> response = task.triggerError();
 
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-    assertThat(response.getBody()).contains(VerboseErrorTask.LEAKED_TOKEN);
+    assertThat(response.getBody()).contains(TEST_TOKEN);
   }
 
   @Test
@@ -53,14 +54,14 @@ class VerboseErrorTaskTest {
 
   @Test
   void configEndpointShouldReturnConfigWhenTokenMatches() {
-    var response = task.fetchConfig(VerboseErrorTask.LEAKED_TOKEN);
+    var response = task.fetchConfig(TEST_TOKEN);
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
     assertThat(response.getBody()).contains("debug");
   }
 
   @Test
   void shouldPassWhenCorrectTokenProvided() {
-    AttackResult result = task.submitToken(VerboseErrorTask.LEAKED_TOKEN);
+    AttackResult result = task.submitToken(TEST_TOKEN);
 
     assertThat(result.assignmentSolved()).isTrue();
     assertThat(result.getFeedback()).isEqualTo("securitymisconfiguration.task2.success");

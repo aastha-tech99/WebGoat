@@ -1,13 +1,19 @@
 $(document).ready(function () {
-    login('Jerry');
+    // Fetch password from server configuration instead of hardcoding in source
+    $.ajax({
+        type: 'GET',
+        url: 'JWT/refresh/appConfig'
+    }).success(function (config) {
+        login('Jerry', config.defaultPassword);
+    });
 })
 
-function login(user) {
+function login(user, pw) {
     $.ajax({
         type: 'POST',
         url: 'JWT/refresh/login',
         contentType: "application/json",
-        data: JSON.stringify({user: user, password: "bm5nhSkxCXZkKRy4"})
+        data: JSON.stringify({user: user, password: pw})
     }).success(
         function (response) {
             localStorage.setItem('access_token', response['access_token']);

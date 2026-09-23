@@ -11,6 +11,7 @@ import java.util.Map;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
 import org.owasp.webgoat.container.assignments.AttackResult;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class ActuatorExposureTask implements AssignmentEndpoint {
 
-  static final String LEAKED_API_KEY = "INTERNAL-API-KEY-987";
+  final String leakedApiKey;
+
+  public ActuatorExposureTask(
+      @Value("${webgoat.lesson.actuator-exposure.api-key}") String leakedApiKey) {
+    this.leakedApiKey = leakedApiKey;
+  }
 
   @GetMapping(
       value = "/SecurityMisconfiguration/task3/actuator/env",
@@ -34,7 +40,7 @@ public class ActuatorExposureTask implements AssignmentEndpoint {
     return Map.of(
         "name", "webgoat-staging",
         "profiles", new String[] {"staging", "debug"},
-        "systemApiKey", LEAKED_API_KEY,
+        "systemApiKey", leakedApiKey,
         "features", Map.of("betaUi", true, "payments", false));
   }
 
@@ -54,7 +60,7 @@ public class ActuatorExposureTask implements AssignmentEndpoint {
       value = "/SecurityMisconfiguration/task3",
       consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   public AttackResult submitApiKey(@RequestParam("apiKey") String apiKey) {
-    if (LEAKED_API_KEY.equals(apiKey)) {
+    if (leakedApiKey.equals(apiKey)) {
       return success(this)
           .feedback("securitymisconfiguration.task3.success")
           .output("Actuator endpoints now require authentication and are limited to ops network.")
