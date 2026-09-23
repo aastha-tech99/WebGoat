@@ -1,9 +1,27 @@
 var dataFetched = false;
 
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+}
+
 function selectUser() {
 
     var newEmployeeID = $("#UserSelect").val();
-    document.getElementById("employeeRecord").innerHTML = document.getElementById(newEmployeeID).innerHTML;
+    var source = document.getElementById(newEmployeeID);
+    var target = document.getElementById("employeeRecord");
+    while (target.firstChild) {
+        target.removeChild(target.firstChild);
+    }
+    if (source) {
+        Array.from(source.childNodes).forEach(function(child) {
+            target.appendChild(child.cloneNode(true));
+        });
+    }
 }
 
 function fetchUserData() {
@@ -24,12 +42,12 @@ function ajaxFunction(userId) {
         html = html + '<td>Salary</td>';
 
         for (var i = 0; i < result.length; i++) {
-            html = html + '<tr id = "' + result[i].UserID + '"</tr>';
-            html = html + '<td>' + result[i].UserID + '</td>';
-            html = html + '<td>' + result[i].FirstName + '</td>';
-            html = html + '<td>' + result[i].LastName + '</td>';
-            html = html + '<td>' + result[i].SSN + '</td>';
-            html = html + '<td>' + result[i].Salary + '</td>';
+            html = html + '<tr id="' + escapeHtml(result[i].UserID) + '">';
+            html = html + '<td>' + escapeHtml(result[i].UserID) + '</td>';
+            html = html + '<td>' + escapeHtml(result[i].FirstName) + '</td>';
+            html = html + '<td>' + escapeHtml(result[i].LastName) + '</td>';
+            html = html + '<td>' + escapeHtml(result[i].SSN) + '</td>';
+            html = html + '<td>' + escapeHtml(result[i].Salary) + '</td>';
             html = html + '</tr>';
         }
         html = html + '</tr></table>';
