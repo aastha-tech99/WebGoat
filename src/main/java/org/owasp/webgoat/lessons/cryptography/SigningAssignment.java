@@ -43,6 +43,10 @@ public class SigningAssignment implements AssignmentEndpoint {
     if (privateKey == null) {
       KeyPair keyPair = CryptoUtil.generateKeyPair();
       privateKey = CryptoUtil.getPrivateKeyInPEM(keyPair);
+      if (keyPair == null || privateKey == null
+          || !privateKey.contains("-----BEGIN PRIVATE KEY-----")) {
+        throw new IllegalStateException("Invalid key material for session storage");
+      }
       request.getSession().setAttribute("privateKeyString", privateKey);
       request.getSession().setAttribute("keyPair", keyPair);
     }
