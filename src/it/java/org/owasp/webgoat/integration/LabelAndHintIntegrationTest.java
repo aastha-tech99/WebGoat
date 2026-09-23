@@ -10,6 +10,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.path.json.exception.JsonPathException;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -163,8 +164,13 @@ public class LabelAndHintIntegrationTest extends IntegrationTest {
     } else {
       lang = "_" + lang;
     }
-    try (InputStream input =
-        new FileInputStream("src/main/resources/i18n/messages" + lang + ".properties")) {
+    // Validate that the resolved path stays within the expected i18n directory
+    var i18nDir = Path.of("src/main/resources/i18n").normalize();
+    var messagesPath = i18nDir.resolve("messages" + lang + ".properties").normalize();
+    if (!messagesPath.startsWith(i18nDir)) {
+      throw new IllegalArgumentException("Invalid language identifier");
+    }
+    try (InputStream input = new FileInputStream(messagesPath.toFile())) {
 
       prop = new Properties();
       // load a properties file

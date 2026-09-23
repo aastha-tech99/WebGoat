@@ -14,6 +14,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -53,17 +54,18 @@ public class BlindSendFileAssignment implements AssignmentEndpoint, Initializabl
   private void createSecretFileWithRandomContents(WebGoatUser user) {
     var fileContents = "WebGoat 8.0 rocks... (" + randomAlphabetic(10) + ")";
     userToFileContents.put(user, fileContents);
-    File parentDir = new File(webGoatHomeDirectory, "/XXE");
-    File targetDirectory = new File(parentDir, user.getUsername());
+    var parentPath = Path.of(webGoatHomeDirectory, "XXE").normalize();
+    var targetPath = parentPath.resolve(user.getUsername()).normalize();
     // Validate resolved path stays within the expected parent directory
-    if (!targetDirectory.toPath().normalize().startsWith(parentDir.toPath().normalize())) {
+    if (!targetPath.startsWith(parentPath)) {
       throw new IllegalArgumentException("Invalid username for directory creation");
     }
+    var targetDirectory = targetPath.toFile();
     if (!targetDirectory.exists()) {
       targetDirectory.mkdirs();
     }
     try {
-      Files.writeString(new File(targetDirectory, "secret.txt").toPath(), fileContents, UTF_8);
+      Files.writeString(targetPath.resolve("secret.txt"), fileContents, UTF_8);
     } catch (IOException e) {
       log.error("Unable to write 'secret.txt' to '{}", targetDirectory);
     }

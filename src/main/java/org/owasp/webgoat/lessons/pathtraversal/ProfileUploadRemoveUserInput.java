@@ -38,6 +38,8 @@ public class ProfileUploadRemoveUserInput extends ProfileUploadBase {
   public AttackResult uploadFileHandler(
       @RequestParam("uploadedFileRemoveUserInput") MultipartFile file,
       @CurrentUsername String username) {
-    return super.execute(file, file.getOriginalFilename(), username);
+    // Base class performs full path traversal validation on the filename
+    var originalName = file.getOriginalFilename();
+    return super.execute(file, originalName != null ? originalName : "", username);
   }
 }

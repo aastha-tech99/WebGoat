@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
@@ -49,34 +50,43 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class ProfileUploadRetrieval implements AssignmentEndpoint {
   private final File catPicturesDirectory;
+  private final Path serverDirectory;
 
   public ProfileUploadRetrieval(@Value("${webgoat.server.directory}") String webGoatHomeDirectory) {
+    this.serverDirectory = Path.of(webGoatHomeDirectory).normalize();
     this.catPicturesDirectory =
-        new File(webGoatHomeDirectory, "/PathTraversal/" + "/cats")
-            .toPath()
-            .normalize()
-            .toFile();
+        this.serverDirectory.resolve("PathTraversal").resolve("cats").toFile();
     this.catPicturesDirectory.mkdirs();
   }
 
   @PostConstruct
   public void initAssignment() {
+    var catPicturesPath = catPicturesDirectory.toPath().normalize();
     for (int i = 1; i <= 10; i++) {
       try (InputStream is =
           new ClassPathResource("lessons/pathtraversal/images/cats/" + i + ".jpg")
               .getInputStream()) {
-        FileCopyUtils.copy(is, new FileOutputStream(new File(catPicturesDirectory, i + ".jpg")));
+        var targetPath = catPicturesPath.resolve(i + ".jpg").normalize();
+        if (!targetPath.startsWith(catPicturesPath)) {
+          continue;
+        }
+        FileCopyUtils.copy(is, new FileOutputStream(targetPath.toFile()));
       } catch (Exception e) {
         log.error("Unable to copy pictures" + e.getMessage());
       }
     }
-    var secretDirectory = this.catPicturesDirectory.getParentFile().getParentFile();
+    // Use the known server directory directly instead of traversing up via getParentFile()
+    var secretPath = this.serverDirectory.resolve("path-traversal-secret.jpg").normalize();
+    if (!secretPath.startsWith(this.serverDirectory)) {
+      log.error("Secret path escapes server directory");
+      return;
+    }
     try {
       Files.writeString(
-          secretDirectory.toPath().resolve("path-traversal-secret.jpg"),
+          secretPath,
           "You found it submit the SHA-512 hash of your username as answer");
     } catch (IOException e) {
-      log.error("Unable to write secret in: {}", secretDirectory, e);
+      log.error("Unable to write secret in: {}", secretPath, e);
     }
   }
 
@@ -105,12 +115,14 @@ public class ProfileUploadRetrieval implements AssignmentEndpoint {
               || id.length() > 255)) {
         return ResponseEntity.badRequest().body("Invalid input");
       }
-      var catPicture =
-          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + ".jpg");
-      if (!catPicture.getCanonicalPath()
-          .startsWith(catPicturesDirectory.getCanonicalPath() + File.separator)) {
+      var catPicturePath =
+          catPicturesDirectory.toPath()
+              .resolve((id == null ? RandomUtils.nextInt(1, 11) : id) + ".jpg")
+              .normalize();
+      if (!catPicturePath.startsWith(catPicturesDirectory.toPath().normalize())) {
         return ResponseEntity.badRequest().body("Invalid file path");
       }
+      var catPicture = catPicturePath.toFile();
 
       if (catPicture.getName().toLowerCase().contains("path-traversal-secret.jpg")) {
         return ResponseEntity.ok()
@@ -123,10 +135,11 @@ public class ProfileUploadRetrieval implements AssignmentEndpoint {
             .location(new URI("/PathTraversal/random-picture?id=" + catPicture.getName()))
             .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));
       }
+      // List only the known cat pictures directory, not an arbitrary parent
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .location(new URI("/PathTraversal/random-picture?id=" + catPicture.getName()))
           .body(
-              StringUtils.arrayToCommaDelimitedString(catPicture.getParentFile().listFiles())
+              StringUtils.arrayToCommaDelimitedString(catPicturesDirectory.listFiles())
                   .getBytes());
     } catch (IOException | URISyntaxException e) {
       log.error("Image not found", e);

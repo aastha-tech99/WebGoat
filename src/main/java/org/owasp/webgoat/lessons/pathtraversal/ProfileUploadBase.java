@@ -9,9 +9,9 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.inform
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -52,30 +52,32 @@ public class ProfileUploadBase implements AssignmentEndpoint {
       if (fullName.indexOf('\0') >= 0 || fullName.length() > 255) {
         return failed(this).feedback("path-traversal-profile-empty-name").build();
       }
-      var requestedFile = new File(uploadDirectory, fullName);
+      // Use Path API to detect traversal without constructing an unsafe File object
+      var uploadPath = uploadDirectory.toPath().normalize();
+      var resolvedPath = uploadPath.resolve(fullName).normalize();
 
-      // Detect path traversal: check if resolved path escapes the upload directory
-      if (attemptWasMade(uploadDirectory, requestedFile)) {
+      // Detect traversal: input contains ".." sequences or resolved path escapes the directory
+      if (fullName.contains("..") || !resolvedPath.startsWith(uploadPath)) {
         // Traversal detected - write safely within directory using only the base filename
-        var safeName = requestedFile.getCanonicalFile().getName();
-        var safeFile = new File(uploadDirectory, safeName);
-        safeFile.createNewFile();
-        FileCopyUtils.copy(file.getBytes(), safeFile);
-        return solvedIt(requestedFile);
+        var safeName = resolvedPath.getFileName().toString();
+        var safeTarget = uploadPath.resolve(safeName).normalize();
+        if (!safeTarget.startsWith(uploadPath)) {
+          return failed(this)
+              .feedback("path-traversal-profile-attempt")
+              .feedbackArgs(fullName)
+              .build();
+        }
+        safeTarget.toFile().createNewFile();
+        FileCopyUtils.copy(file.getBytes(), safeTarget.toFile());
+        return solvedIt(resolvedPath);
       }
 
-      // No traversal - validate canonical path stays within upload directory
-      var canonicalDir = uploadDirectory.getCanonicalPath();
-      var resolvedFile = requestedFile.getCanonicalFile();
-      if (!resolvedFile.getPath().startsWith(canonicalDir + File.separator)) {
-        return failed(this).feedback("path-traversal-profile-attempt").feedbackArgs(fullName).build();
-      }
-
-      resolvedFile.createNewFile();
-      FileCopyUtils.copy(file.getBytes(), resolvedFile);
+      // No traversal - path is verified within upload directory
+      resolvedPath.toFile().createNewFile();
+      FileCopyUtils.copy(file.getBytes(), resolvedPath.toFile());
       return informationMessage(this)
           .feedback("path-traversal-profile-updated")
-          .feedbackArgs(resolvedFile.getAbsoluteFile())
+          .feedbackArgs(resolvedPath.toAbsolutePath())
           .build();
 
     } catch (IOException e) {
@@ -85,34 +87,30 @@ public class ProfileUploadBase implements AssignmentEndpoint {
 
   @SneakyThrows
   protected File cleanupAndCreateDirectoryForUser(String username) {
-    var parentDir = new File(this.webGoatHomeDirectory, "/PathTraversal");
-    var uploadDirectory = new File(parentDir, username);
+    var parentPath = Path.of(this.webGoatHomeDirectory, "PathTraversal").normalize();
+    var uploadPath = parentPath.resolve(username).normalize();
     // Validate resolved path stays within the expected parent directory
-    if (!uploadDirectory.toPath().normalize().startsWith(parentDir.toPath().normalize())) {
+    if (!uploadPath.startsWith(parentPath)) {
       throw new IllegalArgumentException("Invalid username for directory creation");
     }
+    var uploadDirectory = uploadPath.toFile();
     if (uploadDirectory.exists()) {
       FileSystemUtils.deleteRecursively(uploadDirectory);
     }
-    Files.createDirectories(uploadDirectory.toPath());
+    Files.createDirectories(uploadPath);
     return uploadDirectory;
   }
 
-  private boolean attemptWasMade(File expectedUploadDirectory, File uploadedFile)
-      throws IOException {
-    return !expectedUploadDirectory
-        .getCanonicalPath()
-        .equals(uploadedFile.getParentFile().getCanonicalPath());
-  }
-
-  private AttackResult solvedIt(File uploadedFile) throws IOException {
-    if (uploadedFile.getCanonicalFile().getParentFile().getName().endsWith("PathTraversal")) {
+  private AttackResult solvedIt(Path resolvedPath) {
+    if (resolvedPath.getParent() != null
+        && resolvedPath.getParent().getFileName() != null
+        && resolvedPath.getParent().getFileName().toString().endsWith("PathTraversal")) {
       return success(this).build();
     }
     return failed(this)
         .attemptWasMade()
         .feedback("path-traversal-profile-attempt")
-        .feedbackArgs(uploadedFile.getCanonicalPath())
+        .feedbackArgs(resolvedPath.toString())
         .build();
   }
 
@@ -123,12 +121,13 @@ public class ProfileUploadBase implements AssignmentEndpoint {
   }
 
   protected byte[] getProfilePictureAsBase64(String username) {
-    var parentDir = new File(this.webGoatHomeDirectory, "/PathTraversal");
-    var profilePictureDirectory = new File(parentDir, username);
+    var parentPath = Path.of(this.webGoatHomeDirectory, "PathTraversal").normalize();
+    var profilePicturePath = parentPath.resolve(username).normalize();
     // Validate resolved path stays within the expected parent directory
-    if (!profilePictureDirectory.toPath().normalize().startsWith(parentDir.toPath().normalize())) {
+    if (!profilePicturePath.startsWith(parentPath)) {
       return defaultImage();
     }
+    var profilePictureDirectory = profilePicturePath.toFile();
     var profileDirectoryFiles = profilePictureDirectory.listFiles();
 
     if (profileDirectoryFiles != null && profileDirectoryFiles.length > 0) {
@@ -140,15 +139,11 @@ public class ProfileUploadBase implements AssignmentEndpoint {
                 try {
                   var targetFile = profileDirectoryFiles[0];
                   // Validate file stays within the expected directory
-                  if (!targetFile
-                      .getCanonicalPath()
-                      .startsWith(
-                          profilePictureDirectory.getCanonicalPath() + File.separator)) {
+                  if (!targetFile.toPath().normalize().startsWith(profilePicturePath)) {
                     return defaultImage();
                   }
-                  try (var inputStream = new FileInputStream(targetFile)) {
-                    return Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(inputStream));
-                  }
+                  return Base64.getEncoder()
+                      .encode(Files.readAllBytes(targetFile.toPath()));
                 } catch (IOException e) {
                   return defaultImage();
                 }

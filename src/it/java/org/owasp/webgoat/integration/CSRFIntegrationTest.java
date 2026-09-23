@@ -94,6 +94,13 @@ public class CSRFIntegrationTest extends IntegrationTest {
   }
 
   private void uploadTrickHtml(String htmlName, String htmlContent) throws IOException {
+    // Validate htmlName does not contain path traversal characters
+    if (htmlName == null
+        || htmlName.contains("..")
+        || htmlName.contains("/")
+        || htmlName.contains("\\")) {
+      throw new IllegalArgumentException("Invalid HTML file name");
+    }
 
     // remove any left over html
     Path webWolfFilePath = Paths.get(webwolfFileDir);

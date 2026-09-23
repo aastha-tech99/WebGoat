@@ -82,6 +82,11 @@ public class MavenWrapperDownloader {
         System.out.println("- Downloading from: " + url);
 
         File outputFile = new File(baseDirectory.getAbsolutePath(), MAVEN_WRAPPER_JAR_PATH);
+        // Validate output file stays within base directory
+        if (!outputFile.toPath().normalize().startsWith(baseDirectory.toPath().normalize())) {
+            System.out.println("- ERROR: output file path is outside base directory");
+            System.exit(1);
+        }
         if(!outputFile.getParentFile().exists()) {
             if(!outputFile.getParentFile().mkdirs()) {
                 System.out.println(

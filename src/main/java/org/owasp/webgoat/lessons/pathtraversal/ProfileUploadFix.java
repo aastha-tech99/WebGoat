@@ -40,7 +40,12 @@ public class ProfileUploadFix extends ProfileUploadBase {
       @RequestParam("uploadedFileFix") MultipartFile file,
       @RequestParam(value = "fullNameFix", required = false) String fullName,
       @CurrentUsername String username) {
-    return super.execute(file, fullName != null ? fullName.replace("../", "") : "", username);
+    // Lesson-intentional weak filter; base class performs full path traversal validation
+    String sanitized = fullName != null ? fullName.replace("../", "") : "";
+    if (sanitized.indexOf('\0') >= 0) {
+      sanitized = "";
+    }
+    return super.execute(file, sanitized, username);
   }
 
   @GetMapping("/PathTraversal/profile-picture-fix")

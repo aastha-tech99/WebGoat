@@ -5,6 +5,7 @@
 package org.owasp.webgoat.container;
 
 import java.io.File;
+import java.nio.file.Path;
 import org.owasp.webgoat.container.session.LessonSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -28,7 +29,11 @@ public class WebGoat {
 
   @Bean(name = "pluginTargetDirectory")
   public File pluginTargetDirectory(@Value("${webgoat.user.directory}") final String webgoatHome) {
-    return new File(webgoatHome).toPath().normalize().toFile();
+    var resolvedPath = Path.of(webgoatHome).normalize();
+    if (!resolvedPath.isAbsolute()) {
+      throw new IllegalArgumentException("webgoat.user.directory must be an absolute path");
+    }
+    return resolvedPath.toFile();
   }
 
   @Bean
