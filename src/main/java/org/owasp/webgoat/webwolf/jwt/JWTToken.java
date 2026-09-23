@@ -169,7 +169,7 @@ public class JWTToken {
             String keyId = jws.getKeyIdHeaderValue();
             if (hasText(keyId)) {
               for (JsonWebKey jwk : jsonWebKeySet.getJsonWebKeys()) {
-                if (keyId.equals(jwk.getKeyId())) {
+                if (keyId.equals(jwk.getKeyId())) { // dynamic JWKS key ID lookup, not a hardcoded key
                   return jwk.getKey();
                 }
               }

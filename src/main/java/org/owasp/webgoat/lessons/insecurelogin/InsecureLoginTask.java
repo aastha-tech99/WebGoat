@@ -18,7 +18,7 @@ public class InsecureLoginTask implements AssignmentEndpoint {
   @PostMapping("/InsecureLogin/task")
   @ResponseBody
   public AttackResult completed(@RequestParam String username, @RequestParam String password) {
-    if ("CaptainJack".equals(username) && "BlackPearl".equals(password)) {
+    if ("CaptainJack".equals(username) && "BlackPearl".equals(password)) { // WebGoat lesson fixture, not a real secret
       return success(this).build();
     }
     return failed(this).build();

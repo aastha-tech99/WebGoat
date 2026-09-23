@@ -54,7 +54,7 @@ public class ActuatorExposureTask implements AssignmentEndpoint {
       value = "/SecurityMisconfiguration/task3",
       consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   public AttackResult submitApiKey(@RequestParam("apiKey") String apiKey) {
-    if (LEAKED_API_KEY.equals(apiKey)) {
+    if (LEAKED_API_KEY.equals(apiKey)) { // WebGoat lesson fixture, not a real secret
       return success(this)
           .feedback("securitymisconfiguration.task3.success")
           .output("Actuator endpoints now require authentication and are limited to ops network.")

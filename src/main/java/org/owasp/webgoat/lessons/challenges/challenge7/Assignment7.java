@@ -59,7 +59,7 @@ public class Assignment7 implements AssignmentEndpoint {
 
   @GetMapping("/challenge/7/reset-password/{link}")
   public ResponseEntity<String> resetPassword(@PathVariable(value = "link") String link) {
-    if (link.equals(ADMIN_PASSWORD_LINK)) {
+    if (link.equals(ADMIN_PASSWORD_LINK)) { // WebGoat lesson fixture, not a real secret
       return ResponseEntity.accepted()
           .body(
               "<h1>Success!!</h1>"

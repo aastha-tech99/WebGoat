@@ -40,7 +40,7 @@ public class LogBleedingTask implements AssignmentEndpoint {
       return failed(this).output("Please provide username (Admin) and password").build();
     }
 
-    if (username.equals("Admin") && password.equals(this.password)) {
+    if (username.equals("Admin") && password.equals(this.password)) { // WebGoat lesson fixture, not a real secret
       return success(this).build();
     }
 
