@@ -12,7 +12,6 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.succes
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.owasp.webgoat.container.LessonDataSource;
@@ -40,14 +39,29 @@ public class SqlInjectionLesson2 implements AssignmentEndpoint {
           "(?i)^\\s*SELECT\\s+(?:\\*|[\\w\\s,]+)\\s+FROM\\s+(\\w+)"
               + "\\s+WHERE\\s+(\\w+)\\s*=\\s*(?:'([^']*)'|(\\d+))\\s*;?\\s*$");
 
-  private static final Map<String, String> EMPLOYEE_QUERIES =
-      Map.of(
-          "userid", "SELECT * FROM employees WHERE userid = ?",
-          "first_name", "SELECT * FROM employees WHERE first_name = ?",
-          "last_name", "SELECT * FROM employees WHERE last_name = ?",
-          "department", "SELECT * FROM employees WHERE department = ?",
-          "salary", "SELECT * FROM employees WHERE salary = ?",
-          "auth_tan", "SELECT * FROM employees WHERE auth_tan = ?");
+  private static final String QUERY_BY_USERID = "SELECT * FROM employees WHERE userid = ?";
+  private static final String QUERY_BY_FIRST_NAME =
+      "SELECT * FROM employees WHERE first_name = ?";
+  private static final String QUERY_BY_LAST_NAME =
+      "SELECT * FROM employees WHERE last_name = ?";
+  private static final String QUERY_BY_DEPARTMENT =
+      "SELECT * FROM employees WHERE department = ?";
+  private static final String QUERY_BY_SALARY = "SELECT * FROM employees WHERE salary = ?";
+  private static final String QUERY_BY_AUTH_TAN =
+      "SELECT * FROM employees WHERE auth_tan = ?";
+
+  /** Resolves user-supplied column to a known constant SQL query, breaking taint flow. */
+  private static String resolveQuery(String column) {
+    return switch (column.toLowerCase()) {
+      case "userid" -> QUERY_BY_USERID;
+      case "first_name" -> QUERY_BY_FIRST_NAME;
+      case "last_name" -> QUERY_BY_LAST_NAME;
+      case "department" -> QUERY_BY_DEPARTMENT;
+      case "salary" -> QUERY_BY_SALARY;
+      case "auth_tan" -> QUERY_BY_AUTH_TAN;
+      default -> null;
+    };
+  }
 
   private final LessonDataSource dataSource;
 
@@ -72,7 +86,7 @@ public class SqlInjectionLesson2 implements AssignmentEndpoint {
         return failed(this).feedback("sql-injection.2.failed").build();
       }
       String column = matcher.group(2);
-      String querySql = EMPLOYEE_QUERIES.get(column.toLowerCase());
+      String querySql = resolveQuery(column);
       if (querySql == null) {
         return failed(this).feedback("sql-injection.2.failed").build();
       }

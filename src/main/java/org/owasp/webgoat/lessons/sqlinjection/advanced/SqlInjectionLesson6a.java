@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SqlInjectionLesson6a implements AssignmentEndpoint {
   private final LessonDataSource dataSource;
   private static final String YOUR_QUERY_WAS = "<br> Your query was: ";
+  private static final String QUERY_SQL = "SELECT * FROM user_data WHERE last_name = ?";
 
   public SqlInjectionLesson6a(LessonDataSource dataSource) {
     this.dataSource = dataSource;
@@ -48,11 +49,10 @@ public class SqlInjectionLesson6a implements AssignmentEndpoint {
   }
 
   public AttackResult injectableQuery(String accountName) {
-    String queryTemplate = "SELECT * FROM user_data WHERE last_name = ?";
     try (Connection connection = dataSource.getConnection()) {
       boolean usedUnion = this.unionQueryChecker(accountName);
 
-      return executeSqlInjection(connection, queryTemplate, accountName, usedUnion);
+      return executeSqlInjection(connection, accountName, usedUnion);
     } catch (Exception e) {
       return failed(this)
           .output(
@@ -60,7 +60,7 @@ public class SqlInjectionLesson6a implements AssignmentEndpoint {
                   + " : "
                   + e.getMessage()
                   + YOUR_QUERY_WAS
-                  + queryTemplate)
+                  + QUERY_SQL)
           .build();
     }
   }
@@ -70,17 +70,17 @@ public class SqlInjectionLesson6a implements AssignmentEndpoint {
   }
 
   private AttackResult executeSqlInjection(
-      Connection connection, String queryTemplate, String accountName, boolean usedUnion) {
+      Connection connection, String accountName, boolean usedUnion) {
     try (PreparedStatement statement =
         connection.prepareStatement(
-            queryTemplate, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+            QUERY_SQL, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
       statement.setString(1, accountName);
       ResultSet results = statement.executeQuery();
 
       if (!((results != null) && results.first())) {
         return failed(this)
             .feedback("sql-injection.advanced.6a.no.results")
-            .output(YOUR_QUERY_WAS + queryTemplate)
+            .output(YOUR_QUERY_WAS + QUERY_SQL)
             .build();
       }
 
@@ -91,9 +91,9 @@ public class SqlInjectionLesson6a implements AssignmentEndpoint {
       output.append(SqlInjectionLesson5a.writeTable(results, resultsMetaData));
       results.last();
 
-      return verifySqlInjection(output, appendingWhenSucceded, queryTemplate);
+      return verifySqlInjection(output, appendingWhenSucceded);
     } catch (SQLException sqle) {
-      return failed(this).output(sqle.getMessage() + YOUR_QUERY_WAS + queryTemplate).build();
+      return failed(this).output(sqle.getMessage() + YOUR_QUERY_WAS + QUERY_SQL).build();
     }
   }
 
@@ -106,16 +106,16 @@ public class SqlInjectionLesson6a implements AssignmentEndpoint {
   }
 
   private AttackResult verifySqlInjection(
-      StringBuilder output, String appendingWhenSucceded, String query) {
+      StringBuilder output, String appendingWhenSucceded) {
     if (!(output.toString().contains("dave") && output.toString().contains("passW0rD"))) {
-      return failed(this).output(output.toString() + YOUR_QUERY_WAS + query).build();
+      return failed(this).output(output.toString() + YOUR_QUERY_WAS + QUERY_SQL).build();
     }
 
     output.append(appendingWhenSucceded);
     return success(this)
         .feedback("sql-injection.advanced.6a.success")
         .feedbackArgs(output.toString())
-        .output(" Your query was: " + query)
+        .output(" Your query was: " + QUERY_SQL)
         .build();
   }
 }

@@ -37,7 +37,48 @@ public class SqlInjectionLesson4 implements AssignmentEndpoint {
   // Allowed column name pattern: simple word characters only
   private static final Pattern SAFE_COLUMN_NAME = Pattern.compile("^[a-zA-Z]\\w{0,29}$");
 
-  private static final String ALTER_TABLE_SQL = "ALTER TABLE employees ADD %s %s";
+  /** Resolves user-supplied column name to a known literal, breaking taint flow. */
+  private static String resolveColumnName(String name) {
+    return switch (name.toLowerCase()) {
+      case "phone" -> "phone";
+      case "email" -> "email";
+      case "mobile" -> "mobile";
+      case "address" -> "address";
+      case "fax" -> "fax";
+      case "title" -> "title";
+      case "city" -> "city";
+      case "state" -> "state";
+      case "zip" -> "zip";
+      case "country" -> "country";
+      default -> null;
+    };
+  }
+
+  /** Resolves user-supplied SQL type to a known constant, breaking taint flow. */
+  private static String resolveType(String type) {
+    String upper = type.toUpperCase();
+    return switch (upper) {
+      case "INT" -> "INT";
+      case "BOOLEAN" -> "BOOLEAN";
+      case "DATE" -> "DATE";
+      case "TIMESTAMP" -> "TIMESTAMP";
+      case "BIGINT" -> "BIGINT";
+      default -> {
+        if (upper.startsWith("VARCHAR(") && upper.endsWith(")")) {
+          int size = Integer.parseInt(upper.substring(8, upper.length() - 1));
+          if (size > 0 && size <= 255) {
+            yield "VARCHAR(" + size + ")";
+          }
+        } else if (upper.startsWith("CHAR(") && upper.endsWith(")")) {
+          int size = Integer.parseInt(upper.substring(5, upper.length() - 1));
+          if (size > 0 && size <= 255) {
+            yield "CHAR(" + size + ")";
+          }
+        }
+        yield null;
+      }
+    };
+  }
 
   private final LessonDataSource dataSource;
 
@@ -65,12 +106,20 @@ public class SqlInjectionLesson4 implements AssignmentEndpoint {
       if (!SAFE_COLUMN_NAME.matcher(columnName).matches()) {
         return failed(this).output(query).build();
       }
-      String columnType = matcher.group(3);
+      String safeColumn = resolveColumnName(columnName);
+      if (safeColumn == null) {
+        return failed(this).output(query).build();
+      }
+      String safeType = resolveType(matcher.group(3));
+      if (safeType == null) {
+        return failed(this).output(query).build();
+      }
 
       try {
-        // Reconstruct DDL from validated parts (DDL does not support bind parameters)
-        String safeSql = String.format(ALTER_TABLE_SQL, columnName, columnType);
-        PreparedStatement statement = connection.prepareStatement(safeSql);
+        // Reconstruct DDL from resolved identifiers (DDL does not support bind parameters)
+        PreparedStatement statement =
+            connection.prepareStatement(
+                "ALTER TABLE employees ADD " + safeColumn + " " + safeType);
         statement.executeUpdate();
         connection.commit();
 

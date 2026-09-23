@@ -12,7 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.owasp.webgoat.container.LessonDataSource;
@@ -39,8 +39,26 @@ public class SqlInjectionLesson5 implements AssignmentEndpoint {
           "(?i)^\\s*GRANT\\s+(SELECT|INSERT|UPDATE|DELETE|ALL)\\s+ON\\s+(\\w+)"
               + "\\s+TO\\s+(\\w+)\\s*;?\\s*$");
 
-  private static final Set<String> ALLOWED_PRIVILEGES =
-      Set.of("SELECT", "INSERT", "UPDATE", "DELETE", "ALL");
+  /** Precomputed GRANT statements keyed by privilege (table and user are fixed). */
+  private static final Map<String, String> GRANT_QUERIES =
+      Map.of(
+          "SELECT", "GRANT SELECT ON grant_rights TO unauthorized_user",
+          "INSERT", "GRANT INSERT ON grant_rights TO unauthorized_user",
+          "UPDATE", "GRANT UPDATE ON grant_rights TO unauthorized_user",
+          "DELETE", "GRANT DELETE ON grant_rights TO unauthorized_user",
+          "ALL", "GRANT ALL ON grant_rights TO unauthorized_user");
+
+  /** Resolves user-supplied privilege to a known literal, breaking taint flow. */
+  private static String resolvePrivilege(String priv) {
+    return switch (priv.toUpperCase()) {
+      case "SELECT" -> "SELECT";
+      case "INSERT" -> "INSERT";
+      case "UPDATE" -> "UPDATE";
+      case "DELETE" -> "DELETE";
+      case "ALL" -> "ALL";
+      default -> null;
+    };
+  }
 
   private final LessonDataSource dataSource;
 
@@ -73,16 +91,24 @@ public class SqlInjectionLesson5 implements AssignmentEndpoint {
     try (Connection connection = dataSource.getConnection()) {
       Matcher matcher = SAFE_GRANT.matcher(query.trim());
       if (matcher.matches()) {
-        String privilege = matcher.group(1).toUpperCase();
-        if (!ALLOWED_PRIVILEGES.contains(privilege)) {
+        String resolvedPrivilege = resolvePrivilege(matcher.group(1));
+        if (resolvedPrivilege == null) {
           return failed(this).output("Your query was: " + query).build();
         }
         String tableName = matcher.group(2);
         String userName = matcher.group(3);
 
-        // Validate identifiers are simple words (already guaranteed by regex \w+)
-        // Reconstruct DCL from validated parts (GRANT does not support bind parameters)
-        String safeSql = "GRANT " + privilege + " ON " + tableName + " TO " + userName;
+        // Only allow the expected table and user for this lesson
+        if (!"grant_rights".equalsIgnoreCase(tableName)
+            || !"unauthorized_user".equalsIgnoreCase(userName)) {
+          return failed(this).output("Your query was: " + query).build();
+        }
+
+        // Look up precomputed GRANT SQL (DCL does not support bind parameters)
+        String safeSql = GRANT_QUERIES.get(resolvedPrivilege);
+        if (safeSql == null) {
+          return failed(this).output("Your query was: " + query).build();
+        }
         PreparedStatement statement = connection.prepareStatement(safeSql);
         statement.execute();
 

@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.owasp.webgoat.container.LessonDataSource;
@@ -34,8 +36,23 @@ public class SqlInjectionLesson3 implements AssignmentEndpoint {
           "(?i)^\\s*UPDATE\\s+(\\w+)\\s+SET\\s+(\\w+)\\s*=\\s*'([^']*)'"
               + "\\s+WHERE\\s+(\\w+)\\s*=\\s*'([^']*)'\\s*;?\\s*$");
 
-  private static final String UPDATE_SQL_TEMPLATE =
-      "UPDATE employees SET %s = ? WHERE %s = ?";
+  private static final String[] VALID_COLUMNS =
+      {"userid", "first_name", "last_name", "department", "salary", "auth_tan"};
+
+  /** Precomputed UPDATE queries for every valid (setColumn, whereColumn) pair. */
+  private static final Map<String, String> UPDATE_QUERIES;
+
+  static {
+    var m = new HashMap<String, String>();
+    for (String setCol : VALID_COLUMNS) {
+      for (String whereCol : VALID_COLUMNS) {
+        m.put(
+            setCol + "|" + whereCol,
+            "UPDATE employees SET " + setCol + " = ? WHERE " + whereCol + " = ?");
+      }
+    }
+    UPDATE_QUERIES = Map.copyOf(m);
+  }
 
   /** Resolves user-supplied column name to a known literal, breaking taint flow. */
   private static String resolveColumn(String column) {
@@ -86,9 +103,11 @@ public class SqlInjectionLesson3 implements AssignmentEndpoint {
       String whereValue = matcher.group(5);
 
       try {
-        PreparedStatement statement =
-            connection.prepareStatement(
-                String.format(UPDATE_SQL_TEMPLATE, safeSetColumn, safeWhereColumn));
+        String updateSql = UPDATE_QUERIES.get(safeSetColumn + "|" + safeWhereColumn);
+        if (updateSql == null) {
+          return failed(this).build();
+        }
+        PreparedStatement statement = connection.prepareStatement(updateSql);
         statement.setString(1, setValue);
         statement.setString(2, whereValue);
         statement.executeUpdate();
