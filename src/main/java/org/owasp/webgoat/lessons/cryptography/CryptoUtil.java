@@ -46,6 +46,7 @@ public class CryptoUtil {
   }
 
   public static String getPrivateKeyInPEM(KeyPair keyPair) {
+    // Not a secret: standard PEM envelope marker per RFC 7468, contains no key material
     String encodedString = "-----BEGIN PRIVATE KEY-----\n";
     encodedString =
         encodedString
@@ -134,6 +135,7 @@ public class CryptoUtil {
 
   public static PrivateKey getPrivateKeyFromPEM(String privateKeyPem)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
+    // Not a secret: standard PEM envelope marker per RFC 7468, contains no key material
     privateKeyPem = privateKeyPem.replace("-----BEGIN PRIVATE KEY-----", "");
     privateKeyPem = privateKeyPem.replace("-----END PRIVATE KEY-----", "");
     privateKeyPem = privateKeyPem.replace("\n", "").replace("\r", "");
