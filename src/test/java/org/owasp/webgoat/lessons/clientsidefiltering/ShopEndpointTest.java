@@ -38,8 +38,8 @@ public class ShopEndpointTest extends LessonTest {
   @Test
   public void getCoupon() throws Exception {
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/clientSideFiltering/challenge-store/coupons/webgoat"))
-        .andExpect(jsonPath("$.code", CoreMatchers.is("webgoat")))
+        .perform(MockMvcRequestBuilders.get("/clientSideFiltering/challenge-store/coupons/owasp"))
+        .andExpect(jsonPath("$.code", CoreMatchers.is("owasp")))
         .andExpect(jsonPath("$.discount", CoreMatchers.is(25)));
   }
 
@@ -50,6 +50,24 @@ public class ShopEndpointTest extends LessonTest {
             MockMvcRequestBuilders.get(
                 "/clientSideFiltering/challenge-store/coupons/does-not-exists"))
         .andExpect(jsonPath("$.code", CoreMatchers.is("no")))
+        .andExpect(jsonPath("$.discount", CoreMatchers.is(0)));
+  }
+
+  @Test
+  public void couponUsageLimitEnforced() throws Exception {
+    // First use of the coupon should return the discount
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(
+                "/clientSideFiltering/challenge-store/coupons/webgoat"))
+        .andExpect(jsonPath("$.code", CoreMatchers.is("webgoat")))
+        .andExpect(jsonPath("$.discount", CoreMatchers.is(25)));
+    // Second use of the same coupon should return zero discount (usage limit reached)
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(
+                "/clientSideFiltering/challenge-store/coupons/webgoat"))
+        .andExpect(jsonPath("$.code", CoreMatchers.is("webgoat")))
         .andExpect(jsonPath("$.discount", CoreMatchers.is(0)));
   }
 

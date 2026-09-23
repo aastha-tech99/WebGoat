@@ -1,4 +1,8 @@
 $(document).ready(function () {
+    //-- Coupon usage tracking: enforce a maximum number of uses per coupon code
+    var couponUsageCount = {};
+    var MAX_COUPON_USES = 1;
+
     //-- Click on detail
     $("ul.menu-items > li").on("click", function () {
         $("ul.menu-items > li").removeClass("active");
@@ -38,9 +42,19 @@ $(document).ready(function () {
     })
     $(".checkoutCode").on("blur", function () {
         var checkoutCode = $(".checkoutCode").val();
+        if (!checkoutCode) {
+            return;
+        }
+        // Enforce coupon usage limit before applying discount
+        if (couponUsageCount[checkoutCode] && couponUsageCount[checkoutCode] >= MAX_COUPON_USES) {
+            $('#discount').text(0);
+            calculate();
+            return;
+        }
         $.get("clientSideFiltering/challenge-store/coupons/" + checkoutCode, function (result, status) {
             var discount = result.discount;
             if (discount > 0) {
+                couponUsageCount[checkoutCode] = (couponUsageCount[checkoutCode] || 0) + 1;
                 $('#discount').text(discount);
                 calculate();
             } else {
