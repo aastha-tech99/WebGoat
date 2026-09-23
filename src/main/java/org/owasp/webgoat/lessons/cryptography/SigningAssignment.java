@@ -7,7 +7,7 @@ package org.owasp.webgoat.lessons.cryptography;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -36,10 +36,10 @@ public class SigningAssignment implements AssignmentEndpoint {
 
   @GetMapping(path = "/crypto/signing/getprivate", produces = MediaType.TEXT_HTML_VALUE)
   @ResponseBody
-  public String getPrivateKey(HttpServletRequest request)
+  public String getPrivateKey(HttpSession session)
       throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 
-    String privateKey = (String) request.getSession().getAttribute("privateKeyString");
+    String privateKey = (String) session.getAttribute("privateKeyString");
     if (privateKey == null) {
       KeyPair keyPair = CryptoUtil.generateKeyPair();
       privateKey = CryptoUtil.getPrivateKeyInPEM(keyPair);
@@ -47,8 +47,8 @@ public class SigningAssignment implements AssignmentEndpoint {
           || !privateKey.contains("-----BEGIN PRIVATE KEY-----")) {
         throw new IllegalStateException("Invalid key material for session storage");
       }
-      request.getSession().setAttribute("privateKeyString", privateKey);
-      request.getSession().setAttribute("keyPair", keyPair);
+      session.setAttribute("privateKeyString", privateKey);
+      session.setAttribute("keyPair", keyPair);
     }
     return privateKey;
   }
@@ -56,11 +56,11 @@ public class SigningAssignment implements AssignmentEndpoint {
   @PostMapping("/crypto/signing/verify")
   @ResponseBody
   public AttackResult completed(
-      HttpServletRequest request, @RequestParam String modulus, @RequestParam String signature) {
+      HttpSession session, @RequestParam String modulus, @RequestParam String signature) {
 
     String tempModulus =
         modulus; /* used to validate the modulus of the public key but might need to be corrected */
-    KeyPair keyPair = (KeyPair) request.getSession().getAttribute("keyPair");
+    KeyPair keyPair = (KeyPair) session.getAttribute("keyPair");
     RSAPublicKey rsaPubKey = (RSAPublicKey) keyPair.getPublic();
     if (tempModulus.length() == 512) {
       tempModulus = "00".concat(tempModulus);

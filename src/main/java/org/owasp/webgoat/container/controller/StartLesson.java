@@ -35,7 +35,7 @@ public class StartLesson {
         .findFirst()
         .ifPresent(
             lesson -> {
-              request.setAttribute("lesson", lesson);
+              model.addObject("lesson", lesson);
             });
 
     return model;

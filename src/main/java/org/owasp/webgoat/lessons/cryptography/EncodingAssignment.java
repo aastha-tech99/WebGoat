@@ -8,6 +8,7 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.security.SecureRandom;
 import java.util.Base64;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
@@ -28,9 +29,9 @@ public class EncodingAssignment implements AssignmentEndpoint {
 
   @GetMapping(path = "/crypto/encoding/basic", produces = MediaType.TEXT_HTML_VALUE)
   @ResponseBody
-  public String getBasicAuth(HttpServletRequest request) {
+  public String getBasicAuth(HttpServletRequest request, HttpSession session) {
 
-    String basicAuth = (String) request.getSession().getAttribute("basicAuth");
+    String basicAuth = (String) session.getAttribute("basicAuth");
     String username = request.getUserPrincipal().getName();
     if (basicAuth == null) {
       String password =
@@ -39,7 +40,7 @@ public class EncodingAssignment implements AssignmentEndpoint {
       if (basicAuth == null || !basicAuth.matches("[A-Za-z0-9+/=]+")) {
         throw new IllegalStateException("Invalid base64 value for session storage");
       }
-      request.getSession().setAttribute("basicAuth", basicAuth);
+      session.setAttribute("basicAuth", basicAuth);
     }
     return "Authorization: Basic ".concat(basicAuth);
   }
@@ -47,10 +48,10 @@ public class EncodingAssignment implements AssignmentEndpoint {
   @PostMapping("/crypto/encoding/basic-auth")
   @ResponseBody
   public AttackResult completed(
-      HttpServletRequest request,
+      HttpSession session,
       @RequestParam String answer_user,
       @RequestParam String answer_pwd) {
-    String basicAuth = (String) request.getSession().getAttribute("basicAuth");
+    String basicAuth = (String) session.getAttribute("basicAuth");
     if (basicAuth != null
         && answer_user != null
         && answer_pwd != null
