@@ -71,6 +71,7 @@ public class WebSecurityConfig {
         .headers(
             headers ->
                 headers
+                    .contentTypeOptions(contentTypeOptions -> {})
                     .frameOptions(frame -> frame.sameOrigin())
                     .contentSecurityPolicy(
                         csp ->
