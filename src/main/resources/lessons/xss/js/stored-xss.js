@@ -1,18 +1,25 @@
 $(document).ready(function () {
     $("#postComment").on("click", function () {
-        var commentInput = $("#commentInput").val();
-        $.ajax({
-            type: 'POST',
-            url: 'CrossSiteScriptingStored/stored-xss',
-            data: JSON.stringify({text: commentInput}),
-            contentType: "application/json",
-            dataType: 'json'
-        }).then(
-            function () {
-                getChallenges();
-                $("#commentInput").val('');
-            }
-        )
+        // Verify email status before allowing account action (CWE-863)
+        $.get('CrossSiteScriptingStored/email-verification-status')
+            .then(function (status) {
+                if (!status || !status.emailVerified) {
+                    return;
+                }
+                var commentInput = $("#commentInput").val();
+                $.ajax({
+                    type: 'POST',
+                    url: 'CrossSiteScriptingStored/stored-xss',
+                    data: JSON.stringify({text: commentInput}),
+                    contentType: "application/json",
+                    dataType: 'json'
+                }).then(
+                    function () {
+                        getChallenges();
+                        $("#commentInput").val('');
+                    }
+                );
+            });
     })
 
     var html = '<li class="comment">' +

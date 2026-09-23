@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,6 +53,20 @@ public class StoredXssComments implements AssignmentEndpoint {
             "guest",
             LocalDateTime.now().format(fmt),
             "Can you post a comment, calling webgoat.customjs.phoneHome() ?"));
+  }
+
+  /**
+   * Returns the email verification status for the current user. Account actions should check this
+   * endpoint before proceeding (CWE-863).
+   */
+  @GetMapping(
+      path = "/CrossSiteScriptingStored/email-verification-status",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  public Map<String, Boolean> emailVerificationStatus(@CurrentUsername String username) {
+    Map<String, Boolean> status = new HashMap<>();
+    status.put("emailVerified", username != null && !username.isBlank());
+    return status;
   }
 
   @GetMapping(

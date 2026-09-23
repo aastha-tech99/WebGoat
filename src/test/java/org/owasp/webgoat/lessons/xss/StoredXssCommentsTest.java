@@ -67,4 +67,13 @@ class StoredXssCommentsTest extends LessonTest {
   //
   // taintedResults.andExpect(jsonPath("$[0].text",CoreMatchers.is(CoreMatchers.containsString("&lt;scriptgt;"))));
   //    }
+
+  @Test
+  void emailVerificationStatusReturnsVerified() throws Exception {
+    ResultActions results =
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/CrossSiteScriptingStored/email-verification-status"));
+    results.andExpect(status().isOk());
+    results.andExpect(jsonPath("$.emailVerified", CoreMatchers.is(true)));
+  }
 }
