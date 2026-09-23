@@ -19,19 +19,44 @@ $(function () {
             console.log("entry");
             let questionsJson = json;
             var questionsObj = JSON.parse(questionsJson);
-            let html = "";
+            var container = document.getElementById("q_container");
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
             $.each(questionsObj, function(i, obj) {
                 $.each(obj, function(j, quest) {
-                  html += "<div id='question_" + j + "' class='quiz_question' name='question'><p>" + (j+1) + ".&nbsp;" + quest.text + "</p>";
-                  html += "<fieldset>";
-                  $.each(quest.solutions, function(k, solution) {
-                    solution = "Solution " + k + ": " + solution;
-                    html += '<input id="question_' + j + '_' + k + '_input" type="radio" name="question_' + j +'_solution" value="' + solution + '" required><label for="question_' + j + '_' + k + '_input">' + solution + '</label><br>';
-                  });
-                  html += "</fieldset></div>";
+                    var questionDiv = document.createElement("div");
+                    questionDiv.id = "question_" + j;
+                    questionDiv.className = "quiz_question";
+                    questionDiv.setAttribute("name", "question");
+
+                    var p = document.createElement("p");
+                    p.textContent = (j+1) + ". " + quest.text;
+                    questionDiv.appendChild(p);
+
+                    var fieldset = document.createElement("fieldset");
+                    $.each(quest.solutions, function(k, solution) {
+                        var solutionText = "Solution " + k + ": " + solution;
+
+                        var input = document.createElement("input");
+                        input.id = "question_" + j + "_" + k + "_input";
+                        input.type = "radio";
+                        input.name = "question_" + j + "_solution";
+                        input.value = solutionText;
+                        input.required = true;
+
+                        var label = document.createElement("label");
+                        label.setAttribute("for", input.id);
+                        label.textContent = solutionText;
+
+                        fieldset.appendChild(input);
+                        fieldset.appendChild(label);
+                        fieldset.appendChild(document.createElement("br"));
+                    });
+                    questionDiv.appendChild(fieldset);
+                    container.appendChild(questionDiv);
                 });
             });
-            document.getElementById("q_container").innerHTML = html;
         }
     }
     client.send();
