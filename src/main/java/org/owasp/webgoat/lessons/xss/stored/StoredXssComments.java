@@ -75,7 +75,13 @@ public class StoredXssComments implements AssignmentEndpoint {
   @ResponseBody
   public AttackResult createNewComment(
       @RequestBody String commentStr, @CurrentUsername String username) {
+    if (username == null || username.isBlank()) {
+      return (failed(this).feedback("xss-stored-comment-failure").build());
+    }
     Comment comment = parseJson(commentStr);
+    if (comment.getText() == null || comment.getText().isBlank()) {
+      return (failed(this).feedback("xss-stored-comment-failure").build());
+    }
 
     comment.setDateTime(LocalDateTime.now().format(fmt));
     comment.setUser(username);

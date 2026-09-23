@@ -1,18 +1,34 @@
 $(document).ready(function () {
     $("#postComment").on("click", function () {
         var commentInput = $("#commentInput").val();
+        if (!commentInput || commentInput.trim().length === 0) {
+            return;
+        }
+        // Verify user session is authenticated before allowing comment submission
         $.ajax({
-            type: 'POST',
+            type: 'GET',
             url: 'CrossSiteScriptingStored/stored-xss',
-            data: JSON.stringify({text: commentInput}),
-            contentType: "application/json",
             dataType: 'json'
-        }).then(
-            function () {
-                getChallenges();
+        }).then(function () {
+            // User session verified, proceed with comment submission
+            $.ajax({
+                type: 'POST',
+                url: 'CrossSiteScriptingStored/stored-xss',
+                data: JSON.stringify({text: commentInput}),
+                contentType: "application/json",
+                dataType: 'json'
+            }).then(
+                function () {
+                    getChallenges();
+                    $("#commentInput").val('');
+                }
+            ).fail(function () {
                 $("#commentInput").val('');
-            }
-        )
+            });
+        }).fail(function () {
+            // User not verified or session expired
+            $("#commentInput").val('');
+        });
     })
 
     var html = '<li class="comment">' +
