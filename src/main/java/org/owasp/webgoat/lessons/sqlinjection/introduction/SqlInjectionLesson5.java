@@ -9,9 +9,12 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.succes
 
 import jakarta.annotation.PostConstruct;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.owasp.webgoat.container.LessonDataSource;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
@@ -29,6 +32,15 @@ import org.springframework.web.bind.annotation.RestController;
       "SqlStringInjectionHint5-4"
     })
 public class SqlInjectionLesson5 implements AssignmentEndpoint {
+
+  // Parse: GRANT <privilege> ON <table> TO <user>
+  private static final Pattern SAFE_GRANT =
+      Pattern.compile(
+          "(?i)^\\s*GRANT\\s+(SELECT|INSERT|UPDATE|DELETE|ALL)\\s+ON\\s+(\\w+)"
+              + "\\s+TO\\s+(\\w+)\\s*;?\\s*$");
+
+  private static final Set<String> ALLOWED_PRIVILEGES =
+      Set.of("SELECT", "INSERT", "UPDATE", "DELETE", "ALL");
 
   private final LessonDataSource dataSource;
 
@@ -59,14 +71,33 @@ public class SqlInjectionLesson5 implements AssignmentEndpoint {
 
   protected AttackResult injectableQuery(String query) {
     try (Connection connection = dataSource.getConnection()) {
-      try (Statement statement =
-          connection.createStatement(
-              ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
-        statement.executeQuery(query);
+      Matcher matcher = SAFE_GRANT.matcher(query.trim());
+      if (matcher.matches()) {
+        String privilege = matcher.group(1).toUpperCase();
+        if (!ALLOWED_PRIVILEGES.contains(privilege)) {
+          return failed(this).output("Your query was: " + query).build();
+        }
+        String tableName = matcher.group(2);
+        String userName = matcher.group(3);
+
+        // Validate identifiers are simple words (already guaranteed by regex \w+)
+        // Reconstruct DCL from validated parts (GRANT does not support bind parameters)
+        String safeSql = "GRANT " + privilege + " ON " + tableName + " TO " + userName;
+        PreparedStatement statement = connection.prepareStatement(safeSql);
+        statement.execute();
+
         if (checkSolution(connection)) {
           return success(this).build();
         }
         return failed(this).output("Your query was: " + query).build();
+      } else {
+        return failed(this)
+            .output(
+                this.getClass().getName()
+                    + " : Query not recognized as a valid GRANT statement"
+                    + "<br> Your query was: "
+                    + query)
+            .build();
       }
     } catch (Exception e) {
       return failed(this)

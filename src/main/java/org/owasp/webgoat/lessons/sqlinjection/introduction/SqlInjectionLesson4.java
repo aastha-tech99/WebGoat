@@ -4,15 +4,15 @@
  */
 package org.owasp.webgoat.lessons.sqlinjection.introduction;
 
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.owasp.webgoat.container.LessonDataSource;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
@@ -26,6 +26,16 @@ import org.springframework.web.bind.annotation.RestController;
 @AssignmentHints(
     value = {"SqlStringInjectionHint4-1", "SqlStringInjectionHint4-2", "SqlStringInjectionHint4-3"})
 public class SqlInjectionLesson4 implements AssignmentEndpoint {
+
+  // Parse: ALTER TABLE <table> ADD <column> <type>
+  private static final Pattern SAFE_ALTER_ADD =
+      Pattern.compile(
+          "(?i)^\\s*ALTER\\s+TABLE\\s+(\\w+)\\s+ADD\\s+(\\w+)"
+              + "\\s+(VARCHAR\\(\\d+\\)|INT|CHAR\\(\\d+\\)|BOOLEAN|DATE|TIMESTAMP|BIGINT)"
+              + "\\s*;?\\s*$");
+
+  // Allowed column name pattern: simple word characters only
+  private static final Pattern SAFE_COLUMN_NAME = Pattern.compile("^[a-zA-Z]\\w{0,29}$");
 
   private final LessonDataSource dataSource;
 
@@ -41,14 +51,33 @@ public class SqlInjectionLesson4 implements AssignmentEndpoint {
 
   protected AttackResult injectableQuery(String query) {
     try (Connection connection = dataSource.getConnection()) {
-      try (Statement statement =
-          connection.createStatement(TYPE_SCROLL_INSENSITIVE, CONCUR_READ_ONLY)) {
-        statement.executeUpdate(query);
+      Matcher matcher = SAFE_ALTER_ADD.matcher(query.trim());
+      if (!matcher.matches()) {
+        return failed(this).output(query).build();
+      }
+      String table = matcher.group(1);
+      if (!"employees".equalsIgnoreCase(table)) {
+        return failed(this).output(query).build();
+      }
+      String columnName = matcher.group(2);
+      if (!SAFE_COLUMN_NAME.matcher(columnName).matches()) {
+        return failed(this).output(query).build();
+      }
+      String columnType = matcher.group(3);
+
+      try {
+        // Reconstruct DDL from validated parts (DDL does not support bind parameters)
+        String safeSql = "ALTER TABLE employees ADD " + columnName + " " + columnType;
+        PreparedStatement statement = connection.prepareStatement(safeSql);
+        statement.executeUpdate();
         connection.commit();
-        ResultSet results = statement.executeQuery("SELECT phone from employees;");
+
+        PreparedStatement checkStatement =
+            connection.prepareStatement("SELECT phone FROM employees");
+        ResultSet results = checkStatement.executeQuery();
         StringBuilder output = new StringBuilder();
         // user completes lesson if column phone exists
-        if (results.first()) {
+        if (results.next()) {
           output.append("<span class='feedback-positive'>" + query + "</span>");
           return success(this).output(output.toString()).build();
         } else {
@@ -58,7 +87,9 @@ public class SqlInjectionLesson4 implements AssignmentEndpoint {
         return failed(this).output(sqle.getMessage()).build();
       }
     } catch (Exception e) {
-      return failed(this).output(this.getClass().getName() + " : " + e.getMessage()).build();
+      return failed(this)
+          .output(this.getClass().getName() + " : " + e.getMessage())
+          .build();
     }
   }
 }

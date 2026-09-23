@@ -87,31 +87,43 @@ public class SqlInjectionLesson9 implements AssignmentEndpoint {
     }
   }
 
-  private int getSqlInt(Connection connection, String query) throws SQLException {
-    Statement statement = connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
-    ResultSet results = statement.executeQuery(query);
+  private int getMaxSalary(Connection connection) throws SQLException {
+    PreparedStatement statement =
+        connection.prepareStatement(
+            "SELECT max(salary) FROM employees", TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
+    ResultSet results = statement.executeQuery();
     results.first();
     return results.getInt(1);
   }
 
-  private int getMaxSalary(Connection connection) throws SQLException {
-    String query = "SELECT max(salary) FROM employees";
-    return this.getSqlInt(connection, query);
-  }
-
   private int getSumSalariesOfOtherEmployees(Connection connection) throws SQLException {
-    String query = "SELECT sum(salary) FROM employees WHERE auth_tan != '3SL99A'";
-    return this.getSqlInt(connection, query);
+    PreparedStatement statement =
+        connection.prepareStatement(
+            "SELECT sum(salary) FROM employees WHERE auth_tan != '3SL99A'",
+            TYPE_SCROLL_SENSITIVE,
+            CONCUR_UPDATABLE);
+    ResultSet results = statement.executeQuery();
+    results.first();
+    return results.getInt(1);
   }
 
   private int getJohnSalary(Connection connection) throws SQLException {
-    String query = "SELECT salary FROM employees WHERE auth_tan = '3SL99A'";
-    return this.getSqlInt(connection, query);
+    PreparedStatement statement =
+        connection.prepareStatement(
+            "SELECT salary FROM employees WHERE auth_tan = '3SL99A'",
+            TYPE_SCROLL_SENSITIVE,
+            CONCUR_UPDATABLE);
+    ResultSet results = statement.executeQuery();
+    results.first();
+    return results.getInt(1);
   }
 
   private ResultSet getEmployeesDataOrderBySalaryDesc(Connection connection) throws SQLException {
-    String query = "SELECT * FROM employees ORDER BY salary DESC";
-    Statement statement = connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
-    return statement.executeQuery(query);
+    PreparedStatement statement =
+        connection.prepareStatement(
+            "SELECT * FROM employees ORDER BY salary DESC",
+            TYPE_SCROLL_SENSITIVE,
+            CONCUR_UPDATABLE);
+    return statement.executeQuery();
   }
 }
