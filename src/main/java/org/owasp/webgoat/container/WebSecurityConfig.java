@@ -73,6 +73,12 @@ public class WebSecurityConfig {
                 headers
                     .contentTypeOptions(contentTypeOptions -> {})
                     .frameOptions(frame -> frame.sameOrigin())
+                    .httpStrictTransportSecurity(
+                        hsts ->
+                            hsts.includeSubDomains(true)
+                                .maxAgeInSeconds(31536000)
+                                .requestMatcher(
+                                    request -> request.isSecure()))
                     .contentSecurityPolicy(
                         csp ->
                             csp.policyDirectives(
