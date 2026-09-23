@@ -5,7 +5,7 @@ Now let's look at a code review and try to think on an attack with the `alg: non
 // demo/placeholder JWT for WebGoat training -- not a real credential
 [source]
 ----
-eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlciI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.
+<EXAMPLE_JWT_TOKEN: alg=none, sub=1234567890, user=John Doe, admin=true>
 ----
 
 which after decoding becomes:

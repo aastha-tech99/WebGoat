@@ -26,7 +26,7 @@ claims:
 // demo/placeholder JWT for WebGoat training -- not a real credential
 [source]
 ----
-var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.NFvYpuwbF6YWbPyaNAGEPw9wbhiQSovvSrD89B8K7Ng";
+var token = "<EXAMPLE_JWT_TOKEN: alg=HS256, sub=1234567890, name=John Doe>";
 
 Jwts.parser().setSigningKey("test").parseClaimsJws(token);
 ----
@@ -39,7 +39,7 @@ Using the same source as above gives:
 // demo/placeholder JWT for WebGoat training -- not a real credential
 [source]
 ----
-var token = " eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.NFvYpuwbF6YWbPyaNAGEPw9wbhiQSovvSrD89B8K7Ng";
+var token = "<EXAMPLE_JWT_TOKEN: alg=none, sub=1234567890, name=John Doe, with signature>";
 
 Jwts.parser().setSigningKey("test").parseClaimsJws(token);
 ----
@@ -56,7 +56,7 @@ removing the signature completely (leaving the last `.`)
 // demo/placeholder JWT for WebGoat training -- not a real credential
 [source]
 ----
-var token = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.";
+var token = "<EXAMPLE_JWT_TOKEN: alg=none, sub=1234567890, name=John Doe, no signature>";
 
 Jwts.parser().setSigningKey("test").parseClaimsJws(token);
 ----

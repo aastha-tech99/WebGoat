@@ -20,16 +20,32 @@ jobs:
         with:
           cache: 'maven'
 
-      - name: "Set labels for ${{ github.ref }}"
+      - name: "Set labels for release tag"
         env:
           REF_NAME: ${{ github.ref_name }}
         run: |
           echo "WEBGOAT_TAG_VERSION=${REF_NAME}" >> $GITHUB_ENV
           WEBGOAT_MAVEN_VERSION="${REF_NAME}"
           echo "WEBGOAT_MAVEN_VERSION=${WEBGOAT_MAVEN_VERSION:1}" >> $GITHUB_ENV
+          echo "RELEASE_JAR=target/webgoat-${WEBGOAT_MAVEN_VERSION:1}.jar" >> $GITHUB_ENV
+          echo "DOCKER_BUILD_ARGS=webgoat_version=${WEBGOAT_MAVEN_VERSION:1}" >> $GITHUB_ENV
+          {
+            echo "DOCKER_TAGS_WEBGOAT<<EOTAGS"
+            echo "webgoat/webgoat:${REF_NAME}"
+            echo "webgoat/webgoat:latest"
+            echo "EOTAGS"
+          } >> $GITHUB_ENV
+          {
+            echo "DOCKER_TAGS_DESKTOP<<EOTAGS"
+            echo "webgoat/webgoat-desktop:${REF_NAME}"
+            echo "webgoat/webgoat-desktop:latest"
+            echo "EOTAGS"
+          } >> $GITHUB_ENV
       - name: Build with Maven
+        env:
+          WEBGOAT_MAVEN_VERSION: ${{ env.WEBGOAT_MAVEN_VERSION }}
         run: |
-          mvn --no-transfer-progress versions:set -DnewVersion=${{ env.WEBGOAT_MAVEN_VERSION }}
+          mvn --no-transfer-progress versions:set -DnewVersion="${WEBGOAT_MAVEN_VERSION}"
           mvn --no-transfer-progress install -DskipTests
 
       # Published as a draft so the generated notes can be reviewed and edited before they go public,
@@ -41,7 +57,7 @@ jobs:
           draft: true
           generate_release_notes: true
           files: |
-            target/webgoat-${{ env.WEBGOAT_MAVEN_VERSION }}.jar
+            ${{ env.RELEASE_JAR }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -66,11 +82,8 @@ jobs:
           file: ./Dockerfile
           push: true
           platforms: linux/amd64, linux/arm64
-          tags: |
-            webgoat/webgoat:${{ env.WEBGOAT_TAG_VERSION }}
-            webgoat/webgoat:latest
-          build-args: |
-            webgoat_version=${{ env.WEBGOAT_MAVEN_VERSION }}
+          tags: ${{ env.DOCKER_TAGS_WEBGOAT }}
+          build-args: ${{ env.DOCKER_BUILD_ARGS }}
 
       - name: "Build and push WebGoat desktop"
         uses: docker/build-push-action@v7.3.0
@@ -79,16 +92,15 @@ jobs:
           file: ./Dockerfile_desktop
           push: true
           platforms: linux/amd64, linux/arm64
-          tags: |
-            webgoat/webgoat-desktop:${{ env.WEBGOAT_TAG_VERSION }}
-            webgoat/webgoat-desktop:latest
-          build-args: |
-            webgoat_version=${{ env.WEBGOAT_MAVEN_VERSION }}
+          tags: ${{ env.DOCKER_TAGS_DESKTOP }}
+          build-args: ${{ env.DOCKER_BUILD_ARGS }}
   new_version:
     if: github.repository == 'WebGoat/WebGoat'
     name: Update to next SNAPSHOT version
     needs: [ release ]
     runs-on: ubuntu-latest
+    env:
+      REF_NAME: ${{ github.ref_name }}
     permissions:
       contents: write
       pull-requests: write
@@ -116,12 +128,12 @@ jobs:
         with:
             github_token: "${{ secrets.GITHUB_TOKEN }}"
             add_timestamp: true
-            commit_message: "chore: back to snapshot after ${{ github.ref_name }}"
+            commit_message: "chore: back to snapshot after ${{ env.REF_NAME }}"
             force: false
 
       - name: Create PR
         uses: devops-infra/action-pull-request@v1.4.0
         with:
             github_token: "${{ secrets.GITHUB_TOKEN }}"
-            title: "chore: back to snapshot after ${{ github.ref_name }}"
+            title: "chore: back to snapshot after ${{ env.REF_NAME }}"
             target_branch: main
