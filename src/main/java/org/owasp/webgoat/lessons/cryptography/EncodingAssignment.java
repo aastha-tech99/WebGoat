@@ -8,8 +8,8 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.Random;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AttackResult;
 import org.springframework.http.MediaType;
@@ -34,7 +34,7 @@ public class EncodingAssignment implements AssignmentEndpoint {
     String username = request.getUserPrincipal().getName();
     if (basicAuth == null) {
       String password =
-          HashingAssignment.SECRETS[new Random().nextInt(HashingAssignment.SECRETS.length)];
+          HashingAssignment.SECRETS[new SecureRandom().nextInt(HashingAssignment.SECRETS.length)];
       basicAuth = getBasicAuth(username, password);
       if (basicAuth == null || !basicAuth.matches("[A-Za-z0-9+/=]+")) {
         throw new IllegalStateException("Invalid base64 value for session storage");
