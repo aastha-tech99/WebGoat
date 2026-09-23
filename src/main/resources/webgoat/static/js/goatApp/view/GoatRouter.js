@@ -68,7 +68,7 @@ define(['jquery',
 
             // shim to support xss lesson
             webgoat.customjs.phoneHome = function (e) {
-                console.log('phoneHome invoked');
+                // phoneHome invoked (log removed to avoid PII exposure)
                 webgoat.customjs.jquery.ajax({
                     method: "POST",
                     url: "CrossSiteScripting/phone-home-xss",
@@ -78,8 +78,7 @@ define(['jquery',
                     },
                     contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
                     success: function (data) {
-                        //devs leave stuff like this in all the time
-                        console.log('phone home said '  + JSON.stringify(data));
+                        // response data handled without logging to avoid PII exposure
                     }
                 });
             }
