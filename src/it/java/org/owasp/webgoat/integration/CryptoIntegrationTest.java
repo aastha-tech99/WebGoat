@@ -72,7 +72,7 @@ public class CryptoIntegrationTest extends IntegrationTest {
   }
 
   private void checkAssignment3() {
-    String answer_1 = "databasepassword";
+    String answer_1 = "databasepassword"; // WebGoat lesson placeholder — not a production credential
     Map<String, Object> params = new HashMap<>();
     params.clear();
     params.put("answer_pwd1", answer_1);
