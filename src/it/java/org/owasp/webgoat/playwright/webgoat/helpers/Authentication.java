@@ -43,7 +43,7 @@ public class Authentication {
 
   private static User login(Browser browser, User user) {
     if (user.loggedIn()) {
-      return user;
+      return new User(user.name, null, user.auth);
     }
     var page = browser.newContext(new Browser.NewContextOptions().setLocale("en-US")).newPage();
     RegistrationPage registrationPage = new RegistrationPage(page);

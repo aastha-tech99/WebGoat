@@ -49,6 +49,7 @@ public class MissingAccessControlUserRepository {
             .addValue("username", user.getUsername())
             .addValue("password", user.getPassword())
             .addValue("admin", user.isAdmin()));
+    user.setPassword(null);
     return user;
   }
 }

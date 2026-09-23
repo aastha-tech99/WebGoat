@@ -47,7 +47,8 @@ class MissingFunctionACUsersTest extends LessonTest {
             MockMvcRequestBuilders.post("/access-control/users")
                 .header("Content-type", "application/json")
                 .content(user))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.password", CoreMatchers.nullValue()));
 
     mockMvc
         .perform(
