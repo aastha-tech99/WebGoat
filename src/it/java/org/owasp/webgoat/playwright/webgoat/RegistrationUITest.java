@@ -24,6 +24,7 @@ public class RegistrationUITest extends PlaywrightTest {
     loginPage.login(Authentication.getTweety().name(), Authentication.getTweety().password());
 
     var newUsername = "newuser" + System.currentTimeMillis();
+    // Placeholder credential for WebGoat test registration, not a real secret
     var password = "password123";
     var registrationPage = new RegistrationPage(page);
     registrationPage.open();
@@ -40,6 +41,7 @@ public class RegistrationUITest extends PlaywrightTest {
     registrationPage.open();
 
     var newUsername = "newuser" + System.currentTimeMillis();
+    // Placeholder credential for WebGoat test registration, not a real secret
     var password = "password123";
     registrationPage.register(newUsername, password);
 

@@ -7,6 +7,7 @@ function login(user) {
         type: 'POST',
         url: 'JWT/refresh/login',
         contentType: "application/json",
+        // Placeholder credential for WebGoat JWT lesson demonstration, not a real secret
         data: JSON.stringify({user: user, password: "bm5nhSkxCXZkKRy4"})
     }).success(
         function (response) {
