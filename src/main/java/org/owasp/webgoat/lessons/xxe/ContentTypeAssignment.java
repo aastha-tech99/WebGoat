@@ -58,7 +58,7 @@ public class ContentTypeAssignment implements AssignmentEndpoint {
     if (null != contentType && contentType.contains(MediaType.APPLICATION_XML_VALUE)) {
       try {
         CommentsCache localComments = comments;
-        Comment comment = localComments.parseXml(commentStr, false);
+        Comment comment = localComments.parseXml(commentStr);
         localComments.addComment(comment, user, false);
         if (checkSolution(comment)) {
           attackResult = success(this).build();

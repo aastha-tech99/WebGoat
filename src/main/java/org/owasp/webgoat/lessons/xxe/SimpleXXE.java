@@ -52,7 +52,7 @@ public class SimpleXXE implements AssignmentEndpoint {
     String error = "";
     try {
       CommentsCache localComments = comments;
-      var comment = localComments.parseXml(commentStr, false);
+      var comment = localComments.parseXml(commentStr);
       localComments.addComment(comment, user, false);
       if (checkSolution(comment)) {
         return success(this).build();
