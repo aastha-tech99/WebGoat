@@ -46,7 +46,8 @@ public class CryptoUtil {
   }
 
   public static String getPrivateKeyInPEM(KeyPair keyPair) {
-    String encodedString = "-----BEGIN PRIVATE KEY-----\n";
+    String encodedString =
+        "-----BEGIN PRIVATE KEY-----\n"; // Not a secret: standard PEM format delimiter (RFC 7468)
     encodedString =
         encodedString
             + new String(
@@ -134,6 +135,7 @@ public class CryptoUtil {
 
   public static PrivateKey getPrivateKeyFromPEM(String privateKeyPem)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
+    // Not a secret: standard PEM format delimiters (RFC 7468) stripped from caller-supplied input
     privateKeyPem = privateKeyPem.replace("-----BEGIN PRIVATE KEY-----", "");
     privateKeyPem = privateKeyPem.replace("-----END PRIVATE KEY-----", "");
     privateKeyPem = privateKeyPem.replace("\n", "").replace("\r", "");
