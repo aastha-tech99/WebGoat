@@ -75,6 +75,24 @@ class JWTHeaderJKUEndpointTest extends LessonTest {
         .andExpect(jsonPath("$.lessonCompleted", is(false)));
   }
 
+  @Test
+  @DisplayName("When JKU host is not in allowlist then the call should fail")
+  void shouldRejectNonLocalhostJkuHost() throws Exception {
+    Map<String, Object> claims = new HashMap<>();
+    claims.put("username", "Tom");
+    var token =
+        Jwts.builder()
+            .setHeaderParam("jku", "http://evil.example.com/files/jwks")
+            .setClaims(claims)
+            .signWith(RS256, this.keyPair.getPrivate())
+            .compact();
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.post("/JWT/jku/delete").param("token", token).content(""))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.lessonCompleted", is(false)));
+  }
+
   private String createTokenAndSignIt() {
     Map<String, Object> claims = new HashMap<>();
     claims.put("username", "Tom");
