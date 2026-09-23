@@ -53,6 +53,10 @@ public class JWTHeaderJKUEndpoint implements AssignmentEndpoint {
     } else {
       try {
         var decodedJWT = JWT.decode(token);
+        // Reject tokens using the "none" algorithm to prevent JWT forgery
+        if ("none".equalsIgnoreCase(decodedJWT.getAlgorithm())) {
+          return failed(this).feedback("jwt-invalid-token").build();
+        }
         var jku = decodedJWT.getHeaderClaim("jku");
         var jwkProvider = new JwkProviderBuilder(new URL(jku.asString())).build();
         var jwk = jwkProvider.get(decodedJWT.getKeyId());
