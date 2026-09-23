@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -31,11 +31,13 @@ public class CommentsCache {
   }
 
   private static final Comments comments = new Comments();
-  private static final Map<WebGoatUser, Comments> userComments = new HashMap<>();
+  private static final Map<WebGoatUser, Comments> userComments = new ConcurrentHashMap<>();
   private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss");
 
   public CommentsCache() {
-    initDefaultComments();
+    synchronized (comments) {
+      initDefaultComments();
+    }
   }
 
   void initDefaultComments() {
@@ -52,9 +54,13 @@ public class CommentsCache {
     Comments allComments = new Comments();
     Comments commentsByUser = userComments.get(user);
     if (commentsByUser != null) {
-      allComments.addAll(commentsByUser);
+      synchronized (commentsByUser) {
+        allComments.addAll(commentsByUser);
+      }
     }
-    allComments.addAll(comments);
+    synchronized (comments) {
+      allComments.addAll(comments);
+    }
     allComments.sort();
     return allComments;
   }
@@ -86,17 +92,23 @@ public class CommentsCache {
     comment.setDateTime(LocalDateTime.now().format(fmt));
     comment.setUser(user.getUsername());
     if (visibleForAllUsers) {
-      comments.add(comment);
+      synchronized (comments) {
+        comments.add(comment);
+      }
     } else {
-      var comments = userComments.getOrDefault(user.getUsername(), new Comments());
-      comments.add(comment);
-      userComments.put(user, comments);
+      Comments perUser =
+          userComments.computeIfAbsent(user, k -> new Comments());
+      synchronized (perUser) {
+        perUser.add(comment);
+      }
     }
   }
 
   public void reset(WebGoatUser user) {
-    comments.clear();
+    synchronized (comments) {
+      comments.clear();
+      initDefaultComments();
+    }
     userComments.remove(user);
-    initDefaultComments();
   }
 }

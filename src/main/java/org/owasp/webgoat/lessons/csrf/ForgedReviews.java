@@ -14,9 +14,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.owasp.webgoat.container.CurrentUsername;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
@@ -33,7 +33,7 @@ public class ForgedReviews implements AssignmentEndpoint {
 
   private static DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss");
 
-  private static final Map<String, List<Review>> userReviews = new HashMap<>();
+  private static final Map<String, List<Review>> userReviews = new ConcurrentHashMap<>();
   private static final List<Review> REVIEWS = new ArrayList<>();
   private static final String weakAntiCSRF = "2aa14227b9a13d0bede0388a7fba9aa9";
 
@@ -57,9 +57,11 @@ public class ForgedReviews implements AssignmentEndpoint {
   @ResponseBody
   public Collection<Review> retrieveReviews(@CurrentUsername String username) {
     Collection<Review> allReviews = Lists.newArrayList();
-    Collection<Review> newReviews = userReviews.get(username);
+    List<Review> newReviews = userReviews.get(username);
     if (newReviews != null) {
-      allReviews.addAll(newReviews);
+      synchronized (newReviews) {
+        allReviews.addAll(newReviews);
+      }
     }
 
     allReviews.addAll(REVIEWS);
@@ -85,9 +87,10 @@ public class ForgedReviews implements AssignmentEndpoint {
     review.setDateTime(LocalDateTime.now().format(fmt));
     review.setUser(username);
     review.setStars(stars);
-    var reviews = userReviews.getOrDefault(username, new ArrayList<>());
-    reviews.add(review);
-    userReviews.put(username, reviews);
+    var reviews = userReviews.computeIfAbsent(username, k -> new ArrayList<>());
+    synchronized (reviews) {
+      reviews.add(review);
+    }
     // short-circuit
     if (validateReq == null || !validateReq.equals(weakAntiCSRF)) {
       return failed(this).feedback("csrf-you-forgot-something").build();

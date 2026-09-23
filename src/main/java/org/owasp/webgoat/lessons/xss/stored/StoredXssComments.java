@@ -16,9 +16,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.owasp.webgoat.container.CurrentUsername;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AttackResult;
@@ -35,7 +35,7 @@ public class StoredXssComments implements AssignmentEndpoint {
 
   private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss");
 
-  private static final Map<String, List<Comment>> userComments = new HashMap<>();
+  private static final Map<String, List<Comment>> userComments = new ConcurrentHashMap<>();
   private static final List<Comment> comments = new ArrayList<>();
   private static final String phoneHomeString = "<script>webgoat.customjs.phoneHome()</script>";
 
@@ -61,10 +61,12 @@ public class StoredXssComments implements AssignmentEndpoint {
   @ResponseBody
   public Collection<Comment> retrieveComments(@CurrentUsername String username) {
     List<Comment> allComments = Lists.newArrayList();
-    Collection<Comment> newComments = userComments.get(username);
+    List<Comment> newComments = userComments.get(username);
     allComments.addAll(comments);
     if (newComments != null) {
-      allComments.addAll(newComments);
+      synchronized (newComments) {
+        allComments.addAll(newComments);
+      }
     }
     Collections.reverse(allComments);
     return allComments;
@@ -76,12 +78,13 @@ public class StoredXssComments implements AssignmentEndpoint {
       @RequestBody String commentStr, @CurrentUsername String username) {
     Comment comment = parseJson(commentStr);
 
-    List<Comment> comments = userComments.getOrDefault(username, new ArrayList<>());
+    List<Comment> comments = userComments.computeIfAbsent(username, k -> new ArrayList<>());
     comment.setDateTime(LocalDateTime.now().format(fmt));
     comment.setUser(username);
 
-    comments.add(comment);
-    userComments.put(username, comments);
+    synchronized (comments) {
+      comments.add(comment);
+    }
 
     if (comment.getText().contains(phoneHomeString)) {
       return (success(this).feedback("xss-stored-comment-success").build());

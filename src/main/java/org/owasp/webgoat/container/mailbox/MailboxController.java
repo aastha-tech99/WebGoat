@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ public class MailboxController {
   private final MailboxRepository mailboxRepository;
 
   @GetMapping("/mail")
+  @Transactional
   public ModelAndView mail(Authentication authentication, Model model) {
     String username = (null != authentication) ? authentication.getName() : "anonymous";
     ModelAndView modelAndView = new ModelAndView();

@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Version;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -21,7 +22,7 @@ import org.owasp.webgoat.container.lessons.Lesson;
 
 @Slf4j
 @Entity
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = "version")
 public class UserProgress {
 
   @Id
@@ -33,6 +34,8 @@ public class UserProgress {
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<LessonProgress> lessonProgress = new HashSet<>();
+
+  @Version private Integer version;
 
   protected UserProgress() {}
 
@@ -46,7 +49,7 @@ public class UserProgress {
    * @param lesson the lesson
    * @return a lesson tracker created if not already present
    */
-  public LessonProgress getLessonProgress(Lesson lesson) {
+  public synchronized LessonProgress getLessonProgress(Lesson lesson) {
     Optional<LessonProgress> progress =
         lessonProgress.stream().filter(l -> l.getLessonName().equals(lesson.getId())).findFirst();
     if (progress.isEmpty()) {
@@ -58,18 +61,18 @@ public class UserProgress {
     }
   }
 
-  public void assignmentSolved(Lesson lesson, String assignmentName) {
+  public synchronized void assignmentSolved(Lesson lesson, String assignmentName) {
     LessonProgress progress = getLessonProgress(lesson);
     progress.incrementAttempts();
     progress.assignmentSolved(assignmentName);
   }
 
-  public void assignmentFailed(Lesson lesson) {
+  public synchronized void assignmentFailed(Lesson lesson) {
     LessonProgress progress = getLessonProgress(lesson);
     progress.incrementAttempts();
   }
 
-  public void reset(Lesson al) {
+  public synchronized void reset(Lesson al) {
     LessonProgress progress = getLessonProgress(al);
     progress.reset();
   }

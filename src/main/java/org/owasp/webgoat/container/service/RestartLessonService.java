@@ -18,6 +18,7 @@ import org.owasp.webgoat.container.users.UserProgressRepository;
 import org.owasp.webgoat.container.users.WebGoatUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -34,6 +35,7 @@ public class RestartLessonService {
 
   @GetMapping(path = "/service/restartlesson.mvc/{lesson}")
   @ResponseStatus(value = HttpStatus.OK)
+  @Transactional
   public void restartLesson(
       @PathVariable("lesson") LessonName lessonName, @CurrentUser WebGoatUser user) {
     var lesson = course.getLessonByName(lessonName);
