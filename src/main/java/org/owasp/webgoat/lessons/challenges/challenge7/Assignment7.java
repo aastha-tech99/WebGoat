@@ -35,7 +35,7 @@ public class Assignment7 implements AssignmentEndpoint {
 
   public static final String ADMIN_PASSWORD_LINK = "375afe1104f4a487a73823c50a9292a2"; // WebGoat lesson fixture, not a real credential
 
-  private static final String TEMPLATE =
+  private static final String TEMPLATE = // WebGoat lesson fixture template, not a real credential
       "Hi, you requested a password reset link, please use this <a target='_blank'"
           + " href='%s:8080/WebGoat/challenge/7/reset-password/%s'>link</a> to reset your"
           + " password.\n"

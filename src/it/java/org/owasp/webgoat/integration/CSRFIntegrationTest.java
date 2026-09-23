@@ -52,7 +52,7 @@ public class CSRFIntegrationTest extends IntegrationTest {
           + "<input type=\"submit\" value=\"assignment 7\"/>\n"
           + "</form></body></html>";
 
-  private static final String trickHTML8 =
+  private static final String trickHTML8 = // WebGoat lesson fixture, not a real credential
       "<!DOCTYPE html><html><body><form action=\"WEBGOATURL\" method=\"POST\">\n"
           + "<input type=\"hidden\" name=\"username\" value=\"csrf-USERNAME\"/>\n"
           + "<input type=\"hidden\" name=\"password\" value=\"password\"/>\n"
