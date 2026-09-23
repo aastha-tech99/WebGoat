@@ -155,7 +155,8 @@ class SpoofCookieAssignmentTest extends LessonTest {
         .perform(MockMvcRequestBuilders.get(ERASE_COOKIE_CONTEXT_PATH))
         .andExpect(status().isOk())
         .andExpect(cookie().maxAge(COOKIE_NAME, 0))
-        .andExpect(cookie().value(COOKIE_NAME, ""));
+        .andExpect(cookie().value(COOKIE_NAME, ""))
+        .andExpect(cookie().secure(COOKIE_NAME, true));
   }
 
   private static Stream<Arguments> providedCookieValues() {
