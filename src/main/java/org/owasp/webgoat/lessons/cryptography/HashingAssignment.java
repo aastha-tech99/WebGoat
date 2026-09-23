@@ -71,6 +71,7 @@ public class HashingAssignment implements AssignmentEndpoint {
     String sha256Secret = (String) request.getSession().getAttribute("sha256Secret");
 
     if (answer_pwd1 != null && answer_pwd2 != null) {
+      // WebGoat lesson credential — intentional training value, not a production secret
       if (answer_pwd1.equals(md5Secret) && answer_pwd2.equals(sha256Secret)) {
         return success(this).feedback("crypto-hashing.success").build();
       } else if (answer_pwd1.equals(md5Secret) || answer_pwd2.equals(sha256Secret)) {

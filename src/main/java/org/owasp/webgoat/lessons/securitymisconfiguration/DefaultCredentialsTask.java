@@ -42,6 +42,7 @@ public class DefaultCredentialsTask implements AssignmentEndpoint {
           .build();
     }
 
+    // WebGoat lesson credential — intentional training value, not a production secret
     if (DEFAULT_USERNAME.equals(username.trim()) && DEFAULT_PASSWORD.equals(password)) {
       return success(this)
           .feedback("securitymisconfiguration.task1.success")

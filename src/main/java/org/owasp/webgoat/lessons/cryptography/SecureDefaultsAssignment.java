@@ -29,6 +29,7 @@ public class SecureDefaultsAssignment implements AssignmentEndpoint {
   public AttackResult completed(
       @RequestParam String secretFileName, @RequestParam String secretText)
       throws NoSuchAlgorithmException {
+    // WebGoat lesson credential — intentional training value, not a production secret
     if (secretFileName != null && secretFileName.equals("default_secret")) {
       if (secretText != null
           && HashingAssignment.getHash(secretText, "SHA-256")

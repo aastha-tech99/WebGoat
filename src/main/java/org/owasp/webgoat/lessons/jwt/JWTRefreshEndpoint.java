@@ -58,6 +58,7 @@ public class JWTRefreshEndpoint implements AssignmentEndpoint {
     String user = (String) json.get("user");
     String password = (String) json.get("password");
 
+    // WebGoat lesson credential — intentional training value, not a production secret
     if ("Jerry".equalsIgnoreCase(user) && PASSWORD.equals(password)) {
       return ok(createNewTokens(user));
     }

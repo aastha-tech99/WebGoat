@@ -18,6 +18,7 @@ public class InsecureLoginTask implements AssignmentEndpoint {
   @PostMapping("/InsecureLogin/task")
   @ResponseBody
   public AttackResult completed(@RequestParam String username, @RequestParam String password) {
+    // WebGoat lesson credential — intentional training value, not a production secret
     if ("CaptainJack".equals(username) && "BlackPearl".equals(password)) {
       return success(this).build();
     }

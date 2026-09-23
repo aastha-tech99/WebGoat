@@ -63,12 +63,14 @@ public class SpoofCookieAssignment implements AssignmentEndpoint {
   private AttackResult credentialsLoginFlow(
       String username, String password, HttpServletResponse response) {
     String lowerCasedUsername = username.toLowerCase();
+    // WebGoat lesson credential — intentional training value, not a production secret
     if (ATTACK_USERNAME.equals(lowerCasedUsername)
         && users.get(lowerCasedUsername).equals(password)) {
       return informationMessage(this).feedback("spoofcookie.cheating").build();
     }
 
     String authPassword = users.getOrDefault(lowerCasedUsername, "");
+    // WebGoat lesson credential — intentional training value, not a production secret
     if (!authPassword.isBlank() && authPassword.equals(password)) {
       String newCookieValue = EncDec.encode(lowerCasedUsername);
       Cookie newCookie = new Cookie(COOKIE_NAME, newCookieValue);
