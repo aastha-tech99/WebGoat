@@ -30,7 +30,7 @@
                                     <form id="login-form" class="attack-form" accept-charset="UNKNOWN"
                                           method="POST" name="form"
                                           th:action="@{/challenge/6}" role="form">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
                                         <div class="form-group">
                                             <input type="text" name="username_login" id="username4" tabindex="1"
                                                    class="form-control" placeholder="Username" value=""/>
@@ -66,7 +66,7 @@
                                     <form id="register-form" class="attack-form" accept-charset="UNKNOWN"
                                           method="PUT" name="form"
                                           th:action="@{/challenge/6}" style="display: none;" role="form">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
                                         <div class="form-group">
                                             <input type="text" name="username_reg" id="username" tabindex="1"
                                                    class="form-control" placeholder="Username" value=""/>
@@ -102,7 +102,7 @@
         </div>
         <br/>
         <form class="attack-form" method="POST" name="form" th:action="@{/challenge/flag/6}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <div class="form-group">
                 <div class="input-group">
                     <div class="input-group-addon"><i class="fa fa-flag-checkered" aria-hidden="true"

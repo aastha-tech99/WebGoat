@@ -18,7 +18,7 @@
           target="_blank"
           successCallback=""
           th:action="@{/csrf/basic-get-flag}">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
         <input name="csrf" type="hidden" value="false"/>
         <input type="submit" name="submit"/>
 
@@ -38,7 +38,7 @@
               successCallback=""
               th:action="@{/csrf/confirm-flag-1}">
 
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
 
             Confirm Flag Value:
             <input type="text" length="6" name="confirmFlagVal" value=""/>
@@ -97,7 +97,7 @@
                                   method="POST" name="review-form"
                                   successCallback=""
                                   th:action="@{/csrf/review}">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
                                 <input class="form-control" id="reviewText" name="reviewText" placeholder="Add a Review"
                                        type="text"/>
                                 <input class="form-control" id="reviewStars" name="stars" type="text"/>
@@ -152,7 +152,7 @@
                                   prepareData="feedback"
                                   th:action="@{/csrf/feedback/message}"
                                   contentType="application/json">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -219,7 +219,7 @@
               method="POST" name="form2"
               th:action="@{/csrf/feedback}">
 
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
 
             Confirm Flag Value:
             <input type="text" length="6" name="confirmFlagVal" value=""/>
@@ -245,7 +245,7 @@
               method="POST" name="form2"
               th:action="@{/csrf/login}">
 
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
 
             Press the button below when your are logged in as the other user<br/>
 

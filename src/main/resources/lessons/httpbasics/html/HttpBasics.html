@@ -22,11 +22,11 @@
 			<form class="attack-form" accept-charset="UNKNOWN"
 				method="POST" name="form"
 				th:action="@{/HttpBasics/attack1}">
-				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+				<input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
 				<div id="lessonContent">
 					<form accept-charset="UNKNOWN" method="POST" name="form"
 						th:action="@{/#attack/307/100}">
-						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+						<input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
 						Enter your name: <input name="person" value="" type="TEXT"/><input
 							name="SUBMIT" value="Go!" type="SUBMIT" class="spacing"/>
 					</form>
@@ -47,7 +47,7 @@
             <form class="attack-form" accept-charset="UNKNOWN" name="intercept-request"
                   method="POST"
                   th:action="@{/HttpBasics/externalcheck}">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
                 <input type="text" value="" name="code"/>
                 <input type="submit" value="Submit"/>
             </form>
@@ -70,7 +70,7 @@
 				<form class="attack-form" accept-charset="UNKNOWN"
 					method="POST" name="form"
 					th:action="@{/HttpBasics/attack2}">
-					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+					<input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
 					<script>
 					    // sample custom javascript in the recommended way ...
 					    // a namespace has been assigned for it, but you can roll your own if you prefer
@@ -118,7 +118,7 @@
             <form id="quiz-form" class="attack-form" accept-charset="UNKNOWN"
                   method="POST" name="form"
                   th:action="@{/HttpBasics/quiz}" role="form">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
                 <div id="q_container"></div>
                 <br />
                 <input name="Quiz_solutions" value="Submit answers" type="SUBMIT"/>

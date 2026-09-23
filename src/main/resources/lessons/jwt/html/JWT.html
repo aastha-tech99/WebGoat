@@ -18,7 +18,7 @@
     <div class="attack-container">
         <img th:src="@{/images/wolf-enabled.png}" class="webwolf-enabled"/>
         <form id="decode" class="attack-form" method="POST" name="form" th:action="@{/JWT/decode}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <div class="assignment-success"><i class="fa fa-2 fa-check hidden" aria-hidden="true"></i></div>
             <br>
             <div class="row">
@@ -55,7 +55,7 @@
               method="POST"
               successCallback="jwtSigningCallback"
               th:action="@{/JWT/votings}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <div class="container-fluid">
 
                 <div class="row">
@@ -128,7 +128,7 @@
                   method="POST" name="form"
                   th:action="@{/JWT/quiz}"
                   role="form">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
                 <div id="q_container"></div>
                 <br/>
                 <input name="Quiz_solutions" value="Submit answers" type="SUBMIT"/>
@@ -159,7 +159,7 @@
     <div class="attack-container">
         <div class="assignment-success"><i class="fa fa-2 fa-check hidden" aria-hidden="true"></i></div>
         <form class="attack-form" method="POST" name="form" th:action="@{/JWT/secret}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <div class="form-group">
                 <div class="input-group">
                     <div class="input-group-addon"><i class="fa fa-flag-checkered" aria-hidden="true"
@@ -197,7 +197,7 @@
               method="POST"
               additionalHeaders="addBearerToken"
               th:action="@{/JWT/refresh/checkout}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-sm-12 col-md-10 col-md-offset-1">
@@ -326,7 +326,7 @@
         <form class="attack-form" accept-charset="UNKNOWN"
               method="POST"
               th:action="@{/JWT/jku/delete?token=eyJ0eXAiOiJKV1QiLCJqa3UiOiJodHRwOi8vMTI3LjAuMC4xOjgwODAvV2ViR29hdC9pbWFnZXMvandrcy5qc29uIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJXZWJHb2F0IFRva2VuIEJ1aWxkZXIiLCJpYXQiOjE3NzczODQ4NjEsImV4cCI6MjIxOTIzNDQ2MSwiYXVkIjoid2ViZ29hdC5vcmciLCJzdWIiOiJqZXJyeUB3ZWJnb2F0LmNvbSIsInVzZXJuYW1lIjoiSmVycnkiLCJFbWFpbCI6ImplcnJ5QHdlYmdvYXQuY29tIiwiUm9sZSI6WyJDYXQiXX0.P6x2mSeN58GVRs6zz3OESnIwqdA9WND1pnBtix8c760j3_V4TPuQylfKA7TIQ7CN8dtTF0hY_5T-toa8VagkHvy27fYBDNK_XTwRjjoQu1U279e7ILuPvj53lkTOL5vtTYl5FGo4yRGXObPHdOka3tFXTO3296XAqUXiNSmLHCKO_rZiNX8zJJssVyUkGXA7cgGKZn_a77kndxsUukGGaZggqm2kBZng2SQbz3-6Lkrav6QU2GTwKXjuRLt852KuCSqpQYSyPoBWn3IuvgolrtUbb_BCsWX5tSKdXPp3Ffe592wDf_j92THukeKhC88Mu4_0KdwkMMovzCeH7YGXOw}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <div class="container-fluid">
                 <div id="toast"></div>
                 <div class="col-sm-6 col-md-4 col-lg-3 mt-4">
@@ -394,7 +394,7 @@
         <form class="attack-form" accept-charset="UNKNOWN"
               method="POST"
               th:action="@{/JWT/kid/delete?token=eyJ0eXAiOiJKV1QiLCJraWQiOiJ3ZWJnb2F0X2tleSIsImFsZyI6IkhTMjU2In0.ewogICJpc3MiOiAiV2ViR29hdCBUb2tlbiBCdWlsZGVyIiwKICAiaWF0IjogMTUyNDIxMDkwNCwKICAiZXhwIjogMTYxODkwNTMwNCwKICAiYXVkIjogIndlYmdvYXQub3JnIiwKICAic3ViIjogImplcnJ5QHdlYmdvYXQuY29tIiwKICAidXNlcm5hbWUiOiAiSmVycnkiLAogICJFbWFpbCI6ICJqZXJyeUB3ZWJnb2F0LmNvbSIsCiAgIlJvbGUiOiBbCiAgICAiQ2F0IgogIF0KfQ.CgZ27DzgVW8gzc0n6izOU638uUCi6UhiOJKYzoEZGE8}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <div class="container-fluid">
                 <div id="toast"></div>
                 <div class="col-sm-6 col-md-4 col-lg-3 mt-4">
