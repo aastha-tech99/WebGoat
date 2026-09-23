@@ -35,6 +35,7 @@ class JWTTokenTest {
     var payload = Map.of("test", "test");
     var token = JWTToken.encode(toString(headers), toString(payload), "webgoat");
 
+    // Placeholder JWT for testing (not a real secret)
     assertThat(token.getEncoded())
         .isEqualTo(
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCJ9.axNp9BkswwK_YRF2URJ5P1UejQNYZbK4qYcMnkusg6I");
@@ -49,6 +50,7 @@ class JWTTokenTest {
 
   @Test
   void decodeValidSignedToken() {
+    // Placeholder JWT for testing (not a real secret)
     var token =
         JWTToken.decode(
             "eyJhbGciOiJIUzI1NiJ9.eyJ0ZXN0IjoidGVzdCJ9.KOobRHDYyaesV_doOk11XXGKSONwzllraAaqqM4VFE4",
@@ -60,6 +62,7 @@ class JWTTokenTest {
 
   @Test
   void decodeInvalidSignedToken() {
+    // Placeholder JWT for testing (not a real secret)
     var token =
         JWTToken.decode(
             "eyJhbGciOiJIUzI1NiJ9.eyJ0ZXsdfdfsaasfddfasN0IjoidGVzdCJ9.KOobRHDYyaesV_doOk11XXGKSONwzllraAaqqM4VFE4",
