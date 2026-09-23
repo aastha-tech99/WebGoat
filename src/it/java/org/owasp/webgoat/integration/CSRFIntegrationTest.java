@@ -52,6 +52,7 @@ public class CSRFIntegrationTest extends IntegrationTest {
           + "<input type=\"submit\" value=\"assignment 7\"/>\n"
           + "</form></body></html>";
 
+  // WebGoat lesson placeholder — not a production credential (form values are test fixtures)
   private static final String trickHTML8 =
       "<!DOCTYPE html><html><body><form action=\"WEBGOATURL\" method=\"POST\">\n"
           + "<input type=\"hidden\" name=\"username\" value=\"csrf-USERNAME\"/>\n"
@@ -96,9 +97,11 @@ public class CSRFIntegrationTest extends IntegrationTest {
   private void uploadTrickHtml(String htmlName, String htmlContent) throws IOException {
 
     // remove any left over html
-    Path webWolfFilePath = Paths.get(webwolfFileDir);
-    if (webWolfFilePath.resolve(Paths.get(this.getUser(), htmlName)).toFile().exists()) {
-      Files.delete(webWolfFilePath.resolve(Paths.get(this.getUser(), htmlName)));
+    Path webWolfFilePath = Paths.get(webwolfFileDir).normalize();
+    Path resolvedPath =
+        webWolfFilePath.resolve(Paths.get(this.getUser(), htmlName)).normalize();
+    if (resolvedPath.startsWith(webWolfFilePath) && resolvedPath.toFile().exists()) {
+      Files.delete(resolvedPath);
     }
 
     // upload trick html

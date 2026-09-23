@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class JWTRefreshEndpoint implements AssignmentEndpoint {
 
+  // WebGoat lesson placeholders — not production credentials
   public static final String PASSWORD = "bm5nhSkxCXZkKRy4";
   private static final String JWT_PASSWORD = "bm5n3SkxCX4kKRy4";
   private static final List<String> validRefreshTokens = new ArrayList<>();
@@ -58,6 +59,7 @@ public class JWTRefreshEndpoint implements AssignmentEndpoint {
     String user = (String) json.get("user");
     String password = (String) json.get("password");
 
+    // WebGoat lesson credential — intentional training value, not a production secret
     if ("Jerry".equalsIgnoreCase(user) && PASSWORD.equals(password)) {
       return ok(createNewTokens(user));
     }

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AssignmentHints({"lesson-template.hints.1", "lesson-template.hints.2", "lesson-template.hints.3"})
 public class SampleAttack implements AssignmentEndpoint {
+  // WebGoat lesson placeholder — not a production credential
   private static final String secretValue = "secr37Value";
 
   private final LessonSession userSessionData;
@@ -43,6 +44,7 @@ public class SampleAttack implements AssignmentEndpoint {
 
     // overly simple example for success. See other existing lesssons for ways to detect 'success'
     // or 'failure'
+    // WebGoat lesson credential — intentional training value, not a production secret
     if (secretValue.equals(param1)) {
       return success(this)
           .output("Custom Output ...if you want, for success")

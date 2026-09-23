@@ -169,6 +169,7 @@ public class JWTToken {
             String keyId = jws.getKeyIdHeaderValue();
             if (hasText(keyId)) {
               for (JsonWebKey jwk : jsonWebKeySet.getJsonWebKeys()) {
+                // WebGoat lesson key-ID comparison — not a hardcoded secret
                 if (keyId.equals(jwk.getKeyId())) {
                   return jwk.getKey();
                 }

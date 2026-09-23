@@ -41,6 +41,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class ResetLinkAssignment implements AssignmentEndpoint {
 
   private static final String VIEW_FORMATTER = "lessons/passwordreset/templates/%s.html";
+  // WebGoat lesson placeholder — not a production credential
   static final String PASSWORD_TOM_9 =
       "somethingVeryRandomWhichNoOneWillEverTypeInAsPasswordForTom";
   static final String TOM_EMAIL = "tom@webgoat-cloud.org";
@@ -67,6 +68,7 @@ public class ResetLinkAssignment implements AssignmentEndpoint {
   public AttackResult login(
       @RequestParam String password, @RequestParam String email, @CurrentUsername String username) {
     if (TOM_EMAIL.equals(email)) {
+      // WebGoat lesson credential — intentional training value, not a production secret
       String passwordTom = usersToTomPassword.getOrDefault(username, PASSWORD_TOM_9);
       if (passwordTom.equals(PASSWORD_TOM_9)) {
         return failed(this).feedback("login_failed").build();

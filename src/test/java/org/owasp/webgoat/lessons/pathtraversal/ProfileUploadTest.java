@@ -38,7 +38,8 @@ class ProfileUploadTest extends LessonTest {
                 .param("fullName", "../John Doe"))
         .andExpect(status().is(200))
         .andExpect(jsonPath("$.assignment", CoreMatchers.equalTo("ProfileUpload")))
-        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(true)));
+        .andExpect(jsonPath("$.feedback", CoreMatchers.containsString("Nice try")))
+        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(false)));
   }
 
   @Test
@@ -69,13 +70,9 @@ class ProfileUploadTest extends LessonTest {
             MockMvcRequestBuilders.multipart("/PathTraversal/profile-upload")
                 .file(profilePicture)
                 .param("fullName", ".." + File.separator + "test"))
-        .andExpect(
-            jsonPath(
-                "$.output",
-                CoreMatchers.anyOf(
-                    CoreMatchers.containsString("Is a directory"),
-                    CoreMatchers.containsString("..\\\\" + "test"))))
-        .andExpect(status().is(200));
+        .andExpect(status().is(200))
+        .andExpect(jsonPath("$.feedback", CoreMatchers.containsString("Nice try")))
+        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(false)));
   }
 
   @Test

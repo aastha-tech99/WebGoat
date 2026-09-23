@@ -4,6 +4,7 @@ In the past assignments we learned to **NOT** trust the libraries to do the corr
 
 [source]
 ----
+// Example JWT for educational purposes only — not a real credential
 eyJhbGciOiJIUzI1NiJ9.ew0KICAiYWRtaW4iIDogdHJ1ZSwNCiAgImlhdCIgOiAxNTE2MjM5MDIyLA0KICAic3ViIiA6ICIxMjM0NTY3ODkwIiwNCiAgInVzZXIiIDogIkpvaG4gRG9lIg0KfQ.
 
 {

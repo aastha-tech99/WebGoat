@@ -51,7 +51,11 @@ public class ProfileUploadRetrieval implements AssignmentEndpoint {
   private final File catPicturesDirectory;
 
   public ProfileUploadRetrieval(@Value("${webgoat.server.directory}") String webGoatHomeDirectory) {
-    this.catPicturesDirectory = new File(webGoatHomeDirectory, "/PathTraversal/" + "/cats");
+    this.catPicturesDirectory =
+        new File(webGoatHomeDirectory, "/PathTraversal/cats")
+            .toPath()
+            .normalize()
+            .toFile();
     this.catPicturesDirectory.mkdirs();
   }
 
@@ -81,7 +85,9 @@ public class ProfileUploadRetrieval implements AssignmentEndpoint {
   public AttackResult execute(
       @RequestParam(value = "secret", required = false) String secret,
       @CurrentUsername String username) {
-    if (Sha512DigestUtils.shaHex(username).equalsIgnoreCase(secret)) {
+    if (secret != null
+        && secret.matches("[a-fA-F0-9]{128}")
+        && Sha512DigestUtils.shaHex(username).equalsIgnoreCase(secret)) {
       return success(this).build();
     }
     return failed(this).build();
@@ -97,8 +103,27 @@ public class ProfileUploadRetrieval implements AssignmentEndpoint {
     }
     try {
       var id = request.getParameter("id");
+      // Validate decoded parameter: reject path traversal characters
+      if (id != null && (id.contains("..") || id.contains("/") || id.contains("\\"))) {
+        return ResponseEntity.badRequest()
+            .body("Invalid file identifier: path traversal characters not allowed");
+      }
+      // Validate input format: only alphanumeric characters allowed
+      if (id != null && !id.matches("[a-zA-Z0-9]+")) {
+        return ResponseEntity.badRequest()
+            .body("Invalid file identifier: only alphanumeric characters are allowed");
+      }
       var catPicture =
           new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + ".jpg");
+
+      // Path traversal protection: ensure resolved path stays within the allowed directory
+      if (!catPicture
+              .getCanonicalFile()
+              .toPath()
+              .startsWith(catPicturesDirectory.getCanonicalFile().toPath())) {
+        return ResponseEntity.badRequest()
+            .body("Access denied: path traversal attempt detected");
+      }
 
       if (catPicture.getName().toLowerCase().contains("path-traversal-secret.jpg")) {
         return ResponseEntity.ok()

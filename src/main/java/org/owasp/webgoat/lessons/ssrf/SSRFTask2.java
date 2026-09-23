@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
 import org.owasp.webgoat.container.assignments.AttackResult;
@@ -31,24 +32,33 @@ public class SSRFTask2 implements AssignmentEndpoint {
   }
 
   protected AttackResult furBall(String url) {
-    if (url.matches("http://ifconfig\\.pro")) {
-      String html;
-      try (InputStream in = new URL(url).openStream()) {
-        html =
-            new String(in.readAllBytes(), StandardCharsets.UTF_8)
-                .replaceAll("\n", "<br>"); // Otherwise the \n gets escaped in the response
-      } catch (MalformedURLException e) {
-        return getFailedResult(e.getMessage());
-      } catch (IOException e) {
-        // in case the external site is down, the test and lesson should still be ok
-        html =
-            "<html><body>Although the http://ifconfig.pro site is down, you still managed to solve"
-                + " this exercise the right way!</body></html>";
-      }
-      return success(this).feedback("ssrf.success").output(html).build();
+    Set<String> allowedHosts = Set.of("ifconfig.pro");
+
+    URL parsedUrl;
+    try {
+      parsedUrl = new URL(url);
+    } catch (MalformedURLException e) {
+      return getFailedResult(e.getMessage());
     }
-    var html = "<img class=\"image\" alt=\"image post\" src=\"images/cat.jpg\">";
-    return getFailedResult(html);
+
+    if (!"http".equals(parsedUrl.getProtocol())
+        || !allowedHosts.contains(parsedUrl.getHost())) {
+      var html = "<img class=\"image\" alt=\"image post\" src=\"images/cat.jpg\">";
+      return getFailedResult(html);
+    }
+
+    String html;
+    try (InputStream in = parsedUrl.openStream()) {
+      html =
+          new String(in.readAllBytes(), StandardCharsets.UTF_8)
+              .replaceAll("\n", "<br>"); // Otherwise the \n gets escaped in the response
+    } catch (IOException e) {
+      // in case the external site is down, the test and lesson should still be ok
+      html =
+          "<html><body>Although the http://ifconfig.pro site is down, you still managed to solve"
+              + " this exercise the right way!</body></html>";
+    }
+    return success(this).feedback("ssrf.success").output(html).build();
   }
 
   private AttackResult getFailedResult(String errorMsg) {

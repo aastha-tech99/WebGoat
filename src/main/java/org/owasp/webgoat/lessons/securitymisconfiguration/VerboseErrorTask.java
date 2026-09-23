@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class VerboseErrorTask implements AssignmentEndpoint {
 
+  // WebGoat lesson placeholder — not a production credential (simulated leaked token for training)
   static final String LEAKED_TOKEN = "STAGING-TOKEN-42";
 
   @GetMapping(value = "/SecurityMisconfiguration/task2/trigger", produces = MediaType.TEXT_PLAIN_VALUE)

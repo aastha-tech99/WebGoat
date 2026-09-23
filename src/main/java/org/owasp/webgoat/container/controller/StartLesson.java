@@ -26,6 +26,9 @@ public class StartLesson {
     var model = new ModelAndView("lesson_content");
     var path = request.getRequestURL().toString(); // we now got /a/b/c/AccessControlMatrix.lesson
     var lessonName = path.substring(path.lastIndexOf('/') + 1, path.indexOf(".lesson"));
+    if (!lessonName.matches("[a-zA-Z0-9_-]+")) {
+      return model;
+    }
 
     course.getLessons().stream()
         .filter(l -> l.getId().equals(lessonName))

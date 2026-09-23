@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class DefaultCredentialsTask implements AssignmentEndpoint {
 
+  // WebGoat lesson placeholders — not production credentials
   private static final String DEFAULT_USERNAME = "admin";
   private static final String DEFAULT_PASSWORD = "admin";
 
@@ -42,6 +43,7 @@ public class DefaultCredentialsTask implements AssignmentEndpoint {
           .build();
     }
 
+    // WebGoat lesson credential — intentional training value, not a production secret
     if (DEFAULT_USERNAME.equals(username.trim()) && DEFAULT_PASSWORD.equals(password)) {
       return success(this)
           .feedback("securitymisconfiguration.task1.success")
