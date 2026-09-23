@@ -29,6 +29,7 @@
               failureCallback="simpleXXECallback"
               contentType="application/xml"
               th:action="@{/xxe/simple}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div class="container-fluid">
                 <div class="panel post">
                     <div class="post-heading">
@@ -96,6 +97,7 @@
               failureCallback="contentTypeXXECallback"
               th:action="@{/xxe/content-type}"
               contentType="application/json">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div class="container-fluid">
                 <div class="panel post">
                     <div class="post-heading">
@@ -168,6 +170,7 @@
               failureCallback="blindXXECallback"
               th:action="@{/xxe/blind}"
               contentType="application/xml">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div class="container-fluid">
                 <div class="panel post">
                     <div class="post-heading">

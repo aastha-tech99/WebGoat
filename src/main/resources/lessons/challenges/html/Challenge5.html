@@ -26,6 +26,7 @@
                                     <form id="login-form" class="attack-form" accept-charset="UNKNOWN"
                                           method="POST" name="form"
                                           th:action="@{/challenge/5}" role="form">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                         <div class="form-group">
                                             <input type="text" name="username_login" id="username4" tabindex="1"
                                                    class="form-control" placeholder="Username" value=""/>
@@ -67,6 +68,7 @@
         </div>
         <br/>
         <form class="attack-form" method="POST" name="form" th:action="@{/challenge/flag/5}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div class="form-group">
                 <div class="input-group">
                     <div class="input-group-addon"><i class="fa fa-flag-checkered" aria-hidden="true"

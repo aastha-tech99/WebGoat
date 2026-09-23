@@ -14,6 +14,7 @@
         <form class="attack-form" accept-charset="UNKNOWN" id="task" name="task"
               method="POST"
               th:action="@{/HtmlTampering/task}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <script>
                 var regex = /^2999.99$/;
                 var price = 2999.99;

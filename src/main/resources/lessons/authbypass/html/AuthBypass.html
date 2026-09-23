@@ -24,6 +24,7 @@
                   method="POST" name="form"
                   successCallback="onBypassResponse"
                   th:action="@{/auth-bypass/verify-account}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <p>Verify Your Account by answering the questions below:</p>
 
                 <p>What is the name of your favorite teacher?</p>
@@ -44,7 +45,8 @@
                   method="POST" name="form"
                   successCallback="onBypassResponse"
                   th:action="@{/auth-bypass/verify-account}"
-                  style="display:none"><!-- start off hidden -->
+                  style="display:none">
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/><!-- start off hidden -->
                 <p>Please provide a new password for your account</p>
 
                 <p>Password:</p>

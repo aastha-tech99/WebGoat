@@ -26,6 +26,8 @@
                 <form class="form-horizontal" action="#" th:action="@{/register.mvc}" th:object="${userForm}"
                       method='POST'>
 
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
                     <div class="form-group" th:classappend="${#fields.hasErrors('username')}? 'has-error'">
                         <label for="username" class="col-sm-2 control-label" th:text="#{username}">Username</label>
                         <div class="col-sm-4">

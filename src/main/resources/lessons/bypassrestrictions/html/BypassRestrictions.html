@@ -20,6 +20,8 @@
                   method="POST"
                   th:action="@{/BypassRestrictions/FieldRestrictions}">
 
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
                 <div class="bypass-input-container"><b>Select field with two possible value</b>
                     <div class="input-group">
                         <select name="select">
@@ -68,6 +70,7 @@
               method="POST"
               th:action="@{/BypassRestrictions/frontendValidation}"
               onsubmit="return validate()">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div>
                 <strong>Field 1:</strong> exactly three lowercase characters(^[a-z]{3}$)
             </div>

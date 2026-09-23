@@ -16,6 +16,7 @@
             <i class="fa fa-2 fa-check hidden" aria-hidden="true"></i>
         </div>
         <form class="attack-form" method="POST" th:action="@{/SecurityMisconfiguration/task1}">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
           <div class="form-group">
             <label for="username">Username</label>
             <input class="form-control" id="username" name="username" placeholder="Try the default admin username" autocomplete="username" />
@@ -45,6 +46,7 @@
         <pre id="debug-output" class="bg-light border rounded p-2 small text-wrap"></pre>
         <pre id="config-output" class="bg-light border rounded p-2 small text-wrap d-none"></pre>
         <form class="attack-form" method="POST" th:action="@{/SecurityMisconfiguration/task2}" style="margin-top:15px;">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
           <div class="form-group">
             <label for="token">Leaked token</label>
             <input class="form-control" id="token" name="token" placeholder="Paste the token from the stack trace" autocomplete="off" />
@@ -70,6 +72,7 @@
         </div>
         <pre id="actuator-output" class="bg-light border rounded p-2 small text-wrap"></pre>
         <form class="attack-form" method="POST" th:action="@{/SecurityMisconfiguration/task3}" style="margin-top:15px;">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
           <div class="form-group">
             <label for="apiKey">System API key</label>
             <input class="form-control" id="apiKey" name="apiKey" placeholder="Paste the leaked key" autocomplete="off" />
@@ -91,6 +94,7 @@
             <i class="fa fa-2 fa-check hidden" aria-hidden="true"></i>
         </div>
         <form class="attack-form" method="POST" th:action="@{/SecurityMisconfiguration/task4}">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
           <div class="form-group">
             <label for="envEnabled">management.endpoint.env.enabled</label>
             <select class="form-control" id="envEnabled" name="envEnabled">
