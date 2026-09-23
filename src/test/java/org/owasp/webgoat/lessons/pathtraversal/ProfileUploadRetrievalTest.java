@@ -42,22 +42,19 @@ class ProfileUploadRetrievalTest extends LessonTest {
         .andExpect(header().string("Location", containsString("?id=")))
         .andExpect(content().contentTypeCompatibleWith(MediaType.IMAGE_JPEG));
 
-    // Browse the directories
+    // Path traversal attempts should be blocked by canonical path validation
     var uri = new URI("/PathTraversal/random-picture?id=%2E%2E%2F%2E%2E%2F");
     mockMvc
         .perform(get(uri))
-        .andExpect(status().is(404))
-        // .andDo(MockMvcResultHandlers.print())
-        .andExpect(content().string(containsString("path-traversal-secret.jpg")));
+        .andExpect(status().is(400))
+        .andExpect(content().string(containsString("Access denied")));
 
-    // Retrieve the secret file (note: .jpg is added by the server)
+    // Traversal to retrieve the secret file should also be blocked
     uri = new URI("/PathTraversal/random-picture?id=%2E%2E%2F%2E%2E%2Fpath-traversal-secret");
     mockMvc
         .perform(get(uri))
-        .andExpect(status().is(200))
-        .andExpect(
-            content().string("You found it submit the SHA-512 hash of your username as answer"))
-        .andExpect(content().contentTypeCompatibleWith(MediaType.IMAGE_JPEG));
+        .andExpect(status().is(400))
+        .andExpect(content().string(containsString("Access denied")));
 
     // Post flag
     mockMvc

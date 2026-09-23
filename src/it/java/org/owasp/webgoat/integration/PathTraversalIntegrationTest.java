@@ -102,6 +102,7 @@ class PathTraversalIT extends IntegrationTest {
   }
 
   private void assignment4() throws IOException {
+    // Path traversal should be blocked by canonical path validation
     var uri = "PathTraversal/random-picture?id=%2E%2E%2F%2E%2E%2Fpath-traversal-secret";
       RestAssured.given()
         .urlEncodingEnabled(false)
@@ -110,8 +111,8 @@ class PathTraversalIT extends IntegrationTest {
         .cookie("JSESSIONID", getWebGoatCookie())
         .get(webGoatUrlConfig.url(uri))
         .then()
-        .statusCode(200)
-        .body(CoreMatchers.is("You found it submit the SHA-512 hash of your username as answer"));
+        .statusCode(400)
+        .body(CoreMatchers.containsString("Access denied"));
 
       checkAssignment(
               webGoatUrlConfig.url("PathTraversal/random"),
