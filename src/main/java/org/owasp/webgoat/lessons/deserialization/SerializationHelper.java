@@ -8,11 +8,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputFilter;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Base64;
+import java.util.Set;
 
 public class SerializationHelper {
 
@@ -20,16 +19,12 @@ public class SerializationHelper {
 
   public static Object fromString(String s) throws IOException, ClassNotFoundException {
     byte[] data = Base64.getDecoder().decode(s);
-    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
-    ois.setObjectInputFilter(
-        ObjectInputFilter.Config.createFilter(
-            "org.dummy.insecure.framework.VulnerableTaskHolder;"
-                + "java.lang.String;"
-                + "java.time.**;"
-                + "!*"));
-    Object o = ois.readObject();
-    ois.close();
-    return o;
+    try (var ois = new FilteredObjectInputStream(
+        new ByteArrayInputStream(data),
+        Set.of("org.dummy.insecure.framework.VulnerableTaskHolder", "java.lang.String"),
+        "java.time.")) {
+      return ois.readObject();
+    }
   }
 
   public static String toString(Serializable o) throws IOException {

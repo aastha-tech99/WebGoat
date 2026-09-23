@@ -105,39 +105,36 @@ public class ProfileUploadRetrieval implements AssignmentEndpoint {
   @ResponseBody
   public ResponseEntity<?> getProfilePicture(HttpServletRequest request) {
     try {
-      var id = request.getParameter("id");
-      // Validate input: reject null bytes, path separators, and traversal sequences
-      if (id != null
-          && (id.indexOf('\0') >= 0
-              || id.contains("..")
-              || id.contains("/")
-              || id.contains("\\")
-              || id.length() > 255)) {
-        return ResponseEntity.badRequest().body("Invalid input");
+      var idParam = request.getParameter("id");
+      // Parse id as integer to prevent path traversal — valid cat pictures are numbered
+      int numericId;
+      if (idParam == null) {
+        numericId = RandomUtils.nextInt(1, 11);
+      } else {
+        try {
+          numericId = Integer.parseInt(idParam);
+        } catch (NumberFormatException ex) {
+          return ResponseEntity.badRequest().body("Invalid input: id must be numeric");
+        }
       }
       var catPicturePath =
           catPicturesDirectory.toPath()
-              .resolve((id == null ? RandomUtils.nextInt(1, 11) : id) + ".jpg")
+              .resolve(numericId + ".jpg")
               .normalize();
       if (!catPicturePath.startsWith(catPicturesDirectory.toPath().normalize())) {
         return ResponseEntity.badRequest().body("Invalid file path");
       }
       var catPicture = catPicturePath.toFile();
 
-      if (catPicture.getName().toLowerCase().contains("path-traversal-secret.jpg")) {
-        return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
-            .body(FileCopyUtils.copyToByteArray(catPicture));
-      }
       if (catPicture.exists()) {
         return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
-            .location(new URI("/PathTraversal/random-picture?id=" + catPicture.getName()))
+            .location(new URI("/PathTraversal/random-picture?id=" + numericId))
             .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));
       }
       // List only the known cat pictures directory, not an arbitrary parent
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .location(new URI("/PathTraversal/random-picture?id=" + catPicture.getName()))
+          .location(new URI("/PathTraversal/random-picture?id=" + numericId))
           .body(
               StringUtils.arrayToCommaDelimitedString(catPicturesDirectory.listFiles())
                   .getBytes());

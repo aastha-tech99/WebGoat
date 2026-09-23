@@ -72,9 +72,16 @@ class ProfileUploadRetrievalTest extends LessonTest {
   }
 
   @Test
-  void unknownFileShouldGiveDirectoryContents() throws Exception {
+  void nonNumericIdShouldBeBadRequest() throws Exception {
     mockMvc
         .perform(get("/PathTraversal/random-picture?id=test"))
+        .andExpect(status().is(400));
+  }
+
+  @Test
+  void unknownNumericIdShouldGiveDirectoryContents() throws Exception {
+    mockMvc
+        .perform(get("/PathTraversal/random-picture?id=99"))
         .andExpect(status().is(404))
         .andExpect(content().string(containsString("cats" + File.separator + "8.jpg")));
   }

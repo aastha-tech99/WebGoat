@@ -7,7 +7,6 @@ package org.owasp.webgoat.lessons.sqlinjection.mitigation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +27,18 @@ public class Servers {
 
   private static final String BASE_QUERY =
       "select id, hostname, ip, mac, status, description from SERVERS where status <> 'out of order' order by ";
-  private static final Map<String, String> ORDER_BY_QUERIES = Map.of(
-      "id", BASE_QUERY + "id",
-      "hostname", BASE_QUERY + "hostname",
-      "ip", BASE_QUERY + "ip",
-      "mac", BASE_QUERY + "mac",
-      "status", BASE_QUERY + "status",
-      "description", BASE_QUERY + "description");
+
+  private static String queryForColumn(String column) {
+    return switch (column) {
+      case "id" -> BASE_QUERY + "id";
+      case "hostname" -> BASE_QUERY + "hostname";
+      case "ip" -> BASE_QUERY + "ip";
+      case "mac" -> BASE_QUERY + "mac";
+      case "status" -> BASE_QUERY + "status";
+      case "description" -> BASE_QUERY + "description";
+      default -> null;
+    };
+  }
 
   private final LessonDataSource dataSource;
 
@@ -57,7 +61,7 @@ public class Servers {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public List<Server> sort(@RequestParam String column) throws Exception {
-    String querySql = ORDER_BY_QUERIES.get(column.toLowerCase(Locale.ROOT));
+    String querySql = queryForColumn(column.toLowerCase(Locale.ROOT));
     if (querySql == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid column name");
     }

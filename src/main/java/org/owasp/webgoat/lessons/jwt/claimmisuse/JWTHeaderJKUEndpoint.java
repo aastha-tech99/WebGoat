@@ -8,6 +8,8 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Set;
@@ -55,13 +57,20 @@ public class JWTHeaderJKUEndpoint implements AssignmentEndpoint {
       try {
         var decodedJWT = JWT.decode(token);
         var jku = decodedJWT.getHeaderClaim("jku");
-        var jkuUrl = new URL(jku.asString());
-        // Validate JKU URL host to prevent SSRF
-        var allowedHosts = Set.of("localhost", "127.0.0.1", "[::1]");
-        if (!allowedHosts.contains(jkuUrl.getHost())) {
-          return failed(this).feedback("jwt-invalid-token")
-              .output("JKU host not allowed: " + jkuUrl.getHost()).build();
+        var jkuStr = jku.asString();
+        if (jkuStr == null || jkuStr.isEmpty()) {
+          return failed(this).feedback("jwt-invalid-token").build();
         }
+        // Parse as URI first (no network I/O), validate scheme/host, then convert to URL
+        var jkuUri = new URI(jkuStr);
+        var allowedSchemes = Set.of("http", "https");
+        var allowedHosts = Set.of("localhost", "127.0.0.1", "[::1]");
+        if (!allowedSchemes.contains(jkuUri.getScheme())
+            || jkuUri.getUserInfo() != null
+            || !allowedHosts.contains(jkuUri.getHost())) {
+          return failed(this).feedback("jwt-invalid-token").build();
+        }
+        var jkuUrl = jkuUri.toURL();
         var jwkProvider = new JwkProviderBuilder(jkuUrl).build();
         var jwk = jwkProvider.get(decodedJWT.getKeyId());
         var algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey());
@@ -76,7 +85,7 @@ public class JWTHeaderJKUEndpoint implements AssignmentEndpoint {
         } else {
           return failed(this).feedback("jwt-final-not-tom").build();
         }
-      } catch (MalformedURLException | JWTVerificationException | JwkException e) {
+      } catch (MalformedURLException | URISyntaxException | JWTVerificationException | JwkException e) {
         return failed(this).feedback("jwt-invalid-token").output(e.toString()).build();
       }
     }
