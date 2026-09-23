@@ -25,8 +25,7 @@ claims:
 
 [source]
 ----
-// Placeholder JWT from jwt.io for documentation (not a real secret)
-var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.NFvYpuwbF6YWbPyaNAGEPw9wbhiQSovvSrD89B8K7Ng";
+var token = "eyJhbGciOi...<REDACTED>...K7Ng"; // HS256 JWT — see decoded content above
 
 Jwts.parser().setSigningKey("test").parseClaimsJws(token);
 ----
@@ -38,8 +37,7 @@ Using the same source as above gives:
 
 [source]
 ----
-// Placeholder JWT from jwt.io for documentation (not a real secret)
-var token = " eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.NFvYpuwbF6YWbPyaNAGEPw9wbhiQSovvSrD89B8K7Ng";
+var token = "eyJhbGciOi...<REDACTED>...K7Ng"; // same JWT with alg:none header
 
 Jwts.parser().setSigningKey("test").parseClaimsJws(token);
 ----
@@ -55,8 +53,7 @@ removing the signature completely (leaving the last `.`)
 
 [source]
 ----
-// Placeholder JWT from jwt.io for documentation (not a real secret)
-var token = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.";
+var token = "eyJhbGciOi...<REDACTED>."; // unsigned JWT (no signature, trailing dot)
 
 Jwts.parser().setSigningKey("test").parseClaimsJws(token);
 ----

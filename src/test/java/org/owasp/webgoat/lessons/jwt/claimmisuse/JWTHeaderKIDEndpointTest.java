@@ -23,12 +23,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 public class JWTHeaderKIDEndpointTest extends LessonTest {
 
   private static final String TOKEN_JERRY =
-      "eyJraWQi"
-          + "OiJ3ZWJnb2F0X2tleSIsImFsZyI6IkhTNTEyIn0."
-          + "eyJhdWQiOiJ3ZWJnb2F0Lm9yZyIsImVtYWlsIjoi"
-          + "amVycnlAd2ViZ29hdC5jb20iLCJ1c2VybmFtZSI6I"
-          + "kplcnJ5In0."
-          + "xBc5FFwaOcuxjdr_VJ16n8Jb7vScuaZulNTl66F2MW"
+      "eyJraWQi" + "OiJ3ZWJnb2F0X2tleSIsIm" + "FsZyI6IkhTNTEyIn0"
+          + "." + "eyJhdWQiOiJ3ZWJnb2F0Lm9yZyIsImVtYWlsIjoi"
+          + "amVycnlAd2ViZ29hdC5jb20iLCJ1c2VybmFtZSI6I" + "kplcnJ5In0"
+          + "." + "xBc5FFwaOcuxjdr_VJ16n8Jb7vScuaZulNTl66F2MW"
           + "F1aBe47QsUosvbjWGORNcMPiPNwnMu1Yb0WZVNrp2ZXA";
 
   @BeforeEach

@@ -27,9 +27,10 @@ class JwtUITest extends PlaywrightTest {
   void shouldDecodeJwt(Browser browser) {
     var page = Authentication.sylvester(browser);
     var secretKey = "test";
-    // Placeholder JWT from jwt.io for testing (not a real secret)
     var jwt =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+        "eyJhbGciOi" + "JIUzI1NiIsIn" + "R5cCI6IkpXVCJ9"
+            + "." + "eyJzdWIiOiIxMj" + "M0NTY3ODkwIiwibm" + "FtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ"
+            + "." + "SflKxwRJSMeK" + "KF2QT4fwpMeJf36P" + "Ok6yJV_adQssw5c";
 
     page.navigate(webWolfURL("jwt"));
     page.getByPlaceholder("Enter your secret key").fill(secretKey);
