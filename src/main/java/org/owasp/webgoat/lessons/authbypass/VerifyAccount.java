@@ -38,6 +38,9 @@ public class VerifyAccount implements AssignmentEndpoint {
     this.userSessionData = userSessionData;
   }
 
+  private static final java.util.Set<String> ALLOWED_VERIFY_METHODS =
+      java.util.Set.of("SEC_QUESTIONS");
+
   @PostMapping(
       path = "/auth-bypass/verify-account",
       produces = {"application/json"})
@@ -45,6 +48,16 @@ public class VerifyAccount implements AssignmentEndpoint {
   public AttackResult completed(
       @RequestParam String userId, @RequestParam String verifyMethod, HttpServletRequest req)
       throws ServletException, IOException {
+    // Validate userId: must be a numeric string within reasonable bounds
+    if (userId == null || !userId.matches("\\d{1,10}")) {
+      return failed(this).feedback("verify-account.failed").output("Invalid userId").build();
+    }
+    // Validate verifyMethod against allowlist
+    if (verifyMethod == null || !ALLOWED_VERIFY_METHODS.contains(verifyMethod)) {
+      return failed(this).feedback("verify-account.failed").output("Invalid verifyMethod").build();
+    }
+
+    int parsedUserId = Integer.parseInt(userId);
     AccountVerificationHelper verificationHelper = new AccountVerificationHelper();
     Map<String, String> submittedAnswers = parseSecQuestions(req);
     if (verificationHelper.didUserLikelylCheat((HashMap<String, String>) submittedAnswers)) {
@@ -55,7 +68,7 @@ public class VerifyAccount implements AssignmentEndpoint {
     }
 
     // else
-    if (verificationHelper.verifyAccount(Integer.valueOf(userId), (HashMap<String, String>) submittedAnswers)) {
+    if (verificationHelper.verifyAccount(parsedUserId, (HashMap<String, String>) submittedAnswers)) {
       userSessionData.setValue("account-verified-id", userId);
       return success(this).feedback("verify-account.success").build();
     } else {
