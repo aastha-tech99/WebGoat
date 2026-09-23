@@ -38,8 +38,9 @@ public class LandingAssignment implements AssignmentEndpoint {
   @GetMapping("/WebWolf/landing/password-reset")
   public ModelAndView openPasswordReset(@CurrentUsername String username) {
     ModelAndView modelAndView = new ModelAndView();
+    String pageUrl = landingPageUrl;
     modelAndView.addObject(
-        "webwolfLandingPageUrl", landingPageUrl.replace("//landing", "/landing"));
+        "webwolfLandingPageUrl", pageUrl.replace("//landing", "/landing"));
     modelAndView.addObject("uniqueCode", StringUtils.reverse(username));
 
     modelAndView.setViewName("lessons/webwolfintroduction/templates/webwolfPasswordReset.html");

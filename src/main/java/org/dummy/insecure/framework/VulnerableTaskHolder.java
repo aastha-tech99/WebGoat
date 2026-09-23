@@ -60,11 +60,12 @@ public class VulnerableTaskHolder implements Serializable {
     }
 
     // condition is here to prevent you from destroying the goat altogether
-    if ((taskAction.startsWith("sleep") || taskAction.startsWith("ping"))
-        && taskAction.length() < 22) {
-      log.info("about to execute: {}", taskAction);
+    String action = taskAction;
+    if ((action.startsWith("sleep") || action.startsWith("ping"))
+        && action.length() < 22) {
+      log.info("about to execute: {}", action);
       try {
-        Process p = Runtime.getRuntime().exec(taskAction);
+        Process p = Runtime.getRuntime().exec(action);
         BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line = null;
         while ((line = in.readLine()) != null) {

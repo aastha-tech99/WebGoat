@@ -7,8 +7,8 @@ package org.owasp.webgoat.lessons.idor;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
 import org.owasp.webgoat.container.assignments.AttackResult;
@@ -27,21 +27,22 @@ public class IDORLogin implements AssignmentEndpoint {
     this.lessonSession = lessonSession;
   }
 
-  private final Map<String, Map<String, String>> idorUserInfo = new HashMap<>();
+  private final Map<String, Map<String, String>> idorUserInfo = new ConcurrentHashMap<>();
 
-  public void initIDORInfo() {
+  public synchronized void initIDORInfo() {
+    Map<String, String> tom = new ConcurrentHashMap<>();
+    tom.put("password", "cat");
+    tom.put("id", "2342384");
+    tom.put("color", "yellow");
+    tom.put("size", "small");
+    idorUserInfo.put("tom", tom);
 
-    idorUserInfo.put("tom", new HashMap<String, String>());
-    idorUserInfo.get("tom").put("password", "cat");
-    idorUserInfo.get("tom").put("id", "2342384");
-    idorUserInfo.get("tom").put("color", "yellow");
-    idorUserInfo.get("tom").put("size", "small");
-
-    idorUserInfo.put("bill", new HashMap<String, String>());
-    idorUserInfo.get("bill").put("password", "buffalo");
-    idorUserInfo.get("bill").put("id", "2342388");
-    idorUserInfo.get("bill").put("color", "brown");
-    idorUserInfo.get("bill").put("size", "large");
+    Map<String, String> bill = new ConcurrentHashMap<>();
+    bill.put("password", "buffalo");
+    bill.put("id", "2342388");
+    bill.put("color", "brown");
+    bill.put("size", "large");
+    idorUserInfo.put("bill", bill);
   }
 
   @PostMapping("/IDOR/login")

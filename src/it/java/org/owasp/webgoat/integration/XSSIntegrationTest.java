@@ -27,7 +27,8 @@ public class XSSIntegrationTest extends IntegrationTest {
     params.put("QTY4", "1");
     params.put("field1", "<script>alert('XSS+Test')</script>");
     params.put("field2", "111");
-      checkAssignmentWithGet(webGoatUrlConfig.url("CrossSiteScripting/attack5a"), params, true);
+      String xssUrl = webGoatUrlConfig.url("CrossSiteScripting/attack5a");
+      checkAssignmentWithGet(xssUrl, params, true);
 
     params.clear();
     params.put("DOMTestRoute", "start.mvc#test");

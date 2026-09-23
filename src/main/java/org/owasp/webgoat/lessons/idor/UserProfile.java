@@ -73,7 +73,7 @@ public class UserProfile {
   }
 
   //
-  public String getUserId() {
+  public synchronized String getUserId() {
     return userId;
   }
 

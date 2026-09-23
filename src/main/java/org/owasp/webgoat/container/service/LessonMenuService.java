@@ -49,7 +49,10 @@ public class LessonMenuService {
     // if a lesson if solved or not.
     List<LessonMenuItem> menu = new ArrayList<>();
     List<Category> categories = course.getCategories();
-    UserProgress userTracker = userTrackerRepository.findByUser(username);
+    UserProgress userTracker;
+    synchronized (userTrackerRepository) {
+      userTracker = userTrackerRepository.findByUser(username);
+    }
     if (userTracker == null) {
       return menu;
     }

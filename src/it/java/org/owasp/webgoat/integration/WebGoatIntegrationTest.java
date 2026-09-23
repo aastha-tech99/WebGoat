@@ -22,11 +22,12 @@ public class WebGoatIntegrationTest extends IntegrationTest {
 
     String responseBody = readMailbox();
 
-    String uniqueCode = responseBody.replace("%20", " ");
-    uniqueCode =
-        uniqueCode.substring(
-            21 + uniqueCode.lastIndexOf("your unique code is: "),
-            uniqueCode.lastIndexOf("your unique code is: ") + (21 + this.getUser().length()));
+    String decoded = responseBody.replace("%20", " ");
+    int codeStart = decoded.lastIndexOf("your unique code is: ");
+    String uniqueCode =
+        decoded.substring(
+            21 + codeStart,
+            codeStart + (21 + this.getUser().length()));
     params.clear();
     params.put("uniqueCode", uniqueCode);
       checkAssignment(webGoatUrlConfig.url("WebGoat/mail"), params, true);

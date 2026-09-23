@@ -19,9 +19,10 @@ public class PlaywrightTest {
   public static class WebGoatOptions implements OptionsFactory {
     @Override
     public Options getOptions() {
+      Browser.NewContextOptions ctxOptions = getContextOptions();
       return new Options()
               .setHeadless(true)
-              .setContextOptions(getContextOptions());
+              .setContextOptions(ctxOptions);
     }
   }
 

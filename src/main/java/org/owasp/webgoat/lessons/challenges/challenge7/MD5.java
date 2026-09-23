@@ -99,7 +99,7 @@ public class MD5 {
    * @return Array of 16 bytes, the hash of all updated bytes.
    * @since ostermillerutils 1.00.00
    */
-  public static byte[] getHash(byte[] b) {
+  public static synchronized byte[] getHash(byte[] b) {
     MD5 md5 = new MD5();
     md5.update(b);
     return md5.getHash();

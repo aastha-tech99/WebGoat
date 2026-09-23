@@ -43,7 +43,8 @@ public class SqlInjectionLesson5b implements AssignmentEndpoint {
 
   protected AttackResult injectableQuery(String login_count, String accountName) {
     String queryString = "SELECT * From user_data WHERE Login_Count = ? and userid= " + accountName;
-    try (Connection connection = dataSource.getConnection()) {
+    LessonDataSource ds = dataSource;
+    try (Connection connection = ds.getConnection()) {
       PreparedStatement query =
           connection.prepareStatement(
               queryString, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);

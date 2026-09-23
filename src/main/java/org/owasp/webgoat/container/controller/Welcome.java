@@ -28,8 +28,10 @@ public class Welcome {
     // this is so the attack servlet does not also
     // send them to the welcome page
     HttpSession session = request.getSession();
-    if (session.getAttribute(WELCOMED) == null) {
-      session.setAttribute(WELCOMED, "true");
+    synchronized (session) {
+      if (session.getAttribute(WELCOMED) == null) {
+        session.setAttribute(WELCOMED, "true");
+      }
     }
 
     // go ahead and send them to webgoat (skip the welcome page)

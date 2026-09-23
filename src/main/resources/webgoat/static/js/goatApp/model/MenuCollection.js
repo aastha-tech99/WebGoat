@@ -7,6 +7,7 @@ define(['jquery',
         return Backbone.Collection.extend({
             model: MenuModel,
             url: 'service/lessonmenu.mvc',
+            _fetching: false,
 
             initialize: function () {
                 var self = this;
@@ -21,13 +22,18 @@ define(['jquery',
             },
 
             fetch: function () {
+                if (this._fetching) { return; }
+                this._fetching = true;
                 var self = this;
                 Backbone.Collection.prototype.fetch.apply(this, arguments).then(
                     function (data) {
+                        self._fetching = false;
                         this.models = data;
                         self.onDataLoaded();
                     }
-                );
+                ).fail(function () {
+                    self._fetching = false;
+                });
             }
         });
     });

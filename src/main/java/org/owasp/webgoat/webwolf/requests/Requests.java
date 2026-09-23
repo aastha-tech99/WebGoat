@@ -70,7 +70,8 @@ public class Requests {
   }
 
   private String path(HttpExchange t) {
-    return t.getRequest().getUri().getPath();
+    HttpExchange.Request req = t.getRequest();
+    return req.getUri().getPath();
   }
 
   private String toJsonString(HttpExchange t) {

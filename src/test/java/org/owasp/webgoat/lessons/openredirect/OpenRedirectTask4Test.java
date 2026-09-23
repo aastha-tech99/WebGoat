@@ -18,8 +18,9 @@ class OpenRedirectTask4Test {
     AttackResult result = task.doubleDecode("https://webgoat.local%2540evil.com");
 
     assertThat(result.assignmentSolved()).isTrue();
-    assertThat(result.getOutput()).contains("Double decode reveals external host");
-    assertThat(result.getOutput()).contains("2nd host: evil.com");
+    String output = result.getOutput();
+    assertThat(output).contains("Double decode reveals external host");
+    assertThat(output).contains("2nd host: evil.com");
   }
 
   @Test

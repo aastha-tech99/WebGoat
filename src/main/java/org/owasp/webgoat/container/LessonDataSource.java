@@ -34,7 +34,8 @@ public class LessonDataSource implements DataSource {
 
   @Override
   public Connection getConnection(String username, String password) throws SQLException {
-    return originalDataSource.getConnection(username, password);
+    DataSource ds = originalDataSource;
+    return ds.getConnection(username, password);
   }
 
   @Override

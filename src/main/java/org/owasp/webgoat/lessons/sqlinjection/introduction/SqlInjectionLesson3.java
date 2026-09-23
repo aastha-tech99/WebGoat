@@ -39,7 +39,8 @@ public class SqlInjectionLesson3 implements AssignmentEndpoint {
   }
 
   protected AttackResult injectableQuery(String query) {
-    try (Connection connection = dataSource.getConnection()) {
+    LessonDataSource ds = dataSource;
+    try (Connection connection = ds.getConnection()) {
       try (Statement statement =
           connection.createStatement(TYPE_SCROLL_INSENSITIVE, CONCUR_READ_ONLY)) {
         Statement checkStatement =

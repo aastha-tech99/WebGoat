@@ -6,6 +6,9 @@ package org.owasp.webgoat.lessons.vulnerablecomponents;
 
 public interface Contact {
 
+  /**
+   * Returns the contact id. Implementations should ensure thread-safe access.
+   */
   public Integer getId();
 
   public void setId(Integer id);

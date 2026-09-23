@@ -30,9 +30,10 @@ class WithMockWebGoatUserSecurityContextFactory
     SecurityContext context = SecurityContextHolder.createEmptyContext();
 
     WebGoatUser principal = new WebGoatUser(customUser.username(), customUser.password());
+    var authorities = principal.getAuthorities();
     Authentication auth =
         UsernamePasswordAuthenticationToken.authenticated(
-            principal, "password", principal.getAuthorities());
+            principal, "password", authorities);
     context.setAuthentication(auth);
     return context;
   }

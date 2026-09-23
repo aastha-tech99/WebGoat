@@ -15,7 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 public class UserInterceptor implements HandlerInterceptor {
 
-  private Environment env = EnvironmentExposure.getEnv();
+  private volatile Environment env = EnvironmentExposure.getEnv();
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -35,6 +35,9 @@ public class UserInterceptor implements HandlerInterceptor {
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
       if (null != authentication) {
         modelAndView.getModel().put("username", authentication.getName());
+      }
+      if (null == env) {
+        env = EnvironmentExposure.getEnv();
       }
       if (null != env) {
         String githubClientId =

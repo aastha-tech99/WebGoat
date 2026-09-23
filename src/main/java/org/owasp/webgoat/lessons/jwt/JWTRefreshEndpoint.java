@@ -14,11 +14,11 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
@@ -46,7 +46,7 @@ public class JWTRefreshEndpoint implements AssignmentEndpoint {
 
   private final String password;
   private final String jwtPassword;
-  private static final List<String> validRefreshTokens = new ArrayList<>();
+  private static final List<String> validRefreshTokens = new CopyOnWriteArrayList<>();
 
   public JWTRefreshEndpoint(
       @Value("${webgoat.lesson.jwt.refresh.password}") String password,
@@ -145,8 +145,7 @@ public class JWTRefreshEndpoint implements AssignmentEndpoint {
 
     if (user == null || refreshToken == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    } else if (validRefreshTokens.contains(refreshToken)) {
-      validRefreshTokens.remove(refreshToken);
+    } else if (validRefreshTokens.remove(refreshToken)) {
       return ok(createNewTokens(user));
     } else {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

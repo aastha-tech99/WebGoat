@@ -21,8 +21,9 @@ public class WebWolfIntegrationTest extends IntegrationTest {
 
     Map<String, Object> params = new HashMap<>();
 
-    String uniqueCode = StringUtils.reverse(this.getUser());
-      params.put("email", this.getUser() + "@webgoat.org");
+    String currentUser = this.getUser();
+    String uniqueCode = StringUtils.reverse(currentUser);
+      params.put("email", currentUser + "@webgoat.org");
         params.put("uniqueCode", uniqueCode);
 
       RestAssured.given()

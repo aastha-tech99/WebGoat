@@ -13,7 +13,7 @@ import org.owasp.webgoat.container.lessons.LessonName;
 @Slf4j
 public class Course {
 
-  private List<Lesson> lessons;
+  private volatile List<Lesson> lessons;
 
   public Course(List<Lesson> lessons) {
     this.lessons = lessons;

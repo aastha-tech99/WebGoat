@@ -43,7 +43,8 @@ public class SqlInjectionLesson5a implements AssignmentEndpoint {
 
   protected AttackResult injectableQuery(String accountName) {
     String query = "";
-    try (Connection connection = dataSource.getConnection()) {
+    LessonDataSource ds = dataSource;
+    try (Connection connection = ds.getConnection()) {
       query =
           "SELECT * FROM user_data WHERE first_name = 'John' and last_name = '" + accountName + "'";
       try (Statement statement =

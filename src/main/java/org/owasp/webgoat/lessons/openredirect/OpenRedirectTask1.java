@@ -39,13 +39,14 @@ public class OpenRedirectTask1 implements AssignmentEndpoint {
     try {
       URI u = new URI(url);
       String host = u.getHost();
+      String normalizedUrl = url;
       if (host == null) {
         return failed(this).feedback("openredirect.failure1").output("Host could not be determined").build();
       }
       if (INTERNAL_HOSTS.contains(host.toLowerCase())) {
         return failed(this).feedback("openredirect.failure1").output("Internal host: " + host).build();
       }
-      return success(this).feedback("openredirect.success1").output("Would redirect to: " + escape(url)).build();
+      return success(this).feedback("openredirect.success1").output("Would redirect to: " + escape(normalizedUrl)).build();
     } catch (URISyntaxException e) {
       return failed(this).feedback("openredirect.failure1").output("Invalid URL").build();
     }

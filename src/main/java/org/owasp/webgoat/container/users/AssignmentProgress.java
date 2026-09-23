@@ -37,8 +37,8 @@ public class AssignmentProgress {
 
   public boolean hasSameName(String name) {
     Assert.notNull(name, "Name cannot be null");
-
-    return assignment.getName().equals(name);
+    Assignment localAssignment = assignment;
+    return localAssignment.getName().equals(name);
   }
 
   public void solved() {

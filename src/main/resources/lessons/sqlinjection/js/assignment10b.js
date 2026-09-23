@@ -4,8 +4,9 @@ $(document).ready( () => {
     editor.session.setMode("ace/mode/java");
 
     editor.getSession().on("change", () => {
+        var currentValue = ace_collect();
         setTimeout( () => {
-            $("#codesubmit input[name='editor']").val(ace_collect());
+            $("#codesubmit input[name='editor']").val(currentValue);
         }, 20);
     });
 

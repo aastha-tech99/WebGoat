@@ -51,7 +51,8 @@ class JwtUITest extends PlaywrightTest {
     RsaJsonWebKey jwk = RsaJwkGenerator.generateJwk(2048);
     jwk.setKeyId("kid-1");
     JsonWebSignature jws = new JsonWebSignature();
-    jws.setPayload("{\"sub\":\"123\"}");
+    String jwtPayload = "{\"sub\":\"123\"}";
+    jws.setPayload(jwtPayload);
     jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
     jws.setKey(jwk.getPrivateKey());
     jws.setKeyIdHeaderValue(jwk.getKeyId());

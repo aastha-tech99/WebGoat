@@ -5,8 +5,9 @@ editor2.setTheme("ace/theme/monokai");
 editor2.session.setMode("ace/mode/java");
 
 editor2.getSession().on("change", () => {
+    var currentValue = ace_collect2();
     setTimeout( () => {
-    $("#codesubmit2 input[name='editor2']").val(ace_collect2());
+    $("#codesubmit2 input[name='editor2']").val(currentValue);
 }, 20);
 });
 

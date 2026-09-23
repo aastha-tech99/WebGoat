@@ -43,6 +43,7 @@ public class JWTSecretKeyEndpoint implements AssignmentEndpoint {
   @RequestMapping(path = "/JWT/secret/gettoken", produces = MediaType.TEXT_HTML_VALUE)
   @ResponseBody
   public String getSecretToken() {
+    String secret = JWT_SECRET;
     return Jwts.builder()
         .setIssuer("WebGoat Token Builder")
         .setAudience("webgoat.org")
@@ -52,7 +53,7 @@ public class JWTSecretKeyEndpoint implements AssignmentEndpoint {
         .claim("username", "Tom")
         .claim("Email", "tom@webgoat.org")
         .claim("Role", new String[] {"Manager", "Project Administrator"})
-        .signWith(SignatureAlgorithm.HS256, JWT_SECRET)
+        .signWith(SignatureAlgorithm.HS256, secret)
         .compact();
   }
 
@@ -60,7 +61,8 @@ public class JWTSecretKeyEndpoint implements AssignmentEndpoint {
   @ResponseBody
   public AttackResult login(@RequestParam String token) {
     try {
-      Jwt jwt = Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token);
+      String secret = JWT_SECRET;
+      Jwt jwt = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
       Claims claims = (Claims) jwt.getBody();
       if (!claims.keySet().containsAll(expectedClaims)) {
         return failed(this).feedback("jwt-secret-claims-missing").build();

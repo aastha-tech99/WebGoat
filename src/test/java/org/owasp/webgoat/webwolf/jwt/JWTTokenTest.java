@@ -92,7 +92,8 @@ class JWTTokenTest {
     jwk.setKeyId("kid-1");
 
     JsonWebSignature jws = new JsonWebSignature();
-    jws.setPayload(toString(Map.of("role", "admin")));
+    String payload = toString(Map.of("role", "admin"));
+    jws.setPayload(payload);
     jws.setKey(jwk.getPrivateKey());
     jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
     jws.setKeyIdHeaderValue(jwk.getKeyId());

@@ -29,8 +29,9 @@ public class MissingAccessControlUserRepository {
   }
 
   public User findByUsername(String username) {
+    NamedParameterJdbcTemplate jdbc = jdbcTemplate;
     var users =
-        jdbcTemplate.query(
+        jdbc.query(
             "select username, password, admin from access_control_users where username=:username",
             new MapSqlParameterSource().addValue("username", username),
             mapper);

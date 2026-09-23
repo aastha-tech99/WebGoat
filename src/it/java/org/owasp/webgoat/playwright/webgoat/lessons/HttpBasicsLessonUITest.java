@@ -28,7 +28,7 @@ import org.owasp.webgoat.playwright.webgoat.pages.lessons.HttpBasicsLessonPage;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class HttpBasicsLessonUITest extends PlaywrightTest {
 
-    private HttpBasicsLessonPage lessonPage;
+    private volatile HttpBasicsLessonPage lessonPage;
 
     @BeforeEach
     void navigateToLesson(Browser browser) {

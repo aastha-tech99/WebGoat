@@ -12,7 +12,7 @@ import org.owasp.webgoat.container.assignments.AttackResult;
 
 class ConfigHardeningTaskTest {
 
-  private ConfigHardeningTask task;
+  private volatile ConfigHardeningTask task;
 
   @BeforeEach
   void setUp() {

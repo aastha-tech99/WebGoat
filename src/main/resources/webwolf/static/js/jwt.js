@@ -60,7 +60,10 @@ function toggleVerificationMode(mode) {
 toggleVerificationMode(document.querySelector('input[name="verificationMode"]:checked').value);
 });
 
+var _callInProgress = false;
 function call(encode) {
+        if (_callInProgress) { return; }
+        _callInProgress = true;
         var url = encode ? 'jwt/encode' : 'jwt/decode';
         var formData = encode ? $('#encodeForm').getFormData() : $('#decodeForm').getFormData();
         var mode = $("input[name='verificationMode']:checked").val();
@@ -83,7 +86,7 @@ function call(encode) {
             },
             contentType: "application/x-www-form-urlencoded",
             dataType: 'json'
-        }).always(() => hideLoading());
+        }).always(() => { _callInProgress = false; hideLoading(); });
 }
 
 function update(token) {

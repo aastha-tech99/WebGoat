@@ -45,6 +45,7 @@ public class SqlInjectionLesson9Test extends LessonTest {
 
   @Test
   public void SmithIsNotMostEarning() throws Exception {
+    String expectedMsg = messages.getMessage("sql-injection.9.one");
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/SqlInjection/attack9")
@@ -54,7 +55,7 @@ public class SqlInjectionLesson9Test extends LessonTest {
                     "3SL99A'; UPDATE employees SET salary = 9999 WHERE last_name = 'Smith"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("lessonCompleted", is(false)))
-        .andExpect(jsonPath("$.feedback", is(messages.getMessage("sql-injection.9.one"))));
+        .andExpect(jsonPath("$.feedback", is(expectedMsg)));
   }
 
   @Test

@@ -34,7 +34,8 @@ public class SecurityMisconfigurationLessonPage extends LessonPage {
   }
 
   public void submitTask1() {
-    getPage().getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName("Attempt login")).click();
+    Page page = getPage();
+    page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName("Attempt login")).click();
   }
 
   public Locator task1Output() {

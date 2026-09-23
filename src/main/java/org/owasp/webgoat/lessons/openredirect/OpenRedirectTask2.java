@@ -43,10 +43,11 @@ public class OpenRedirectTask2 implements AssignmentEndpoint {
     try {
       URI u = new URI(url);
       String host = u.getHost();
+      String normalizedHost = (host != null) ? host.toLowerCase() : null;
       if (host == null) {
         return failed(this).feedback("openredirect.failure2").output("Could not parse host").build();
       }
-      if (!ALLOWED.contains(host.toLowerCase())) {
+      if (!ALLOWED.contains(normalizedHost)) {
         return success(this)
             .feedback("openredirect.success2")
             .output("Bypassed naive filter - host: " + escape(host))

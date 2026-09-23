@@ -42,15 +42,17 @@ public class IDOREditOtherProfile implements AssignmentEndpoint {
   public AttackResult completed(
       @PathVariable("userId") String userId, @RequestBody UserProfile userSubmittedProfile) {
 
-    String authUserId = (String) userSessionData.getValue("idor-authenticated-user-id");
+    LessonSession session = userSessionData;
+    String authUserId = (String) session.getValue("idor-authenticated-user-id");
     // this is where it starts ... accepting the user submitted ID and assuming it will be the same
     // as the logged in userId and not checking for proper authorization
     // Certain roles can sometimes edit others' profiles, but we shouldn't just assume that and let
     // everyone, right?
     // Except that this is a vulnerable app ... so we will
     UserProfile currentUserProfile = new UserProfile(userId);
-    if (userSubmittedProfile.getUserId() != null
-        && !userSubmittedProfile.getUserId().equals(authUserId)) {
+    String submittedUserId = userSubmittedProfile.getUserId();
+    if (submittedUserId != null
+        && !submittedUserId.equals(authUserId)) {
       // let's get this started ...
       currentUserProfile.setColor(userSubmittedProfile.getColor());
       currentUserProfile.setRole(userSubmittedProfile.getRole());
@@ -85,8 +87,8 @@ public class IDOREditOtherProfile implements AssignmentEndpoint {
           .feedback("idor.edit.profile.failure3")
           .output(currentUserProfile.profileToMap().toString())
           .build();
-    } else if (userSubmittedProfile.getUserId() != null
-        && userSubmittedProfile.getUserId().equals(authUserId)) {
+    } else if (submittedUserId != null
+        && submittedUserId.equals(authUserId)) {
       return failed(this).feedback("idor.edit.profile.failure4").build();
     }
 

@@ -72,6 +72,7 @@ public class MvcConfiguration implements WebMvcConfigurer {
    */
   @Bean
   public ITemplateResolver lessonThymeleafTemplateResolver(ResourceLoader resourceLoader) {
+    ResourceLoader localResourceLoader = resourceLoader;
     var resolver =
         new FileTemplateResolver() {
           @Override
@@ -83,7 +84,7 @@ public class MvcConfiguration implements WebMvcConfigurer {
               String characterEncoding,
               Map<String, Object> templateResolutionAttributes) {
             try (var is =
-                resourceLoader.getResource("classpath:" + resourceName).getInputStream()) {
+                localResourceLoader.getResource("classpath:" + resourceName).getInputStream()) {
               return new StringTemplateResource(
                   new String(is.readAllBytes(), StandardCharsets.UTF_8));
             } catch (IOException e) {

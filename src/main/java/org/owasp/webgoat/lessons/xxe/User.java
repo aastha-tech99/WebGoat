@@ -9,8 +9,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class User {
 
-  private String username = "";
-  private String password = "";
+  private volatile String username = "";
+  private volatile String password = "";
 
   public String getPassword() {
     return password;

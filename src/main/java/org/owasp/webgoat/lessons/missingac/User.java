@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User {
 
-  private String username;
-  private String password;
-  private boolean admin;
+  private volatile String username;
+  private volatile String password;
+  private volatile boolean admin;
 }

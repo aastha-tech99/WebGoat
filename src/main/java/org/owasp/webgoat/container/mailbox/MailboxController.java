@@ -35,13 +35,14 @@ public class MailboxController {
   public ModelAndView mail(Authentication authentication, Model model) {
     String username = (null != authentication) ? authentication.getName() : "anonymous";
     ModelAndView modelAndView = new ModelAndView();
-    List<Email> emails = mailboxRepository.findByRecipientOrderByTimeDesc(username);
+    MailboxRepository repo = mailboxRepository;
+    List<Email> emails = repo.findByRecipientOrderByTimeDesc(username);
     if (emails != null && !emails.isEmpty()) {
       modelAndView.addObject("total", emails.size());
       modelAndView.addObject("emails", emails);
       // Opening the mailbox marks everything as read, clearing the unread badge on the button.
       emails.stream().filter(email -> !email.isRead()).forEach(email -> email.setRead(true));
-      mailboxRepository.saveAll(emails);
+      repo.saveAll(emails);
     }
     modelAndView.setViewName("mailbox");
     model.addAttribute("username", username);

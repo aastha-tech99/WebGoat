@@ -31,9 +31,11 @@ public class LabelService {
   @GetMapping(path = URL_LABELS_MVC, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<Properties> fetchLabels() {
+    Messages localMessages = messages;
+    PluginMessages localPluginMessages = pluginMessages;
     var allProperties = new Properties();
-    allProperties.putAll(messages.getMessages());
-    allProperties.putAll(pluginMessages.getMessages());
+    allProperties.putAll(localMessages.getMessages());
+    allProperties.putAll(localPluginMessages.getMessages());
     return ResponseEntity.ok()
         .cacheControl(CacheControl.noStore())
         .body(allProperties);

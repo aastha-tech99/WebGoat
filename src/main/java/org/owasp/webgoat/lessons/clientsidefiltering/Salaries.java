@@ -40,9 +40,7 @@ public class Salaries {
   public void copyFiles() {
     ClassPathResource classPathResource = new ClassPathResource("lessons/employees.xml");
     File targetDirectory = new File(webGoatHomeDirectory, "/ClientSideFiltering");
-    if (!targetDirectory.exists()) {
-      targetDirectory.mkdir();
-    }
+    targetDirectory.mkdirs();
     try {
       FileCopyUtils.copy(
           classPathResource.getInputStream(),

@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.owasp.webgoat.container.users.UserProgress;
 import org.owasp.webgoat.container.CurrentUsername;
 import org.owasp.webgoat.container.lessons.Assignment;
 import org.owasp.webgoat.container.lessons.LessonName;
@@ -35,7 +36,10 @@ public class LessonProgressService {
   @ResponseBody
   public List<LessonOverview> lessonOverview(
       @PathVariable("lesson") LessonName lessonName, @CurrentUsername String username) {
-    var userProgress = userProgressRepository.findByUser(username);
+    UserProgress userProgress;
+    synchronized (userProgressRepository) {
+      userProgress = userProgressRepository.findByUser(username);
+    }
     if (userProgress == null) {
       return List.of();
     }

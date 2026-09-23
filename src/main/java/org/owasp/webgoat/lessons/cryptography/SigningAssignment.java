@@ -39,14 +39,16 @@ public class SigningAssignment implements AssignmentEndpoint {
   public String getPrivateKey(HttpServletRequest request)
       throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 
-    String privateKey = (String) request.getSession().getAttribute("privateKeyString");
-    if (privateKey == null) {
-      KeyPair keyPair = CryptoUtil.generateKeyPair();
-      privateKey = CryptoUtil.getPrivateKeyInPEM(keyPair);
-      request.getSession().setAttribute("privateKeyString", privateKey);
-      request.getSession().setAttribute("keyPair", keyPair);
+    synchronized (request.getSession()) {
+      String privateKey = (String) request.getSession().getAttribute("privateKeyString");
+      if (privateKey == null) {
+        KeyPair keyPair = CryptoUtil.generateKeyPair();
+        privateKey = CryptoUtil.getPrivateKeyInPEM(keyPair);
+        request.getSession().setAttribute("privateKeyString", privateKey);
+        request.getSession().setAttribute("keyPair", keyPair);
+      }
+      return privateKey;
     }
-    return privateKey;
   }
 
   @PostMapping("/crypto/signing/verify")

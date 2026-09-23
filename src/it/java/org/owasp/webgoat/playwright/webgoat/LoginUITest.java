@@ -20,7 +20,8 @@ class LoginUITest extends PlaywrightTest {
     var page = Authentication.tweety(browser);
     var loginPage = new WebGoatLoginPage(page);
     loginPage.open();
-    loginPage.login(Authentication.getTweety().name(), Authentication.getTweety().password());
+    var tweety = Authentication.getTweety();
+    loginPage.login(tweety.name(), tweety.password());
 
     // logout
     page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("")).click();

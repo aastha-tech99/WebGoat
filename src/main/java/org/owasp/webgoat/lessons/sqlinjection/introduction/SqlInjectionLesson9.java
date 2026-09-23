@@ -53,7 +53,8 @@ public class SqlInjectionLesson9 implements AssignmentEndpoint {
             + "' AND auth_tan = '"
             + auth_tan
             + "'";
-    try (Connection connection = dataSource.getConnection()) {
+    LessonDataSource ds = dataSource;
+    try (Connection connection = ds.getConnection()) {
       // V2019_09_26_7__employees.sql
       int oldMaxSalary = this.getMaxSalary(connection);
       int oldSumSalariesOfOtherEmployees = this.getSumSalariesOfOtherEmployees(connection);

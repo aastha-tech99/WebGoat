@@ -19,7 +19,8 @@ public class RegistrationPage {
 
   public RegistrationPage(Page page) {
     this.page = page;
-    this.signUpButton = this.page.getByRole(BUTTON, new Page.GetByRoleOptions().setName("Sign up"));
+    Page localPage = this.page;
+    this.signUpButton = localPage.getByRole(BUTTON, new Page.GetByRoleOptions().setName("Sign up"));
   }
 
   public void open() {

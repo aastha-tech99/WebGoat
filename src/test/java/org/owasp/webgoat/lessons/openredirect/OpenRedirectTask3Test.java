@@ -18,8 +18,9 @@ class OpenRedirectTask3Test {
     AttackResult result = task.challenge("https://webgoat.local@evil.com", null);
 
     assertThat(result.assignmentSolved()).isTrue();
-    assertThat(result.getOutput()).contains("RealHost: evil.com");
-    assertThat(result.getOutput()).contains("Bypassed flawed normalization");
+    String output = result.getOutput();
+    assertThat(output).contains("RealHost: evil.com");
+    assertThat(output).contains("Bypassed flawed normalization");
   }
 
   @Test

@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -31,7 +31,7 @@ public class CommentsCache {
   }
 
   private static final Comments comments = new Comments();
-  private static final Map<WebGoatUser, Comments> userComments = new HashMap<>();
+  private static final Map<WebGoatUser, Comments> userComments = new ConcurrentHashMap<>();
   private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss");
 
   public CommentsCache() {
@@ -48,7 +48,7 @@ public class CommentsCache {
     comments.add(new Comment("guest", LocalDateTime.now().format(fmt), "Lol!! :-)."));
   }
 
-  protected Comments getComments(WebGoatUser user) {
+  protected synchronized Comments getComments(WebGoatUser user) {
     Comments allComments = new Comments();
     Comments commentsByUser = userComments.get(user);
     if (commentsByUser != null) {
@@ -82,7 +82,8 @@ public class CommentsCache {
     return (Comment) unmarshaller.unmarshal(xsr);
   }
 
-  public void addComment(Comment comment, WebGoatUser user, boolean visibleForAllUsers) {
+  public synchronized void addComment(
+      Comment comment, WebGoatUser user, boolean visibleForAllUsers) {
     comment.setDateTime(LocalDateTime.now().format(fmt));
     comment.setUser(user.getUsername());
     if (visibleForAllUsers) {
@@ -94,7 +95,7 @@ public class CommentsCache {
     }
   }
 
-  public void reset(WebGoatUser user) {
+  public synchronized void reset(WebGoatUser user) {
     comments.clear();
     userComments.remove(user);
     initDefaultComments();

@@ -64,17 +64,19 @@ public class AsciiDoctorTemplateResolver extends FileTemplateResolver {
     var templateName = resourceName.substring(PREFIX.length());
     log.debug("template used: {}", templateName);
     try (InputStream is = getInputStream(templateName)) {
-      JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
-      extensionRegistry.inlineMacro("webWolfLink", WebWolfMacro.class);
-      extensionRegistry.inlineMacro("webWolfRootLink", WebWolfRootMacro.class);
-      extensionRegistry.inlineMacro("webGoatVersion", WebGoatVersionMacro.class);
-      extensionRegistry.inlineMacro("webGoatTempDir", WebGoatTmpDirMacro.class);
-      extensionRegistry.inlineMacro("operatingSystem", OperatingSystemMacro.class);
-      extensionRegistry.inlineMacro("username", UsernameMacro.class);
+      synchronized (asciidoctor) {
+        JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
+        extensionRegistry.inlineMacro("webWolfLink", WebWolfMacro.class);
+        extensionRegistry.inlineMacro("webWolfRootLink", WebWolfRootMacro.class);
+        extensionRegistry.inlineMacro("webGoatVersion", WebGoatVersionMacro.class);
+        extensionRegistry.inlineMacro("webGoatTempDir", WebGoatTmpDirMacro.class);
+        extensionRegistry.inlineMacro("operatingSystem", OperatingSystemMacro.class);
+        extensionRegistry.inlineMacro("username", UsernameMacro.class);
 
-      StringWriter writer = new StringWriter();
-      asciidoctor.convert(new InputStreamReader(is), writer, createAttributes());
-      return new StringTemplateResource(writer.getBuffer().toString());
+        StringWriter writer = new StringWriter();
+        asciidoctor.convert(new InputStreamReader(is), writer, createAttributes());
+        return new StringTemplateResource(writer.getBuffer().toString());
+      }
     } catch (IOException e) {
       return new StringTemplateResource(
           "<div>Unable to find documentation for: " + templateName + " </div>");

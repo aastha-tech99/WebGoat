@@ -14,8 +14,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
@@ -42,7 +42,7 @@ public class BlindSendFileAssignment implements AssignmentEndpoint, Initializabl
 
   private final String webGoatHomeDirectory;
   private final CommentsCache comments;
-  private final Map<WebGoatUser, String> userToFileContents = new HashMap<>();
+  private final Map<WebGoatUser, String> userToFileContents = new ConcurrentHashMap<>();
 
   public BlindSendFileAssignment(
       @Value("${webgoat.user.directory}") String webGoatHomeDirectory, CommentsCache comments) {

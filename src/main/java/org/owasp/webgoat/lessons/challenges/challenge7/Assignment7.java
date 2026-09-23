@@ -59,7 +59,8 @@ public class Assignment7 implements AssignmentEndpoint {
 
   @GetMapping("/challenge/7/reset-password/{link}")
   public ResponseEntity<String> resetPassword(@PathVariable(value = "link") String link) {
-    if (link.equals(ADMIN_PASSWORD_LINK)) {
+    String resetLink = link;
+    if (resetLink.equals(ADMIN_PASSWORD_LINK)) {
       return ResponseEntity.accepted()
           .body(
               "<h1>Success!!</h1>"

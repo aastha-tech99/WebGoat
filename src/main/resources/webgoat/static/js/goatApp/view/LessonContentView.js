@@ -143,12 +143,16 @@ define(['jquery',
             },
 
             markAssignmentComplete: function () {
-                $(this.curForm).siblings('.assignment-success').find('i').removeClass('hidden');
+                var form = this.curForm;
+                if (!form) { return; }
+                $(form).siblings('.assignment-success').find('i').removeClass('hidden');
                 this.paginationControlView.updateCollection();
             },
 
             markAssignmentIncomplete: function () {
-                $(this.curForm).siblings('.assignment-success').find('i').addClass('hidden');
+                var form = this.curForm;
+                if (!form) { return; }
+                $(form).siblings('.assignment-success').find('i').addClass('hidden');
             },
 
             onErrorResponse: function (data, b, c) {

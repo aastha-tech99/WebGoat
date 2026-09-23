@@ -31,33 +31,37 @@ public class HashingAssignment implements AssignmentEndpoint {
   @ResponseBody
   public String getMd5(HttpServletRequest request) throws NoSuchAlgorithmException {
 
-    String md5Hash = (String) request.getSession().getAttribute("md5Hash");
-    if (md5Hash == null) {
+    synchronized (request.getSession()) {
+      String md5Hash = (String) request.getSession().getAttribute("md5Hash");
+      if (md5Hash == null) {
 
-      String secret = SECRETS[new Random().nextInt(SECRETS.length)];
+        String secret = SECRETS[new Random().nextInt(SECRETS.length)];
 
-      MessageDigest md = MessageDigest.getInstance("SHA-256");
-      md.update(secret.getBytes());
-      byte[] digest = md.digest();
-      md5Hash = DatatypeConverter.printHexBinary(digest).toUpperCase();
-      request.getSession().setAttribute("md5Hash", md5Hash);
-      request.getSession().setAttribute("md5Secret", secret);
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update(secret.getBytes());
+        byte[] digest = md.digest();
+        md5Hash = DatatypeConverter.printHexBinary(digest).toUpperCase();
+        request.getSession().setAttribute("md5Hash", md5Hash);
+        request.getSession().setAttribute("md5Secret", secret);
+      }
+      return md5Hash;
     }
-    return md5Hash;
   }
 
   @RequestMapping(path = "/crypto/hashing/sha256", produces = MediaType.TEXT_HTML_VALUE)
   @ResponseBody
   public String getSha256(HttpServletRequest request) throws NoSuchAlgorithmException {
 
-    String sha256 = (String) request.getSession().getAttribute("sha256");
-    if (sha256 == null) {
-      String secret = SECRETS[new Random().nextInt(SECRETS.length)];
-      sha256 = getHash(secret, "SHA-256");
-      request.getSession().setAttribute("sha256Hash", sha256);
-      request.getSession().setAttribute("sha256Secret", secret);
+    synchronized (request.getSession()) {
+      String sha256 = (String) request.getSession().getAttribute("sha256");
+      if (sha256 == null) {
+        String secret = SECRETS[new Random().nextInt(SECRETS.length)];
+        sha256 = getHash(secret, "SHA-256");
+        request.getSession().setAttribute("sha256Hash", sha256);
+        request.getSession().setAttribute("sha256Secret", secret);
+      }
+      return sha256;
     }
-    return sha256;
   }
 
   @PostMapping("/crypto/hashing")

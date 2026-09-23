@@ -51,8 +51,9 @@ public class SimpleXXE implements AssignmentEndpoint {
       @RequestBody String commentStr, @CurrentUser WebGoatUser user) {
     String error = "";
     try {
-      var comment = comments.parseXml(commentStr, false);
-      comments.addComment(comment, user, false);
+      CommentsCache localComments = comments;
+      var comment = localComments.parseXml(commentStr, false);
+      localComments.addComment(comment, user, false);
       if (checkSolution(comment)) {
         return success(this).build();
       }

@@ -24,11 +24,12 @@
   if (configButton) {
     configButton.addEventListener('click', async () => {
       configButton.disabled = true;
+      var currentToken = tokenField.value || '';
       configOutput.classList.remove('d-none');
       configOutput.textContent = 'Querying /config ...';
       try {
         const url = new URL(configButton.getAttribute('data-url'), window.location.origin);
-        url.searchParams.set('token', tokenField.value || '');
+        url.searchParams.set('token', currentToken);
         const response = await fetch(url, { method: 'GET' });
         const text = await response.text();
         configOutput.textContent = text;

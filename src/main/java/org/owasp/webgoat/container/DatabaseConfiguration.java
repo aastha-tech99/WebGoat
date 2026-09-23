@@ -28,11 +28,12 @@ public class DatabaseConfiguration {
   @Bean
   @Primary
   public DataSource dataSource() {
+    DataSourceProperties props = properties;
     DriverManagerDataSource dataSource = new DriverManagerDataSource();
-    dataSource.setDriverClassName(properties.getDriverClassName());
-    dataSource.setUrl(properties.getUrl());
-    dataSource.setUsername(properties.getUsername());
-    dataSource.setPassword(properties.getPassword());
+    dataSource.setDriverClassName(props.getDriverClassName());
+    dataSource.setUrl(props.getUrl());
+    dataSource.setUsername(props.getUsername());
+    dataSource.setPassword(props.getPassword());
     return dataSource;
   }
 

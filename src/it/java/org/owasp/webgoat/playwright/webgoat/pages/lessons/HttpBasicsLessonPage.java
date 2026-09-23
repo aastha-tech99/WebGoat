@@ -24,10 +24,11 @@ public class HttpBasicsLessonPage extends LessonPage {
 
     public HttpBasicsLessonPage(Page page) {
         super(page);
-        enterYourName = page.locator("input[name=\"person\"]");
-        code = page.locator("input[name=\"code\"]");
-        goButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Go!"));
-        submitButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Submit"));
+        Page localPage = page;
+        enterYourName = localPage.locator("input[name=\"person\"]");
+        code = localPage.locator("input[name=\"code\"]");
+        goButton = localPage.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Go!"));
+        submitButton = localPage.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Submit"));
     }
 
     public Locator getTitle() {

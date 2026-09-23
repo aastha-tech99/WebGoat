@@ -19,10 +19,15 @@ define(['jquery',
         },
 
         loadData: function(options) {
+            if (this._loading) { return; }
+            this._loading = true;
             this.urlRoot = _.escape(encodeURIComponent(options.name)) + '.lesson'
             var self = this;
             this.fetch().done(function(data) {
+                self._loading = false;
                 self.setContent(data);
+            }).fail(function() {
+                self._loading = false;
             });
         },
 

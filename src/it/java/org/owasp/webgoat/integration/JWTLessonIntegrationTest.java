@@ -57,11 +57,13 @@ public class JWTLessonIntegrationTest extends IntegrationTest {
   }
 
   private String generateToken(String key) {
+    Date issuedAt = Calendar.getInstance().getTime();
+    Date expiration = Date.from(Instant.now().plusSeconds(60));
     return Jwts.builder()
         .setIssuer("WebGoat Token Builder")
         .setAudience("webgoat.org")
-        .setIssuedAt(Calendar.getInstance().getTime())
-        .setExpiration(Date.from(Instant.now().plusSeconds(60)))
+        .setIssuedAt(issuedAt)
+        .setExpiration(expiration)
         .setSubject("tom@webgoat.org")
         .claim("username", "WebGoat")
         .claim("Email", "tom@webgoat.org")

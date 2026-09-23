@@ -51,13 +51,14 @@ public class ProfileUploadBase implements AssignmentEndpoint {
       var uploadedFile = new File(uploadDirectory, fullName);
       uploadedFile.createNewFile();
       FileCopyUtils.copy(file.getBytes(), uploadedFile);
+      File absoluteFile = uploadedFile.getAbsoluteFile();
 
       if (attemptWasMade(uploadDirectory, uploadedFile)) {
         return solvedIt(uploadedFile);
       }
       return informationMessage(this)
           .feedback("path-traversal-profile-updated")
-          .feedbackArgs(uploadedFile.getAbsoluteFile())
+          .feedbackArgs(absoluteFile)
           .build();
 
     } catch (IOException e) {

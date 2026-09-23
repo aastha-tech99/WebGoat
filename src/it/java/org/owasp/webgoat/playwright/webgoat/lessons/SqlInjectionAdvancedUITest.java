@@ -20,7 +20,7 @@ import org.owasp.webgoat.playwright.webgoat.pages.lessons.LessonPage;
 
 public class SqlInjectionAdvancedUITest extends PlaywrightTest {
 
-  private LessonPage lessonPage;
+  private volatile LessonPage lessonPage;
 
   @BeforeEach
   void navigateToLesson(Browser browser) {

@@ -51,9 +51,9 @@ class UserProgressRepositoryTest {
     var userProgress = new UserProgress(USER);
     userProgressRepository.save(userProgress);
 
-    userProgress = userProgressRepository.findByUser(USER);
+    UserProgress found = userProgressRepository.findByUser(USER);
 
-    assertThat(userProgress.getLessonProgress(new TestLesson())).isNotNull();
+    assertThat(found.getLessonProgress(new TestLesson())).isNotNull();
   }
 
   @Test

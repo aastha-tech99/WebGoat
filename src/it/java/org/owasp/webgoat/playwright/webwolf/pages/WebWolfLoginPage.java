@@ -20,9 +20,10 @@ public class WebWolfLoginPage {
 
   public WebWolfLoginPage(Page page) {
     this.page = page;
-    this.signInButton = this.page.getByRole(BUTTON, new Page.GetByRoleOptions().setName("Sign In"));
+    Page localPage = this.page;
+    this.signInButton = localPage.getByRole(BUTTON, new Page.GetByRoleOptions().setName("Sign In"));
     this.signOutButton =
-        this.page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Sign out"));
+        localPage.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Sign out"));
   }
 
   public void open() {

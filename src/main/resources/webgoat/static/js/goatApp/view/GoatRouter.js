@@ -105,6 +105,7 @@ define(['jquery',
 
         lessonRoute: function(name) {
             render();
+            this._currentLesson = name;
             this.lessonController.loadLesson(name, 0);
             this.menuController.updateMenu(name);
         },
@@ -112,6 +113,7 @@ define(['jquery',
         lessonPageRoute: function (name, pageNum) {
             render();
             pageNum = (_.isNumber(parseInt(pageNum))) ? parseInt(pageNum) : 0;
+            this._currentLesson = name;
             this.lessonController.loadLesson(name, pageNum);
             this.menuController.updateMenu(name);
         },

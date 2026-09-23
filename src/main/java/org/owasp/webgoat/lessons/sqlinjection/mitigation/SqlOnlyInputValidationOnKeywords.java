@@ -38,13 +38,19 @@ public class SqlOnlyInputValidationOnKeywords implements AssignmentEndpoint {
     if (userId.contains(" ")) {
       return failed(this).feedback("SqlOnlyInputValidationOnKeywords-failed").build();
     }
-    AttackResult attackResult = lesson6a.injectableQuery(userId);
+    SqlInjectionLesson6a localLesson = lesson6a;
+    AttackResult attackResult = localLesson.injectableQuery(userId);
+    boolean completed = attackResult.isLessonCompleted();
+    String feedback = attackResult.getFeedback();
+    String[] feedbackArgs = attackResult.getFeedbackArgs();
+    String output = attackResult.getOutput();
+    String[] outputArgs = attackResult.getOutputArgs();
     return new AttackResult(
-        attackResult.isLessonCompleted(),
-        attackResult.getFeedback(),
-        attackResult.getFeedbackArgs(),
-        attackResult.getOutput(),
-        attackResult.getOutputArgs(),
+        completed,
+        feedback,
+        feedbackArgs,
+        output,
+        outputArgs,
         getClass().getSimpleName(),
         true);
   }

@@ -52,7 +52,8 @@ public class JWTToken {
   }
 
   public static JWTToken decode(String jwt, String secretKey, String jwksJson) {
-    var cleanedToken = jwt.trim().replace(System.getProperty("line.separator"), "");
+    String lineSep = System.getProperty("line.separator");
+    var cleanedToken = jwt.trim().replace(lineSep, "");
     var token = parseToken(cleanedToken);
     return token
         .toBuilder()

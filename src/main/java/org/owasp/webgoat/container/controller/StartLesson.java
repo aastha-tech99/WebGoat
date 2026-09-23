@@ -27,7 +27,8 @@ public class StartLesson {
     var path = request.getRequestURL().toString(); // we now got /a/b/c/AccessControlMatrix.lesson
     var lessonName = path.substring(path.lastIndexOf('/') + 1, path.indexOf(".lesson"));
 
-    course.getLessons().stream()
+    Course localCourse = course;
+    localCourse.getLessons().stream()
         .filter(l -> l.getId().equals(lessonName))
         .findFirst()
         .ifPresent(

@@ -27,7 +27,8 @@ public class SecurePasswordsAssignment implements AssignmentEndpoint {
   public AttackResult completed(@RequestParam String password) {
     Zxcvbn zxcvbn = new Zxcvbn();
     StringBuilder output = new StringBuilder();
-    DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+    DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
+    DecimalFormat df = new DecimalFormat("0", symbols);
     df.setMaximumFractionDigits(340);
     Strength strength = zxcvbn.measure(password);
 

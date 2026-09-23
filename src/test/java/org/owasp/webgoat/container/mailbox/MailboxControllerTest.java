@@ -122,7 +122,8 @@ class MailboxControllerTest extends LessonTest {
     this.mockMvc.perform(get("/mail").principal(user("test1234"))).andExpect(status().isOk());
 
     // Opening the mailbox flips the unread mail to read and persists it.
-    assertThat(email.isRead()).isTrue();
+    boolean isRead = email.isRead();
+    assertThat(isRead).isTrue();
     Mockito.verify(mailbox).saveAll(anyList());
   }
 

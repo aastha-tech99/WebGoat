@@ -23,7 +23,8 @@ public class LessonPage {
   }
 
   public void navigateTo(int pageNumber) {
-    page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("" + pageNumber)).click();
+    Page localPage = page;
+    localPage.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("" + pageNumber)).click();
   }
 
   public void open(LessonName lessonName) {

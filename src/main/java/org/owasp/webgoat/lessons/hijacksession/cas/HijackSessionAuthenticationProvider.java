@@ -5,10 +5,11 @@
 package org.owasp.webgoat.lessons.hijacksession.cas;
 
 import java.time.Instant;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoublePredicate;
 import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
@@ -21,18 +22,18 @@ import org.springframework.web.context.annotation.ApplicationScope;
 @Component
 public class HijackSessionAuthenticationProvider implements AuthenticationProvider<Authentication> {
 
-  private Queue<String> sessions = new LinkedList<>();
-  private static long id = new Random().nextLong() & Long.MAX_VALUE;
+  private final Queue<String> sessions = new ConcurrentLinkedQueue<>();
+  private static final AtomicLong id = new AtomicLong(new Random().nextLong() & Long.MAX_VALUE);
   protected static final int MAX_SESSIONS = 50;
 
   private static final DoublePredicate PROBABILITY_DOUBLE_PREDICATE = pr -> pr < 0.75;
   private static final Supplier<String> GENERATE_SESSION_ID =
-      () -> ++id + "-" + Instant.now().toEpochMilli();
+      () -> id.incrementAndGet() + "-" + Instant.now().toEpochMilli();
   public static final Supplier<Authentication> AUTHENTICATION_SUPPLIER =
       () -> Authentication.builder().id(GENERATE_SESSION_ID.get()).build();
 
   @Override
-  public Authentication authenticate(Authentication authentication) {
+  public synchronized Authentication authenticate(Authentication authentication) {
     if (authentication == null) {
       return AUTHENTICATION_SUPPLIER.get();
     }
@@ -60,7 +61,7 @@ public class HijackSessionAuthenticationProvider implements AuthenticationProvid
     }
   }
 
-  protected boolean addSession(String sessionId) {
+  protected synchronized boolean addSession(String sessionId) {
     if (sessions.size() >= MAX_SESSIONS) {
       sessions.remove();
     }

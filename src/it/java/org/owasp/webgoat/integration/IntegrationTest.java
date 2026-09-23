@@ -23,8 +23,8 @@ public abstract class IntegrationTest {
   protected final ServerUrlConfig webGoatUrlConfig = ServerUrlConfig.webGoat();
   protected final ServerUrlConfig webWolfUrlConfig = ServerUrlConfig.webWolf();
 
-  @Getter private String webGoatCookie;
-  @Getter private String webWolfCookie;
+  @Getter private volatile String webGoatCookie;
+  @Getter private volatile String webWolfCookie;
   @Getter private final String user = "webgoat";
 
   @BeforeEach

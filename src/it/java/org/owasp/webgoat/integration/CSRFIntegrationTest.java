@@ -209,7 +209,8 @@ public class CSRFIntegrationTest extends IntegrationTest {
     registerCSRFUser();
 
     Map<String, Object> params = new HashMap<>();
-    params.put("username", "csrf-" + this.getUser());
+    String csrfUser = "csrf-" + this.getUser();
+    params.put("username", csrfUser);
     params.put("password", "password");
 
     // login and get the new cookie

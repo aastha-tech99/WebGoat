@@ -65,6 +65,7 @@ public class VulnerableComponentsLessonTest {
     Exception e =
         assertThrows(
             StreamException.class, () -> ((Contact) xstream.fromXML("bullssjfs")).getFirstName());
-    assertThat(e.getCause().getMessage().contains("START_DOCUMENT")).isTrue();
+    Throwable cause = e.getCause();
+    assertThat(cause.getMessage().contains("START_DOCUMENT")).isTrue();
   }
 }

@@ -33,18 +33,23 @@ webgoat.customjs.addBearerToken = function () {
 }
 
 //Dev comment: Temporarily disabled from page we need to work out the refresh token flow but for now we can go live with the checkout page
+var _refreshing = false;
 function newToken() {
+    if (_refreshing) { return; }
+    _refreshing = true;
+    var currentRefreshToken = tokenStore.refresh_token;
     $.ajax({
         headers: {
             'Authorization': 'Bearer ' + (tokenStore.access_token || '')
         },
         type: 'POST',
         url: 'JWT/refresh/newToken',
-        data: JSON.stringify({refresh_token: tokenStore.refresh_token})
+        data: JSON.stringify({refresh_token: currentRefreshToken})
     }).success(
         function () {
+            _refreshing = false;
             tokenStore.access_token = apiToken;
             tokenStore.refresh_token = refreshToken;
         }
-    )
+    ).fail(function() { _refreshing = false; })
 }

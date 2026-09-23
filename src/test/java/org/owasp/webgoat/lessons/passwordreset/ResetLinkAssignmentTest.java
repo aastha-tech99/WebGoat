@@ -70,7 +70,8 @@ class ResetLinkAssignmentTest extends LessonTest {
             .andExpect(status().isOk())
             .andExpect(view().name("lessons/passwordreset/templates/password_link_not_found.html"))
             .andReturn();
-    Assertions.assertThat(resourceLoader.getResource(mvcResult.getModelAndView().getViewName()))
+    String viewName = mvcResult.getModelAndView().getViewName();
+    Assertions.assertThat(resourceLoader.getResource(viewName))
         .isNotNull();
   }
 

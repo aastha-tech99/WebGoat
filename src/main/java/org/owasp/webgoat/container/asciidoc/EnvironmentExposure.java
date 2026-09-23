@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EnvironmentExposure implements ApplicationContextAware {
 
-  private static ApplicationContext context;
+  private static volatile ApplicationContext context;
 
   public static Environment getEnv() {
     return null != context ? context.getEnvironment() : null;

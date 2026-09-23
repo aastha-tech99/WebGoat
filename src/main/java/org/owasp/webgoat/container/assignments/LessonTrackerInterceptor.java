@@ -50,7 +50,7 @@ public class LessonTrackerInterceptor implements ResponseBodyAdvice<Object> {
     return o;
   }
 
-  private void trackProgress(AttackResult attackResult) {
+  private synchronized void trackProgress(AttackResult attackResult) {
     var user = (WebGoatUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Assert.notNull(user, "User not found in SecurityContext");
     var username = realUsername(user);

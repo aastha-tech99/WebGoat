@@ -53,8 +53,9 @@ class UserValidatorTest {
     userForm.setUsername("test12345");
     userForm.setPassword("test12345");
     userForm.setMatchingPassword("test12345");
+    WebGoatUser existingUser = new WebGoatUser("test1245", "password");
     when(userRepository.findByUsername(anyString()))
-        .thenReturn(new WebGoatUser("test1245", "password"));
+        .thenReturn(existingUser);
     Errors errors = new BeanPropertyBindingResult(userForm, "userForm");
     new UserValidator(userRepository).validate(userForm, errors);
     Assertions.assertThat(errors.hasErrors()).isTrue();

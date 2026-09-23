@@ -13,10 +13,10 @@ import lombok.ToString;
 @ToString
 public class Authentication implements Principal {
 
-  private boolean authenticated = false;
+  private volatile boolean authenticated = false;
   private String name;
   private Object credentials;
-  private String id;
+  private volatile String id;
 
   @Builder
   public Authentication(String name, Object credentials, String id) {

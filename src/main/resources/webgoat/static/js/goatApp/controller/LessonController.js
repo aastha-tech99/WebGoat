@@ -133,16 +133,22 @@ define(['jquery',
                 }
             };
 
+            this._restarting = false;
             this.restartLesson = function() {
+                if (this._restarting) { return; }
+                this._restarting = true;
                 var self=this;
                 $.ajax({
                     url: 'service/restartlesson.mvc/' + encodeURIComponent(self.name),
                     method:'GET'
                 }).done(function(lessonLink) {
+                    self._restarting = false;
                     self.loadLesson(self.name);
                     self.updateMenu();
                     self.callPaginationUpdate();
                     self.lessonContentView.resetLesson();
+                }).fail(function() {
+                    self._restarting = false;
                 });
             };
 

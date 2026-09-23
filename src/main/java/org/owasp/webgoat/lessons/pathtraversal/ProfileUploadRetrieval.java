@@ -57,11 +57,12 @@ public class ProfileUploadRetrieval implements AssignmentEndpoint {
 
   @PostConstruct
   public void initAssignment() {
+    File localCatDir = catPicturesDirectory;
     for (int i = 1; i <= 10; i++) {
       try (InputStream is =
           new ClassPathResource("lessons/pathtraversal/images/cats/" + i + ".jpg")
               .getInputStream()) {
-        FileCopyUtils.copy(is, new FileOutputStream(new File(catPicturesDirectory, i + ".jpg")));
+        FileCopyUtils.copy(is, new FileOutputStream(new File(localCatDir, i + ".jpg")));
       } catch (Exception e) {
         log.error("Unable to copy pictures" + e.getMessage());
       }

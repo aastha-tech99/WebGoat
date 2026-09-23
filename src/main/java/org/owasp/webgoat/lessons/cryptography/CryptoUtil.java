@@ -63,13 +63,13 @@ public class CryptoUtil {
     String signature = null;
 
     try {
-      // Initiate signature verification
-      Signature instance = Signature.getInstance("SHA256withRSA");
-      instance.initSign(privateKey);
-      instance.update(message.getBytes("UTF-8"));
+      // Initiate signing
+      Signature sigInstance = Signature.getInstance("SHA256withRSA");
+      sigInstance.initSign(privateKey);
+      sigInstance.update(message.getBytes("UTF-8"));
 
       // actual verification against signature
-      signature = new String(Base64.getEncoder().encode(instance.sign()), Charset.forName("UTF-8"));
+      signature = new String(Base64.getEncoder().encode(sigInstance.sign()), Charset.forName("UTF-8"));
 
       log.info("signe the signature with result: {}", signature);
     } catch (Exception e) {
