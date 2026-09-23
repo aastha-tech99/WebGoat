@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -20,6 +21,12 @@ public class SerializationHelper {
   public static Object fromString(String s) throws IOException, ClassNotFoundException {
     byte[] data = Base64.getDecoder().decode(s);
     try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
+      ois.setObjectInputFilter(
+          ObjectInputFilter.Config.createFilter(
+              "org.dummy.insecure.framework.VulnerableTaskHolder;"
+                  + "java.lang.String;"
+                  + "java.time.**;"
+                  + "!*"));
       return ois.readObject();
     }
   }
