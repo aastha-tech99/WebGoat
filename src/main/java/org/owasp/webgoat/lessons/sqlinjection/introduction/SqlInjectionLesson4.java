@@ -37,7 +37,7 @@ public class SqlInjectionLesson4 implements AssignmentEndpoint {
 
   private static final Pattern ALTER_ADD_PATTERN =
       Pattern.compile(
-          "^\\s*ALTER\\s+TABLE\\s+(\\w+)\\s+ADD\\s+(\\w+)\\s+(\\w+(?:\\([^)]+\\))?)\\s*;?\\s*$",
+          "^\\s*ALTER\\s+TABLE\\s+(\\w+)\\s+ADD\\s+(?:COLUMN\\s+)?(\\w+)\\s+(\\w+(?:\\([^)]+\\))?)\\s*;?\\s*$",
           Pattern.CASE_INSENSITIVE);
 
   private static final Pattern TYPE_PATTERN =

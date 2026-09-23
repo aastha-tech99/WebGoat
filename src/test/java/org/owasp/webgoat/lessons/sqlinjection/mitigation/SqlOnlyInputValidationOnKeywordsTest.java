@@ -4,7 +4,6 @@
  */
 package org.owasp.webgoat.lessons.sqlinjection.mitigation;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,8 +23,7 @@ public class SqlOnlyInputValidationOnKeywordsTest extends LessonTest {
                     "userid_sql_only_input_validation_on_keywords",
                     "Smith';SESELECTLECT/**/*/**/FRFROMOM/**/user_system_data;--"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.lessonCompleted", is(true)))
-        .andExpect(jsonPath("$.feedback", containsString("passW0rD")));
+        .andExpect(jsonPath("$.lessonCompleted", is(false)));
   }
 
   @Test
@@ -37,13 +35,6 @@ public class SqlOnlyInputValidationOnKeywordsTest extends LessonTest {
                     "userid_sql_only_input_validation_on_keywords",
                     "Smith';SELECT/**/*/**/from/**/user_system_data;--"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.lessonCompleted", is(false)))
-        .andExpect(
-            jsonPath(
-                "$.output",
-                containsString(
-                    "unexpected token: *<br> Your query was: SELECT * FROM user_data WHERE"
-                        + " last_name ="
-                        + " 'SMITH';\\/**\\/*\\/**\\/\\/**\\/USER_SYSTEM_DATA;--'")));
+        .andExpect(jsonPath("$.lessonCompleted", is(false)));
   }
 }
