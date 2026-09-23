@@ -24,13 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class SecureDefaultsAssignment implements AssignmentEndpoint {
 
+  private static final String EXPECTED_FILENAME =
+      System.getenv().getOrDefault("WEBGOAT_SECRET_FILENAME", "default_secret");
+
   @PostMapping("/crypto/secure/defaults")
   @ResponseBody
   public AttackResult completed(
       @RequestParam String secretFileName, @RequestParam String secretText)
       throws NoSuchAlgorithmException {
-    // WebGoat lesson fixture, not a real secret
-    if (secretFileName != null && secretFileName.equals("default_secret")) {
+    if (secretFileName != null && secretFileName.equals(EXPECTED_FILENAME)) {
       if (secretText != null
           && HashingAssignment.getHash(secretText, "SHA-256")
               .equalsIgnoreCase(

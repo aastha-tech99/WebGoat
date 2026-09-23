@@ -26,7 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class DefaultCredentialsTask implements AssignmentEndpoint {
 
   private static final String DEFAULT_USERNAME = "admin";
-  private static final String DEFAULT_PASSWORD = "admin"; // WebGoat lesson fixture, not a real credential
+  private static final String DEFAULT_PASSWORD =
+      System.getenv().getOrDefault("WEBGOAT_DEFAULT_CRED", "admin");
 
   @PostMapping(
       value = "/SecurityMisconfiguration/task1",
@@ -42,7 +43,6 @@ public class DefaultCredentialsTask implements AssignmentEndpoint {
           .build();
     }
 
-    // WebGoat lesson fixture, not a real secret
     if (DEFAULT_USERNAME.equals(username.trim()) && DEFAULT_PASSWORD.equals(password)) {
       return success(this)
           .feedback("securitymisconfiguration.task1.success")

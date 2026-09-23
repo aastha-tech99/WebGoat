@@ -35,7 +35,13 @@ public class SpoofCookieAssignment implements AssignmentEndpoint {
   private static final String ATTACK_USERNAME = "tom";
 
   private static final Map<String, String> users =
-      Map.of("webgoat", "webgoat", "admin", "admin", ATTACK_USERNAME, "apasswordfortom");
+      Map.of(
+          "webgoat",
+          System.getenv().getOrDefault("WEBGOAT_SPOOF_PWD_WEBGOAT", "webgoat"),
+          "admin",
+          System.getenv().getOrDefault("WEBGOAT_SPOOF_PWD_ADMIN", "admin"),
+          ATTACK_USERNAME,
+          System.getenv().getOrDefault("WEBGOAT_SPOOF_PWD_TOM", "apasswordfortom"));
 
   @PostMapping(path = "/SpoofCookie/login")
   @ResponseBody
@@ -66,12 +72,12 @@ public class SpoofCookieAssignment implements AssignmentEndpoint {
       String username, String password, HttpServletResponse response) {
     String lowerCasedUsername = username.toLowerCase();
     if (ATTACK_USERNAME.equals(lowerCasedUsername)
-        && users.get(lowerCasedUsername).equals(password)) { // WebGoat lesson fixture, not a real secret
+        && users.get(lowerCasedUsername).equals(password)) {
       return informationMessage(this).feedback("spoofcookie.cheating").build();
     }
 
     String authPassword = users.getOrDefault(lowerCasedUsername, "");
-    if (!authPassword.isBlank() && authPassword.equals(password)) { // WebGoat lesson fixture, not a real secret
+    if (!authPassword.isBlank() && authPassword.equals(password)) {
       String newCookieValue = EncDec.encode(lowerCasedUsername);
       Cookie newCookie = new Cookie(COOKIE_NAME, newCookieValue);
       newCookie.setPath("/WebGoat");

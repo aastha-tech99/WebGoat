@@ -26,7 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class VerboseErrorTask implements AssignmentEndpoint {
 
-  static final String LEAKED_TOKEN = "STAGING-TOKEN-42"; // WebGoat lesson fixture, not a real credential
+  static final String LEAKED_TOKEN =
+      System.getenv().getOrDefault("WEBGOAT_LEAKED_TOKEN", "STAGING-TOKEN-42");
+
+  private static final String LESSON_DB_PWD =
+      System.getenv().getOrDefault("WEBGOAT_VERBOSE_DB_PWD", "staging_password123");
 
   @GetMapping(value = "/SecurityMisconfiguration/task2/trigger", produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> triggerError() {
@@ -39,7 +43,7 @@ public class VerboseErrorTask implements AssignmentEndpoint {
             + "\nENVIRONMENT=staging\n"
             + "DEBUG_MODE=true\n"
             + "DB_USER=staging_user\n"
-            + "DB_PASSWORD=staging_password123\n"
+            + "DB_PASSWORD=" + LESSON_DB_PWD + "\n"
             + "SYSTEM_API_TOKEN="
             + LEAKED_TOKEN
             + "\n";

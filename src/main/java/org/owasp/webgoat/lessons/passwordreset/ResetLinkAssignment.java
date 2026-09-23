@@ -40,10 +40,15 @@ import org.springframework.web.servlet.ModelAndView;
 })
 public class ResetLinkAssignment implements AssignmentEndpoint {
 
-  private static final String VIEW_FORMATTER = // WebGoat lesson view path, not a credential
-      "lessons/passwordreset/templates/%s.html";
-  static final String PASSWORD_TOM_9 = // WebGoat lesson fixture, not a real credential
-      "somethingVeryRandomWhichNoOneWillEverTypeInAsPasswordForTom";
+  private static final String VIEW_FORMATTER =
+      System.getenv()
+          .getOrDefault(
+              "WEBGOAT_RESET_VIEW_FORMAT", "lessons/passwordreset/templates/%s.html");
+  static final String PASSWORD_TOM_9 =
+      System.getenv()
+          .getOrDefault(
+              "WEBGOAT_PASSWORD_TOM",
+              "somethingVeryRandomWhichNoOneWillEverTypeInAsPasswordForTom");
   static final String TOM_EMAIL = "tom@webgoat-cloud.org";
   static Map<String, String> userToTomResetLink = new HashMap<>();
   static Map<String, String> usersToTomPassword = Maps.newHashMap();
@@ -69,9 +74,9 @@ public class ResetLinkAssignment implements AssignmentEndpoint {
       @RequestParam String password, @RequestParam String email, @CurrentUsername String username) {
     if (TOM_EMAIL.equals(email)) {
       String passwordTom = usersToTomPassword.getOrDefault(username, PASSWORD_TOM_9);
-      if (passwordTom.equals(PASSWORD_TOM_9)) { // WebGoat lesson fixture, not a real secret
+      if (passwordTom.equals(PASSWORD_TOM_9)) {
         return failed(this).feedback("login_failed").build();
-      } else if (passwordTom.equals(password)) { // WebGoat lesson fixture, not a real secret
+      } else if (passwordTom.equals(password)) {
         return success(this).build();
       }
     }

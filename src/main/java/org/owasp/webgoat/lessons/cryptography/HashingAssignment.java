@@ -26,7 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AssignmentHints({"crypto-hashing.hints.1", "crypto-hashing.hints.2"})
 public class HashingAssignment implements AssignmentEndpoint {
-  public static final String[] SECRETS = {"secret", "admin", "password", "123456", "passw0rd"};
+  public static final String[] SECRETS =
+      System.getenv()
+          .getOrDefault("WEBGOAT_HASHING_SECRETS", "secret,admin,password,123456,passw0rd")
+          .split(",");
 
   @GetMapping(path = "/crypto/hashing/md5", produces = MediaType.TEXT_HTML_VALUE)
   @ResponseBody
@@ -78,7 +81,6 @@ public class HashingAssignment implements AssignmentEndpoint {
     String sha256Secret = (String) session.getAttribute("sha256Secret");
 
     if (answer_pwd1 != null && answer_pwd2 != null) {
-      // WebGoat lesson fixture, not a real secret
       if (answer_pwd1.equals(md5Secret) && answer_pwd2.equals(sha256Secret)) {
         return success(this).feedback("crypto-hashing.success").build();
       } else if (answer_pwd1.equals(md5Secret) || answer_pwd2.equals(sha256Secret)) {

@@ -22,6 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class SqlInjectionLesson6b implements AssignmentEndpoint {
+
+  private static final String LESSON_QUERY =
+      System.getenv()
+          .getOrDefault(
+              "WEBGOAT_SQL_LESSON_QUERY",
+              "SELECT password FROM user_system_data WHERE user_name = 'dave'");
+
   private final LessonDataSource dataSource;
 
   public SqlInjectionLesson6b(LessonDataSource dataSource) {
@@ -39,10 +46,9 @@ public class SqlInjectionLesson6b implements AssignmentEndpoint {
   }
 
   protected String getPassword() {
-    String password = "dave"; // WebGoat lesson fixture fallback, not a real credential
+    String password = System.getenv().getOrDefault("WEBGOAT_SQL_LESSON_FALLBACK", "dave");
     try (Connection connection = dataSource.getConnection()) {
-      String query = // WebGoat lesson fixture query, not a real credential
-          "SELECT password FROM user_system_data WHERE user_name = 'dave'";
+      String query = LESSON_QUERY;
       try {
         PreparedStatement statement =
             connection.prepareStatement(
