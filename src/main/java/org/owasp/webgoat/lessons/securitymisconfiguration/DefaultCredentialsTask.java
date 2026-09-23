@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class DefaultCredentialsTask implements AssignmentEndpoint {
 
+  // WebGoat lesson placeholders — not production credentials
   private static final String DEFAULT_USERNAME = "admin";
   private static final String DEFAULT_PASSWORD = "admin";
 

@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class User {
 
   private String username = "";
-  private String password = "";
+  private String password = ""; // Not a credential — empty default for XML bean
 
   public String getPassword() {
     return password;

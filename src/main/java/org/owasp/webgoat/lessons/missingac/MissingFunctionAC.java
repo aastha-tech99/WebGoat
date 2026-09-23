@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MissingFunctionAC extends Lesson {
 
+  // WebGoat lesson placeholders — not production credentials
   public static final String PASSWORD_SALT_SIMPLE = "DeliberatelyInsecure1234";
   public static final String PASSWORD_SALT_ADMIN = "DeliberatelyInsecure1235";
 
