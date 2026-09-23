@@ -42,7 +42,10 @@ public class SqlInjectionLesson5b implements AssignmentEndpoint {
   }
 
   protected AttackResult injectableQuery(String login_count, String accountName) {
-    String queryString = "SELECT * From user_data WHERE Login_Count = ? and userid= " + accountName;
+    String queryString = "SELECT * From user_data WHERE Login_Count = ? and userid= ?";
+    String displayQuery =
+        "SELECT * From user_data WHERE Login_Count = " + login_count + " and userid= "
+            + accountName;
     try (Connection connection = dataSource.getConnection()) {
       PreparedStatement query =
           connection.prepareStatement(
@@ -58,11 +61,12 @@ public class SqlInjectionLesson5b implements AssignmentEndpoint {
                     + login_count
                     + " to a number"
                     + "<br> Your query was: "
-                    + queryString.replace("?", login_count))
+                    + displayQuery)
             .build();
       }
 
       query.setInt(1, count);
+      query.setString(2, accountName);
       // String query = "SELECT * FROM user_data WHERE Login_Count = " + login_count + " and userid
       // = " + accountName, ;
       try {
@@ -79,7 +83,7 @@ public class SqlInjectionLesson5b implements AssignmentEndpoint {
           if (results.getRow() >= 6) {
             return success(this)
                 .feedback("sql-injection.5b.success")
-                .output("Your query was: " + queryString.replace("?", login_count))
+                .output("Your query was: " + displayQuery)
                 .feedbackArgs(output.toString())
                 .build();
           } else {
@@ -87,21 +91,21 @@ public class SqlInjectionLesson5b implements AssignmentEndpoint {
                 .output(
                     output.toString()
                         + "<br> Your query was: "
-                        + queryString.replace("?", login_count))
+                        + displayQuery)
                 .build();
           }
 
         } else {
           return failed(this)
               .feedback("sql-injection.5b.no.results")
-              .output("Your query was: " + queryString.replace("?", login_count))
+              .output("Your query was: " + displayQuery)
               .build();
         }
       } catch (SQLException sqle) {
 
         return failed(this)
             .output(
-                sqle.getMessage() + "<br> Your query was: " + queryString.replace("?", login_count))
+                sqle.getMessage() + "<br> Your query was: " + displayQuery)
             .build();
       }
     } catch (Exception e) {
@@ -111,7 +115,7 @@ public class SqlInjectionLesson5b implements AssignmentEndpoint {
                   + " : "
                   + e.getMessage()
                   + "<br> Your query was: "
-                  + queryString.replace("?", login_count))
+                  + displayQuery)
           .build();
     }
   }
