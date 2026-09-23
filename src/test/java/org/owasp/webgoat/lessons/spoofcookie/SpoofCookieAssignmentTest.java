@@ -62,6 +62,7 @@ class SpoofCookieAssignmentTest extends LessonTest {
     result.andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(false)));
     result.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     result.andExpect(cookie().value(COOKIE_NAME, not(emptyString())));
+    result.andExpect(cookie().httpOnly(COOKIE_NAME, true));
   }
 
   @ParameterizedTest
@@ -156,7 +157,8 @@ class SpoofCookieAssignmentTest extends LessonTest {
         .andExpect(status().isOk())
         .andExpect(cookie().maxAge(COOKIE_NAME, 0))
         .andExpect(cookie().value(COOKIE_NAME, ""))
-        .andExpect(cookie().secure(COOKIE_NAME, true));
+        .andExpect(cookie().secure(COOKIE_NAME, true))
+        .andExpect(cookie().httpOnly(COOKIE_NAME, true));
   }
 
   private static Stream<Arguments> providedCookieValues() {
