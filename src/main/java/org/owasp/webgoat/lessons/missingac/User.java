@@ -4,6 +4,7 @@
  */
 package org.owasp.webgoat.lessons.missingac;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,9 @@ import lombok.NoArgsConstructor;
 public class User {
 
   private String username;
+
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String password;
+
   private boolean admin;
 }
