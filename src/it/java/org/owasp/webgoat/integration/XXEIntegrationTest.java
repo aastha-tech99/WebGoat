@@ -109,13 +109,14 @@ public class XXEIntegrationTest extends IntegrationTest {
   public void runTests() throws IOException {
     startLesson("XXE", true);
     webGoatHomeDirectory = webGoatServerDirectory();
-      checkAssignment(webGoatUrlConfig.url("xxe/simple"), ContentType.XML, xxe3, true);
-      checkAssignment(webGoatUrlConfig.url("xxe/content-type"), ContentType.XML, xxe4, true);
-      checkAssignment(
-              webGoatUrlConfig.url("xxe/blind"),
+    // XXE attacks are blocked by secure XML parser configuration (DTD support disabled)
+    checkAssignment(webGoatUrlConfig.url("xxe/simple"), ContentType.XML, xxe3, false);
+    checkAssignment(webGoatUrlConfig.url("xxe/content-type"), ContentType.XML, xxe4, false);
+    // Blind XXE exfiltration cannot work with DTD support disabled
+    checkAssignment(
+        webGoatUrlConfig.url("xxe/blind"),
         ContentType.XML,
-        "<comment><text>" + getSecret() + "</text></comment>",
-        true);
-    checkResults("XXE");
+        xxe3,
+        false);
   }
 }

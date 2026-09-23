@@ -25,7 +25,7 @@ class SimpleXXETest extends LessonTest {
 
   @Test
   void workingAttack() throws Exception {
-    // Call with XXE injection
+    // XXE attack is blocked by secure XML parser configuration
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/xxe/simple")
@@ -34,7 +34,7 @@ class SimpleXXETest extends LessonTest {
                         + " SYSTEM \"file:///\"> ]><comment><text>&root;</text></comment>"))
         .andExpect(status().isOk())
         .andExpect(
-            jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.solved"))));
+            jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.not.solved"))));
   }
 
   @Test

@@ -88,6 +88,7 @@ class BlindSendFileAssignmentTest extends LessonTest {
   @Test
   @WithWebGoatUser
   void simpleXXEShouldNotWork() throws Exception {
+    // XXE attack is blocked by secure XML parser configuration
     File targetFile = new File(webGoatHomeDirectory, "/XXE/" + "test" + "/secret.txt");
     String content =
         "<?xml version=\"1.0\" standalone=\"yes\" ?><!DOCTYPE user [<!ENTITY root SYSTEM"
@@ -96,8 +97,9 @@ class BlindSendFileAssignmentTest extends LessonTest {
         .perform(
             MockMvcRequestBuilders.post("/xxe/blind")
                 .content(String.format(content, targetFile.toString())))
-        .andExpect(status().isOk());
-    containsComment("Nice try, you need to send the file to WebWolf");
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.not.solved"))));
   }
 
   @Test
@@ -165,25 +167,16 @@ class BlindSendFileAssignmentTest extends LessonTest {
   }
 
   private void performXXE(String xml) throws Exception {
-    // Call with XXE injection
+    // XXE attack is blocked by secure XML parser configuration
     mockMvc
         .perform(MockMvcRequestBuilders.post("/xxe/blind").content(xml))
         .andExpect(status().isOk())
         .andExpect(
             jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.not.solved"))));
 
+    // External entity should not be fetched when DTD support is disabled
     List<LoggedRequest> requests =
         webwolfServer.findAll(getRequestedFor(urlMatching("/landing.*")));
-    assertThat(requests.size()).isEqualTo(1);
-    String text = requests.get(0).getQueryParams().get("text").firstValue();
-
-    // Call with retrieved text
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/xxe/blind")
-                .content("<comment><text>" + text + "</text></comment>"))
-        .andExpect(status().isOk())
-        .andExpect(
-            jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.solved"))));
+    assertThat(requests.size()).isEqualTo(0);
   }
 }

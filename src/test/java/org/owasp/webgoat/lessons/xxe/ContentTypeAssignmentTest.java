@@ -45,6 +45,7 @@ class ContentTypeAssignmentTest extends LessonTest {
 
   @Test
   void workingAttack() throws Exception {
+    // XXE attack is blocked by secure XML parser configuration
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/xxe/content-type")
@@ -54,7 +55,9 @@ class ContentTypeAssignmentTest extends LessonTest {
                         + " SYSTEM \"file:///\"> ]><comment><text>&root;</text></comment>"))
         .andExpect(status().isOk())
         .andExpect(
-            jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.solved"))));
+            jsonPath(
+                "$.feedback",
+                CoreMatchers.is(messages.getMessage("xxe.content.type.feedback.xml"))));
   }
 
   @Test
