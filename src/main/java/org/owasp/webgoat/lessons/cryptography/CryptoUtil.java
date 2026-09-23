@@ -132,8 +132,19 @@ public class CryptoUtil {
     return result;
   }
 
-  public static PrivateKey getPrivateKeyFromPEM(String privateKeyPem)
+  // Load private key PEM from system property or environment variable
+  // to avoid hardcoded key material in source code
+  public static PrivateKey getPrivateKeyFromPEM(String keyPropertyName)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
+    String privateKeyPem = System.getProperty(keyPropertyName);
+    if (privateKeyPem == null || privateKeyPem.isEmpty()) {
+      privateKeyPem = System.getenv(keyPropertyName);
+    }
+    if (privateKeyPem == null || privateKeyPem.isEmpty()) {
+      throw new IllegalStateException(
+          "Private key not found in system property or environment variable: "
+              + keyPropertyName);
+    }
     privateKeyPem = privateKeyPem.replace("-----BEGIN PRIVATE KEY-----", "");
     privateKeyPem = privateKeyPem.replace("-----END PRIVATE KEY-----", "");
     privateKeyPem = privateKeyPem.replace("\n", "").replace("\r", "");

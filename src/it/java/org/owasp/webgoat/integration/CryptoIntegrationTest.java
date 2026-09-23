@@ -130,16 +130,21 @@ public class CryptoIntegrationTest extends IntegrationTest {
             .then()
             .extract()
             .asString();
-    PrivateKey privateKey = CryptoUtil.getPrivateKeyFromPEM(privatePEM);
+    System.setProperty("test.crypto.privatekey", privatePEM);
+    try {
+      PrivateKey privateKey = CryptoUtil.getPrivateKeyFromPEM("test.crypto.privatekey");
 
-    RSAPrivateKey privk = (RSAPrivateKey) privateKey;
-    String modulus = DatatypeConverter.printHexBinary(privk.getModulus().toByteArray());
-    String signature = CryptoUtil.signMessage(modulus, privateKey);
-    Map<String, Object> params = new HashMap<>();
-    params.clear();
-    params.put("modulus", modulus);
-    params.put("signature", signature);
+      RSAPrivateKey privk = (RSAPrivateKey) privateKey;
+      String modulus = DatatypeConverter.printHexBinary(privk.getModulus().toByteArray());
+      String signature = CryptoUtil.signMessage(modulus, privateKey);
+      Map<String, Object> params = new HashMap<>();
+      params.clear();
+      params.put("modulus", modulus);
+      params.put("signature", signature);
       checkAssignment(webGoatUrlConfig.url("crypto/signing/verify"), params, true);
+    } finally {
+      System.clearProperty("test.crypto.privatekey");
+    }
   }
 
   private void checkAssignmentDefaults() {

@@ -22,14 +22,17 @@ public class CryptoUtilTest {
     try {
       KeyPair keyPair = CryptoUtil.generateKeyPair();
       RSAPublicKey rsaPubKey = (RSAPublicKey) keyPair.getPublic();
-      PrivateKey privateKey =
-          CryptoUtil.getPrivateKeyFromPEM(CryptoUtil.getPrivateKeyInPEM(keyPair));
+      System.setProperty(
+          "test.crypto.privatekey", CryptoUtil.getPrivateKeyInPEM(keyPair));
+      PrivateKey privateKey = CryptoUtil.getPrivateKeyFromPEM("test.crypto.privatekey");
       String modulus = DatatypeConverter.printHexBinary(rsaPubKey.getModulus().toByteArray());
       String signature = CryptoUtil.signMessage(modulus, privateKey);
       log.debug("public exponent {}", rsaPubKey.getPublicExponent());
       assertThat(CryptoUtil.verifyAssignment(modulus, signature, keyPair.getPublic())).isTrue();
     } catch (Exception e) {
       fail("Signing failed");
+    } finally {
+      System.clearProperty("test.crypto.privatekey");
     }
   }
 }
