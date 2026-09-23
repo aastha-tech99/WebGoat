@@ -54,6 +54,19 @@ public class ShopEndpointTest extends LessonTest {
   }
 
   @Test
+  public void couponUsageLimitExceeded() throws Exception {
+    // First use should return the valid discount
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/clientSideFiltering/challenge-store/coupons/webgoat"))
+        .andExpect(jsonPath("$.discount", CoreMatchers.is(25)));
+    // Second use of the same coupon should return zero discount
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/clientSideFiltering/challenge-store/coupons/webgoat"))
+        .andExpect(jsonPath("$.code", CoreMatchers.is("webgoat")))
+        .andExpect(jsonPath("$.discount", CoreMatchers.is(0)));
+  }
+
+  @Test
   public void fetchAllTheCouponsShouldContainGetItForFree() throws Exception {
     mockMvc
         .perform(MockMvcRequestBuilders.get("/clientSideFiltering/challenge-store/coupons"))

@@ -36,11 +36,19 @@ $(document).ready(function () {
         }
         calculate();
     })
+    var couponUsageCount = {};
+    var maxCouponUses = 1;
     $(".checkoutCode").on("blur", function () {
         var checkoutCode = $(".checkoutCode").val();
+        if (couponUsageCount[checkoutCode] && couponUsageCount[checkoutCode] >= maxCouponUses) {
+            $('#discount').text(0);
+            calculate();
+            return;
+        }
         $.get("clientSideFiltering/challenge-store/coupons/" + checkoutCode, function (result, status) {
             var discount = result.discount;
             if (discount > 0) {
+                couponUsageCount[checkoutCode] = (couponUsageCount[checkoutCode] || 0) + 1;
                 $('#discount').text(discount);
                 calculate();
             } else {
