@@ -51,7 +51,8 @@ public class SqlInjectionLesson9Test extends LessonTest {
                 .param("name", "Smith")
                 .param(
                     "auth_tan",
-                    "3SL99A'; UPDATE employees SET salary = 9999 WHERE last_name = 'Smith"))
+                    "3SL99A'; UPDATE employees SET salary = 9999 WHERE last_name = 'Smith'"
+                        + " -- "))
         .andExpect(status().isOk())
         .andExpect(jsonPath("lessonCompleted", is(false)))
         .andExpect(jsonPath("$.feedback", is(messages.getMessage("sql-injection.9.one"))));
@@ -89,7 +90,8 @@ public class SqlInjectionLesson9Test extends LessonTest {
                 .param("name", "Smith")
                 .param(
                     "auth_tan",
-                    "3SL99A'; UPDATE employees SET salary = '300000' WHERE last_name = 'Smith"))
+                    "3SL99A'; UPDATE employees SET salary = '300000' WHERE last_name = 'Smith'"
+                        + " -- "))
         .andExpect(status().isOk())
         .andExpect(jsonPath("lessonCompleted", is(true)))
         .andExpect(jsonPath("$.feedback", is(messages.getMessage("sql-injection.9.success"))))

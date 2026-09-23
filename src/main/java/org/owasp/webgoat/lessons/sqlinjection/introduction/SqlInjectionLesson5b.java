@@ -42,7 +42,10 @@ public class SqlInjectionLesson5b implements AssignmentEndpoint {
   }
 
   protected AttackResult injectableQuery(String login_count, String accountName) {
-    String queryString = "SELECT * From user_data WHERE Login_Count = ? and userid= " + accountName;
+    String queryString =
+        "SELECT * From user_data WHERE Login_Count = ? and userid= "
+            + accountName
+            + " FETCH FIRST 100 ROWS ONLY";
     try (Connection connection = dataSource.getConnection()) {
       PreparedStatement query =
           connection.prepareStatement(

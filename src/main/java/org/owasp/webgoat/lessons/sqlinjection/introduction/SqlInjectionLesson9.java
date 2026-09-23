@@ -52,7 +52,7 @@ public class SqlInjectionLesson9 implements AssignmentEndpoint {
             + name
             + "' AND auth_tan = '"
             + auth_tan
-            + "'";
+            + "' FETCH FIRST 100 ROWS ONLY";
     try (Connection connection = dataSource.getConnection()) {
       // V2019_09_26_7__employees.sql
       int oldMaxSalary = this.getMaxSalary(connection);
@@ -112,7 +112,7 @@ public class SqlInjectionLesson9 implements AssignmentEndpoint {
   }
 
   private ResultSet getEmployeesDataOrderBySalaryDesc(Connection connection) throws SQLException {
-    String query = "SELECT * FROM employees ORDER BY salary DESC";
+    String query = "SELECT * FROM employees ORDER BY salary DESC FETCH FIRST 100 ROWS ONLY";
     Statement statement = connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
     return statement.executeQuery(query);
   }

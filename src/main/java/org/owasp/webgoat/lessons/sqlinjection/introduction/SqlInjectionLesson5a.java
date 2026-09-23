@@ -26,7 +26,8 @@ public class SqlInjectionLesson5a implements AssignmentEndpoint {
           + " '1'</span> always evaluates to true (The string ending literal for '1 is closed by"
           + " the query itself, so you should not inject it). So the injected query basically looks"
           + " like this: <span style=\"font-style: italic\">SELECT * FROM user_data WHERE"
-          + " (first_name = 'John' and last_name = '') or (TRUE)</span>, which will always evaluate"
+          + " (first_name = 'John' and last_name = '') or (TRUE) FETCH FIRST 100 ROWS"
+          + " ONLY</span>, which will always evaluate"
           + " to true, no matter what came before it.";
   private final LessonDataSource dataSource;
 
@@ -45,7 +46,9 @@ public class SqlInjectionLesson5a implements AssignmentEndpoint {
     String query = "";
     try (Connection connection = dataSource.getConnection()) {
       query =
-          "SELECT * FROM user_data WHERE first_name = 'John' and last_name = '" + accountName + "'";
+          "SELECT * FROM user_data WHERE first_name = 'John' and last_name = '"
+              + accountName
+              + "' FETCH FIRST 100 ROWS ONLY";
       try (Statement statement =
           connection.createStatement(
               ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {

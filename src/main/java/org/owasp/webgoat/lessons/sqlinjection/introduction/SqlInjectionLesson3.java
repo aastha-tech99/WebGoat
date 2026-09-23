@@ -46,7 +46,8 @@ public class SqlInjectionLesson3 implements AssignmentEndpoint {
             connection.createStatement(TYPE_SCROLL_INSENSITIVE, CONCUR_READ_ONLY);
         statement.executeUpdate(query);
         ResultSet results =
-            checkStatement.executeQuery("SELECT * FROM employees WHERE last_name='Barnett';");
+            checkStatement.executeQuery(
+                "SELECT * FROM employees WHERE last_name='Barnett' FETCH FIRST 100 ROWS ONLY");
         StringBuilder output = new StringBuilder();
         // user completes lesson if the department of Tobi Barnett now is 'Sales'
         results.first();

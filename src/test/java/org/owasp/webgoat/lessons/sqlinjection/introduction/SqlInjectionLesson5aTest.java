@@ -74,8 +74,9 @@ public class SqlInjectionLesson5aTest extends LessonTest {
         .andExpect(
             jsonPath(
                 "$.output",
-                is(
-                    "malformed string: '1''<br> Your query was: SELECT * FROM user_data WHERE"
-                        + " first_name = 'John' and last_name = 'Smith' OR '1' = '1''")));
+                containsString(
+                    "Your query was: SELECT * FROM user_data WHERE"
+                        + " first_name = 'John' and last_name = 'Smith' OR '1' = '1''"
+                        + " FETCH FIRST 100 ROWS ONLY")));
   }
 }

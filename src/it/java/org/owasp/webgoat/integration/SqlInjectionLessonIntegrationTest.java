@@ -27,7 +27,7 @@ public class SqlInjectionLessonIntegrationTest extends IntegrationTest {
 
   public static final String sql_12_a = "Smith";
   public static final String sql_12_b =
-      "3SL99A' ; update employees set salary= '100000' where last_name='Smith";
+      "3SL99A' ; update employees set salary= '100000' where last_name='Smith' -- ";
 
   public static final String sql_13 = "%update% '; drop table access_log ; --'";
 

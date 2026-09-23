@@ -51,7 +51,7 @@ public class SqlInjectionLesson8 implements AssignmentEndpoint {
             + name
             + "' AND auth_tan = '"
             + auth_tan
-            + "'";
+            + "' FETCH FIRST 100 ROWS ONLY";
 
     try (Connection connection = dataSource.getConnection()) {
       try {

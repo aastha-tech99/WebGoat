@@ -81,7 +81,7 @@ public class SqlInjectionLesson5 implements AssignmentEndpoint {
       var stmt =
           connection.prepareStatement(
               "SELECT * FROM INFORMATION_SCHEMA.TABLE_PRIVILEGES WHERE TABLE_NAME = ? AND GRANTEE ="
-                  + " ?");
+                  + " ? FETCH FIRST 100 ROWS ONLY");
       stmt.setString(1, "GRANT_RIGHTS");
       stmt.setString(2, "UNAUTHORIZED_USER");
       var resultSet = stmt.executeQuery();
