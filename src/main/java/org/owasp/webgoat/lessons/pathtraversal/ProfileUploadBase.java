@@ -48,6 +48,10 @@ public class ProfileUploadBase implements AssignmentEndpoint {
     File uploadDirectory = cleanupAndCreateDirectoryForUser(username);
 
     try {
+      // Validate input: reject null bytes and excessively long filenames
+      if (fullName.indexOf('\0') >= 0 || fullName.length() > 255) {
+        return failed(this).feedback("path-traversal-profile-empty-name").build();
+      }
       var requestedFile = new File(uploadDirectory, fullName);
 
       // Detect path traversal: check if resolved path escapes the upload directory

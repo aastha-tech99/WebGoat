@@ -96,6 +96,15 @@ public class ProfileUploadRetrieval implements AssignmentEndpoint {
   public ResponseEntity<?> getProfilePicture(HttpServletRequest request) {
     try {
       var id = request.getParameter("id");
+      // Validate input: reject null bytes, path separators, and traversal sequences
+      if (id != null
+          && (id.indexOf('\0') >= 0
+              || id.contains("..")
+              || id.contains("/")
+              || id.contains("\\")
+              || id.length() > 255)) {
+        return ResponseEntity.badRequest().body("Invalid input");
+      }
       var catPicture =
           new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + ".jpg");
       if (!catPicture.getCanonicalPath()
