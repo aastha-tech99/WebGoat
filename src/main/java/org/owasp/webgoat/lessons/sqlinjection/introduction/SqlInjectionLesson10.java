@@ -53,6 +53,7 @@ public class SqlInjectionLesson10 implements AssignmentEndpoint {
         Statement statement =
             connection.createStatement(
                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        statement.setMaxRows(100);
         ResultSet results = statement.executeQuery(query);
 
         if (results.getStatement() != null) {
@@ -97,6 +98,7 @@ public class SqlInjectionLesson10 implements AssignmentEndpoint {
     try {
       Statement stmt =
           connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+      stmt.setMaxRows(1);
       ResultSet results = stmt.executeQuery("SELECT * FROM access_log");
       int cols = results.getMetaData().getColumnCount();
       return (cols > 0);

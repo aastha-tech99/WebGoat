@@ -58,6 +58,7 @@ public class SqlInjectionLesson8 implements AssignmentEndpoint {
         Statement statement =
             connection.createStatement(
                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        statement.setMaxRows(100);
         log(connection, query);
         ResultSet results = statement.executeQuery(query);
 
