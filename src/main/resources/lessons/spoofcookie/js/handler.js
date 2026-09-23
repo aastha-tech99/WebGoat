@@ -5,8 +5,18 @@ function getCookieValue() {
 	return null;
 }
 
+function hasCookieConsent() {
+	try {
+		return localStorage.getItem('cookieConsent') === 'true';
+	} catch (e) {
+		return false;
+	}
+}
+
 function cleanup() {
-	document.cookie = 'spoof_auth=;Max-Age=0;secure=true';
+	if (hasCookieConsent()) {
+		document.cookie = 'spoof_auth=;Max-Age=0;secure=true';
+	}
 	$('#spoof_username').removeAttr('disabled');
 	$('#spoof_password').removeAttr('disabled');
 	$('#spoof_submit').removeAttr('disabled');
