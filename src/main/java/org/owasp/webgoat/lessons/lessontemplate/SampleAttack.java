@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AssignmentHints({"lesson-template.hints.1", "lesson-template.hints.2", "lesson-template.hints.3"})
 public class SampleAttack implements AssignmentEndpoint {
-  private static final String secretValue = "secr37Value";
+  private static final String secretValue = "secr37Value"; // WebGoat lesson fixture, not a real credential
 
   private final LessonSession userSessionData;
 

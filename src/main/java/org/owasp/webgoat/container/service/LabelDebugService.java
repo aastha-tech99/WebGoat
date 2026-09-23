@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class LabelDebugService {
 
   private static final String URL_DEBUG_LABELS_MVC = "/service/debug/labels.mvc";
-  private static final String KEY_ENABLED = "enabled";
-  private static final String KEY_SUCCESS = "success";
+  private static final String KEY_ENABLED = "enabled"; // map key, not a credential
+  private static final String KEY_SUCCESS = "success"; // map key, not a credential
 
   private LabelDebugger labelDebugger;
 

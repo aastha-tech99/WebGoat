@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MissingFunctionAC extends Lesson {
 
-  public static final String PASSWORD_SALT_SIMPLE = "DeliberatelyInsecure1234";
-  public static final String PASSWORD_SALT_ADMIN = "DeliberatelyInsecure1235";
+  public static final String PASSWORD_SALT_SIMPLE = "DeliberatelyInsecure1234"; // WebGoat lesson fixture, not a real credential
+  public static final String PASSWORD_SALT_ADMIN = "DeliberatelyInsecure1235"; // WebGoat lesson fixture, not a real credential
 
   @Override
   public Category getDefaultCategory() {
