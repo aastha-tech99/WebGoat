@@ -57,6 +57,7 @@ public class SpoofCookieAssignment implements AssignmentEndpoint {
   public void cleanup(HttpServletResponse response) {
     Cookie cookie = new Cookie(COOKIE_NAME, "");
     cookie.setMaxAge(0);
+    cookie.setSecure(true);
     response.addCookie(cookie);
   }
 
