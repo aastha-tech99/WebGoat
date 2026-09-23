@@ -45,3 +45,7 @@ pipeline:
                     advanced:
                       log:
                         level: info
+                    resources:
+                      limits:
+                        memory: 4Gi
+                        cpu: 2
