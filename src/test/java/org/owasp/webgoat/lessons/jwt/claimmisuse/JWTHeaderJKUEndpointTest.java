@@ -21,30 +21,45 @@ import java.util.HashMap;
 import java.util.Map;
 import org.jose4j.jwk.JsonWebKeySet;
 import org.jose4j.jwk.RsaJsonWebKey;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.owasp.webgoat.container.plugins.LessonTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 class JWTHeaderJKUEndpointTest extends LessonTest {
   private KeyPair keyPair;
-  private WireMockServer webwolfServer;
-  private int port;
+
+  private static final WireMockServer webwolfServer;
+  private static final int port;
+
+  static {
+    webwolfServer = new WireMockServer(options().dynamicPort());
+    webwolfServer.start();
+    port = webwolfServer.port();
+  }
+
+  @DynamicPropertySource
+  static void overrideWebWolfUrl(DynamicPropertyRegistry registry) {
+    registry.add("webwolf.url", () -> "http://localhost:" + port);
+  }
+
+  @AfterAll
+  static void stopWireMock() {
+    if (webwolfServer.isRunning()) {
+      webwolfServer.stop();
+    }
+  }
 
   @BeforeEach
   public void setup() throws Exception {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-
-    setupWebWolf();
+    webwolfServer.resetAll();
     this.keyPair = generateRsaKey();
-  }
-
-  private void setupWebWolf() {
-    this.webwolfServer = new WireMockServer(options().dynamicPort());
-    webwolfServer.start();
-    this.port = webwolfServer.port();
   }
 
   private KeyPair generateRsaKey() throws Exception {

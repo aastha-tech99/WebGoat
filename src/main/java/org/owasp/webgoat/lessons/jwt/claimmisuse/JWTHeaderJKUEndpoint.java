@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
 import org.owasp.webgoat.container.assignments.AttackResult;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,6 +38,13 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 })
 public class JWTHeaderJKUEndpoint implements AssignmentEndpoint {
 
+  private static final String ALLOWED_ALGORITHM = "RS256";
+  private final String trustedJkuBaseUrl;
+
+  public JWTHeaderJKUEndpoint(@Value("${webwolf.url}") String webWolfUrl) {
+    this.trustedJkuBaseUrl = webWolfUrl;
+  }
+
   @PostMapping("/JWT/jku/follow/{user}")
   public @ResponseBody String follow(@PathVariable("user") String user) {
     if ("Jerry".equals(user)) {
@@ -53,13 +61,24 @@ public class JWTHeaderJKUEndpoint implements AssignmentEndpoint {
     } else {
       try {
         var decodedJWT = JWT.decode(token);
-        var jku = decodedJWT.getHeaderClaim("jku");
-        var jwkProvider = new JwkProviderBuilder(new URL(jku.asString())).build();
+
+        // Reject tokens with unexpected algorithms (e.g. "none")
+        if (!ALLOWED_ALGORITHM.equals(decodedJWT.getAlgorithm())) {
+          return failed(this).feedback("jwt-invalid-token").build();
+        }
+
+        // Validate JKU URL against trusted base URL to prevent key injection
+        var jkuUrl = decodedJWT.getHeaderClaim("jku").asString();
+        if (jkuUrl == null || !jkuUrl.startsWith(trustedJkuBaseUrl)) {
+          return failed(this).feedback("jwt-invalid-token").build();
+        }
+
+        var jwkProvider = new JwkProviderBuilder(new URL(jkuUrl)).build();
         var jwk = jwkProvider.get(decodedJWT.getKeyId());
         var algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey());
-        JWT.require(algorithm).build().verify(decodedJWT);
+        var verifiedJwt = JWT.require(algorithm).build().verify(token);
 
-        var username = decodedJWT.getClaims().get("username").asString();
+        var username = verifiedJwt.getClaims().get("username").asString();
         if ("Jerry".equals(username)) {
           return failed(this).feedback("jwt-final-jerry-account").build();
         }
