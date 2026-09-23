@@ -68,7 +68,17 @@ public class WebSecurityConfig {
             })
         .logout(logout -> logout.deleteCookies("JSESSIONID").invalidateHttpSession(true))
         .csrf(csrf -> csrf.disable())
-        .headers(headers -> headers.disable())
+        .headers(
+            headers ->
+                headers
+                    .frameOptions(frame -> frame.sameOrigin())
+                    .contentSecurityPolicy(
+                        csp ->
+                            csp.policyDirectives(
+                                "default-src 'self'; script-src 'self' 'unsafe-inline'"
+                                    + " 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src"
+                                    + " 'self' data:; font-src 'self'; frame-ancestors 'self';"
+                                    + " form-action 'self'")))
         .exceptionHandling(
             handling ->
                 handling.authenticationEntryPoint(new AjaxAuthenticationEntryPoint("/login")))
