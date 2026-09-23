@@ -101,6 +101,11 @@ public class ProfileUploadRetrieval implements AssignmentEndpoint {
     }
     try {
       var id = request.getParameter("id");
+      // Validate decoded parameter: reject path traversal characters
+      if (id != null && (id.contains("..") || id.contains("/") || id.contains("\\"))) {
+        return ResponseEntity.badRequest()
+            .body("Invalid file identifier: path traversal characters not allowed");
+      }
       var catPicture =
           new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + ".jpg");
 
