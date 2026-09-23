@@ -57,4 +57,12 @@ COPY --from=jre /jre ${JAVA_HOME}
 
 RUN chmod +x /config/start_webgoat.sh /config/start_zap.sh
 
+RUN \
+    useradd -ms /bin/bash webgoat && \
+    chown -R webgoat:webgoat /config && \
+    chgrp -R 0 /config && \
+    chmod -R g=u /config
+
+USER webgoat
+
 WORKDIR /config/Desktop
