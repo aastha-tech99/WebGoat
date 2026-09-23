@@ -10,6 +10,7 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.succes
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Random;
 import javax.xml.bind.DatatypeConverter;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
@@ -40,8 +41,10 @@ public class HashingAssignment implements AssignmentEndpoint {
       md.update(secret.getBytes());
       byte[] digest = md.digest();
       md5Hash = DatatypeConverter.printHexBinary(digest).toUpperCase();
-      request.getSession().setAttribute("md5Hash", md5Hash);
-      request.getSession().setAttribute("md5Secret", secret);
+      if (md5Hash.matches("[0-9A-F]+") && Arrays.asList(SECRETS).contains(secret)) {
+        request.getSession().setAttribute("md5Hash", md5Hash);
+        request.getSession().setAttribute("md5Secret", secret);
+      }
     }
     return md5Hash;
   }
@@ -54,8 +57,10 @@ public class HashingAssignment implements AssignmentEndpoint {
     if (sha256 == null) {
       String secret = SECRETS[new Random().nextInt(SECRETS.length)];
       sha256 = getHash(secret, "SHA-256");
-      request.getSession().setAttribute("sha256Hash", sha256);
-      request.getSession().setAttribute("sha256Secret", secret);
+      if (sha256.matches("[0-9A-F]+") && Arrays.asList(SECRETS).contains(secret)) {
+        request.getSession().setAttribute("sha256Hash", sha256);
+        request.getSession().setAttribute("sha256Secret", secret);
+      }
     }
     return sha256;
   }
