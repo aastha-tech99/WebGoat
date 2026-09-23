@@ -42,8 +42,8 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class JWTRefreshEndpoint implements AssignmentEndpoint {
 
-  public static final String PASSWORD = "bm5nhSkxCXZkKRy4";
-  private static final String JWT_PASSWORD = "bm5n3SkxCX4kKRy4";
+  public static final String PASSWORD = "bm5nhSkxCXZkKRy4"; // placeholder lesson credential (not a real secret)
+  private static final String JWT_PASSWORD = "bm5n3SkxCX4kKRy4"; // placeholder lesson signing key (not a real secret)
   private static final List<String> validRefreshTokens = new ArrayList<>();
 
   @PostMapping(

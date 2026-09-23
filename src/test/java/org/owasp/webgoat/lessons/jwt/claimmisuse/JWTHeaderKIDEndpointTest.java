@@ -65,7 +65,7 @@ public class JWTHeaderKIDEndpointTest extends LessonTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/JWT/kid/delete")
-                .param("token", ".eyJ1c2VybmFtZSI6IlRvbSJ9.")
+                .param("token", ".eyJ1c2VybmFtZSI6IlRvbSJ9.") // placeholder test JWT (not a real secret)
                 .content(""))
         .andExpect(status().isOk())
         .andExpect(

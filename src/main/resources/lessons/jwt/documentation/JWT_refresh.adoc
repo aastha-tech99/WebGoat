@@ -29,7 +29,7 @@ The server returns:
     "token_type":"bearer",
     "access_token":"XXXX.YYYY.ZZZZ",
     "expires_in":10,
-    "refresh_token":"4a9a0b1eac1a34201b3c5659944e8b7"
+    "refresh_token":"4a9a0b1eac1a34201b3c5659944e8b7"  // placeholder example token (not a real secret)
 }
 ```
 
