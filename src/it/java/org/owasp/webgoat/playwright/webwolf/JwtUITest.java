@@ -27,6 +27,7 @@ class JwtUITest extends PlaywrightTest {
   void shouldDecodeJwt(Browser browser) {
     var page = Authentication.sylvester(browser);
     var secretKey = "test";
+    // Well-known jwt.io example token (secret "test", dummy claims) — not a real credential
     var jwt =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 
