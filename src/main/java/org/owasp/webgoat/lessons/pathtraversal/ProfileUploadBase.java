@@ -48,16 +48,30 @@ public class ProfileUploadBase implements AssignmentEndpoint {
     File uploadDirectory = cleanupAndCreateDirectoryForUser(username);
 
     try {
-      var uploadedFile = new File(uploadDirectory, fullName);
-      uploadedFile.createNewFile();
-      FileCopyUtils.copy(file.getBytes(), uploadedFile);
+      var requestedFile = new File(uploadDirectory, fullName);
 
-      if (attemptWasMade(uploadDirectory, uploadedFile)) {
-        return solvedIt(uploadedFile);
+      // Detect path traversal: check if resolved path escapes the upload directory
+      if (attemptWasMade(uploadDirectory, requestedFile)) {
+        // Traversal detected - write safely within directory using only the base filename
+        var safeName = requestedFile.getCanonicalFile().getName();
+        var safeFile = new File(uploadDirectory, safeName);
+        safeFile.createNewFile();
+        FileCopyUtils.copy(file.getBytes(), safeFile);
+        return solvedIt(requestedFile);
       }
+
+      // No traversal - validate canonical path stays within upload directory
+      var canonicalDir = uploadDirectory.getCanonicalPath();
+      var resolvedFile = requestedFile.getCanonicalFile();
+      if (!resolvedFile.getPath().startsWith(canonicalDir + File.separator)) {
+        return failed(this).feedback("path-traversal-profile-attempt").feedbackArgs(fullName).build();
+      }
+
+      resolvedFile.createNewFile();
+      FileCopyUtils.copy(file.getBytes(), resolvedFile);
       return informationMessage(this)
           .feedback("path-traversal-profile-updated")
-          .feedbackArgs(uploadedFile.getAbsoluteFile())
+          .feedbackArgs(resolvedFile.getAbsoluteFile())
           .build();
 
     } catch (IOException e) {
@@ -67,7 +81,12 @@ public class ProfileUploadBase implements AssignmentEndpoint {
 
   @SneakyThrows
   protected File cleanupAndCreateDirectoryForUser(String username) {
-    var uploadDirectory = new File(this.webGoatHomeDirectory, "/PathTraversal/" + username);
+    var parentDir = new File(this.webGoatHomeDirectory, "/PathTraversal");
+    var uploadDirectory = new File(parentDir, username);
+    // Validate resolved path stays within the expected parent directory
+    if (!uploadDirectory.toPath().normalize().startsWith(parentDir.toPath().normalize())) {
+      throw new IllegalArgumentException("Invalid username for directory creation");
+    }
     if (uploadDirectory.exists()) {
       FileSystemUtils.deleteRecursively(uploadDirectory);
     }
@@ -100,7 +119,12 @@ public class ProfileUploadBase implements AssignmentEndpoint {
   }
 
   protected byte[] getProfilePictureAsBase64(String username) {
-    var profilePictureDirectory = new File(this.webGoatHomeDirectory, "/PathTraversal/" + username);
+    var parentDir = new File(this.webGoatHomeDirectory, "/PathTraversal");
+    var profilePictureDirectory = new File(parentDir, username);
+    // Validate resolved path stays within the expected parent directory
+    if (!profilePictureDirectory.toPath().normalize().startsWith(parentDir.toPath().normalize())) {
+      return defaultImage();
+    }
     var profileDirectoryFiles = profilePictureDirectory.listFiles();
 
     if (profileDirectoryFiles != null && profileDirectoryFiles.length > 0) {
@@ -109,8 +133,18 @@ public class ProfileUploadBase implements AssignmentEndpoint {
           .findFirst()
           .map(
               file -> {
-                try (var inputStream = new FileInputStream(profileDirectoryFiles[0])) {
-                  return Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(inputStream));
+                try {
+                  var targetFile = profileDirectoryFiles[0];
+                  // Validate file stays within the expected directory
+                  if (!targetFile
+                      .getCanonicalPath()
+                      .startsWith(
+                          profilePictureDirectory.getCanonicalPath() + File.separator)) {
+                    return defaultImage();
+                  }
+                  try (var inputStream = new FileInputStream(targetFile)) {
+                    return Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(inputStream));
+                  }
                 } catch (IOException e) {
                   return defaultImage();
                 }

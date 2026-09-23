@@ -64,7 +64,8 @@ public class ProfileZipSlip extends ProfileUploadBase {
 
   @SneakyThrows
   private AttackResult processZipUpload(MultipartFile file, String username) {
-    var tmpZipDirectory = Files.createTempDirectory(username);
+    var safePrefix = username.replaceAll("[^a-zA-Z0-9._-]", "_");
+    var tmpZipDirectory = Files.createTempDirectory(safePrefix);
     cleanupAndCreateDirectoryForUser(username);
     var currentImage = getProfilePictureAsBase64(username);
 

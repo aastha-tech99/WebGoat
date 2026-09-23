@@ -47,7 +47,7 @@ public class MavenWrapperDownloader {
 
     public static void main(String args[]) {
         System.out.println("- Downloader started");
-        File baseDirectory = new File(args[0]);
+        File baseDirectory = new File(args[0]).toPath().normalize().toFile();
         System.out.println("- Using base directory: " + baseDirectory.getAbsolutePath());
 
         // If the maven-wrapper.properties exists, read it and check if it contains a custom
@@ -57,6 +57,12 @@ public class MavenWrapperDownloader {
         if(mavenWrapperPropertyFile.exists()) {
             FileInputStream mavenWrapperPropertyFileInputStream = null;
             try {
+                // Validate that property file stays within base directory
+                if (!mavenWrapperPropertyFile.toPath().normalize()
+                        .startsWith(baseDirectory.toPath().normalize())) {
+                    System.out.println("- ERROR: property file path is outside base directory");
+                    return;
+                }
                 mavenWrapperPropertyFileInputStream = new FileInputStream(mavenWrapperPropertyFile);
                 Properties mavenWrapperProperties = new Properties();
                 mavenWrapperProperties.load(mavenWrapperPropertyFileInputStream);

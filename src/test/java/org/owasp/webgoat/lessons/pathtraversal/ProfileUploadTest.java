@@ -69,13 +69,8 @@ class ProfileUploadTest extends LessonTest {
             MockMvcRequestBuilders.multipart("/PathTraversal/profile-upload")
                 .file(profilePicture)
                 .param("fullName", ".." + File.separator + "test"))
-        .andExpect(
-            jsonPath(
-                "$.output",
-                CoreMatchers.anyOf(
-                    CoreMatchers.containsString("Is a directory"),
-                    CoreMatchers.containsString("..\\\\" + "test"))))
-        .andExpect(status().is(200));
+        .andExpect(status().is(200))
+        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(true)));
   }
 
   @Test
