@@ -48,7 +48,15 @@ public class ProfileUploadBase implements AssignmentEndpoint {
     File uploadDirectory = cleanupAndCreateDirectoryForUser(username);
 
     try {
-      var uploadedFile = new File(uploadDirectory, fullName);
+      var uploadedFile =
+          new File(uploadDirectory, fullName).toPath().normalize().toFile();
+      if (!uploadedFile.toPath().startsWith(uploadDirectory.toPath().normalize())) {
+        return failed(this)
+            .attemptWasMade()
+            .feedback("path-traversal-profile-attempt")
+            .feedbackArgs(fullName)
+            .build();
+      }
       uploadedFile.createNewFile();
       FileCopyUtils.copy(file.getBytes(), uploadedFile);
 
@@ -67,7 +75,15 @@ public class ProfileUploadBase implements AssignmentEndpoint {
 
   @SneakyThrows
   protected File cleanupAndCreateDirectoryForUser(String username) {
-    var uploadDirectory = new File(this.webGoatHomeDirectory, "/PathTraversal/" + username);
+    var baseDir = new File(this.webGoatHomeDirectory, "/PathTraversal/").toPath().normalize();
+    var uploadDirectory =
+        new File(this.webGoatHomeDirectory, "/PathTraversal/" + username)
+            .toPath()
+            .normalize()
+            .toFile();
+    if (!uploadDirectory.toPath().startsWith(baseDir)) {
+      throw new IllegalArgumentException("Invalid path for username");
+    }
     if (uploadDirectory.exists()) {
       FileSystemUtils.deleteRecursively(uploadDirectory);
     }
@@ -100,7 +116,15 @@ public class ProfileUploadBase implements AssignmentEndpoint {
   }
 
   protected byte[] getProfilePictureAsBase64(String username) {
-    var profilePictureDirectory = new File(this.webGoatHomeDirectory, "/PathTraversal/" + username);
+    var basePath = new File(this.webGoatHomeDirectory, "/PathTraversal/").toPath().normalize();
+    var profilePictureDirectory =
+        new File(this.webGoatHomeDirectory, "/PathTraversal/" + username)
+            .toPath()
+            .normalize()
+            .toFile();
+    if (!profilePictureDirectory.toPath().startsWith(basePath)) {
+      return defaultImage();
+    }
     var profileDirectoryFiles = profilePictureDirectory.listFiles();
 
     if (profileDirectoryFiles != null && profileDirectoryFiles.length > 0) {
@@ -109,7 +133,12 @@ public class ProfileUploadBase implements AssignmentEndpoint {
           .findFirst()
           .map(
               file -> {
-                try (var inputStream = new FileInputStream(profileDirectoryFiles[0])) {
+                var safeFile =
+                    profileDirectoryFiles[0].toPath().normalize().toFile();
+                if (!safeFile.toPath().startsWith(profilePictureDirectory.toPath())) {
+                  return defaultImage();
+                }
+                try (var inputStream = new FileInputStream(safeFile)) {
                   return Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(inputStream));
                 } catch (IOException e) {
                   return defaultImage();
