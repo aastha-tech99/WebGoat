@@ -5,7 +5,10 @@
 package org.owasp.webgoat.lessons.sqlinjection.mitigation;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasLength;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,6 +47,7 @@ public class SqlOnlyInputValidationOnKeywordsTest extends LessonTest {
                 containsString(
                     "unexpected token: *<br> Your query was: SELECT * FROM user_data WHERE"
                         + " last_name ="
-                        + " 'SMITH';\\/**\\/*\\/**\\/\\/**\\/USER_SYSTEM_DATA;--'")));
+                        + " 'SMITH';\\/**\\/*\\/**\\/\\/**\\/USER_SYSTEM_DATA;--'")))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 }

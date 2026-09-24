@@ -52,7 +52,11 @@ public class SecurityMisconfigurationLessonPage extends LessonPage {
   }
 
   public String extractTokenFromDebug() {
-    Matcher matcher = TOKEN_PATTERN.matcher(debugOutput());
+    String output = debugOutput();
+    if (output.length() > 10_000) {
+      output = output.substring(0, 10_000);
+    }
+    Matcher matcher = TOKEN_PATTERN.matcher(output);
     if (matcher.find()) {
       return matcher.group(1);
     }
@@ -73,6 +77,9 @@ public class SecurityMisconfigurationLessonPage extends LessonPage {
   }
 
   public String extractApiKey(String json) {
+    if (json.length() > 10_000) {
+      json = json.substring(0, 10_000);
+    }
     Matcher matcher = API_KEY_PATTERN.matcher(json);
     if (matcher.find()) {
       return matcher.group(1);

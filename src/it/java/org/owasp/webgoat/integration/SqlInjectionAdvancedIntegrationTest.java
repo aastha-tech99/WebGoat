@@ -4,8 +4,12 @@
  */
 package org.owasp.webgoat.integration;
 
+import static io.restassured.RestAssured.given;
+
 import java.util.HashMap;
 import java.util.Map;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 public class SqlInjectionAdvancedIntegrationTest extends IntegrationTest {
@@ -29,6 +33,21 @@ public class SqlInjectionAdvancedIntegrationTest extends IntegrationTest {
     params.clear();
     params.put("userid_6a", "'; SELECT * FROM user_system_data;--");
       checkAssignment(webGoatUrlConfig.url("SqlInjectionAdvanced/attack6a"), params, true);
+
+    // Verify response body is bounded (no unbounded result sets)
+    String responseBody =
+        given()
+            .when()
+            .relaxedHTTPSValidation()
+            .cookie("JSESSIONID", getWebGoatCookie())
+            .formParams(params)
+            .post(webGoatUrlConfig.url("SqlInjectionAdvanced/attack6a"))
+            .then()
+            .statusCode(200)
+            .extract()
+            .body()
+            .asString();
+    MatcherAssert.assertThat(responseBody.length(), Matchers.lessThan(50000));
 
     params.clear();
     params.put(

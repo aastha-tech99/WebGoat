@@ -4,6 +4,9 @@
  */
 package org.owasp.webgoat.lessons.sqlinjection.introduction;
 
+import static org.hamcrest.Matchers.hasLength;
+import static org.hamcrest.Matchers.lessThan;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -55,6 +58,7 @@ public class SqlInjectionLesson5Test extends LessonTest {
             MockMvcRequestBuilders.post("/SqlInjection/attack5")
                 .param("query", "select * from grant_rights"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(false)));
+        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(false)))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 }

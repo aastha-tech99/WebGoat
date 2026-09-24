@@ -5,7 +5,10 @@
 package org.owasp.webgoat.lessons.sqlinjection.introduction;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasLength;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,7 +68,8 @@ public class SqlInjectionLesson6aTest extends LessonTest {
                 .param("userid_6a", "Smith'; SELECT * from user_system_data; --"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.lessonCompleted", is(true)))
-        .andExpect(jsonPath("$.feedback", containsString("passW0rD")));
+        .andExpect(jsonPath("$.feedback", containsString("passW0rD")))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 
   @Test
@@ -87,6 +91,7 @@ public class SqlInjectionLesson6aTest extends LessonTest {
                 .param("userid_6a", "S'; Select * from user_system_data; --"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.lessonCompleted", is(true)))
-        .andExpect(jsonPath("$.feedback", containsString("UNION")));
+        .andExpect(jsonPath("$.feedback", containsString("UNION")))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 }

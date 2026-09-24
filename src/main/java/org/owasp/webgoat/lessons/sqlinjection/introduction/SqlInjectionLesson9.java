@@ -61,6 +61,7 @@ public class SqlInjectionLesson9 implements AssignmentEndpoint {
       connection.setAutoCommit(false);
       // do injectable query
       Statement statement = connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
+      statement.setMaxRows(100);
       SqlInjectionLesson8.log(connection, queryInjection);
       statement.execute(queryInjection);
       // check new sum of salaries other employees and new salaries of John
@@ -91,6 +92,7 @@ public class SqlInjectionLesson9 implements AssignmentEndpoint {
 
   private int getSqlInt(Connection connection, String query) throws SQLException {
     Statement statement = connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
+    statement.setMaxRows(100);
     ResultSet results = statement.executeQuery(query);
     results.first();
     return results.getInt(1);
@@ -114,6 +116,7 @@ public class SqlInjectionLesson9 implements AssignmentEndpoint {
   private ResultSet getEmployeesDataOrderBySalaryDesc(Connection connection) throws SQLException {
     String query = "SELECT * FROM employees ORDER BY salary DESC";
     Statement statement = connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
+    statement.setMaxRows(100);
     return statement.executeQuery(query);
   }
 }

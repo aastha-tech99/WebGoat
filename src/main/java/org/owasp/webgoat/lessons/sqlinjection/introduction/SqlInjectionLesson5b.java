@@ -47,6 +47,7 @@ public class SqlInjectionLesson5b implements AssignmentEndpoint {
       PreparedStatement query =
           connection.prepareStatement(
               queryString, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+      query.setMaxRows(100);
 
       int count = 0;
       try {
