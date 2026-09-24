@@ -4,6 +4,7 @@
  */
 package org.owasp.webgoat.lessons.authbypass;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
