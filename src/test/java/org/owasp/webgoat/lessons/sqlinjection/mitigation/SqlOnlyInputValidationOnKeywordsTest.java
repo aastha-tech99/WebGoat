@@ -28,7 +28,8 @@ public class SqlOnlyInputValidationOnKeywordsTest extends LessonTest {
                     "Smith';SESELECTLECT/**/*/**/FRFROMOM/**/user_system_data;--"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.lessonCompleted", is(true)))
-        .andExpect(jsonPath("$.feedback", containsString("passW0rD")));
+        .andExpect(jsonPath("$.feedback", containsString("passW0rD")))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 
   @Test

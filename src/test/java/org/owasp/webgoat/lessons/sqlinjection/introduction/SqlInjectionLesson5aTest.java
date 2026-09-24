@@ -30,7 +30,8 @@ public class SqlInjectionLesson5aTest extends LessonTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("lessonCompleted", is(false)))
         .andExpect(jsonPath("$.feedback", is(messages.getMessage("assignment.not.solved"))))
-        .andExpect(jsonPath("$.output", containsString("<p>USERID, FIRST_NAME")));
+        .andExpect(jsonPath("$.output", containsString("<p>USERID, FIRST_NAME")))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 
   @Disabled
@@ -59,7 +60,8 @@ public class SqlInjectionLesson5aTest extends LessonTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("lessonCompleted", is(true)))
         .andExpect(jsonPath("$.feedback", containsString("You have succeed")))
-        .andExpect(jsonPath("$.output").exists());
+        .andExpect(jsonPath("$.output").exists())
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 
   @Test
