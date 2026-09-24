@@ -11,8 +11,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -24,14 +25,18 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class CommentsCache {
 
-  static class Comments extends ArrayList<Comment> {
+  static class Comments extends CopyOnWriteArrayList<Comment> {
     void sort() {
-      sort(Comparator.comparing(Comment::getDateTime).reversed());
+      var sorted = new ArrayList<>(this);
+      sorted.sort(Comparator.comparing(Comment::getDateTime).reversed());
+      // atomic bulk replace
+      clear();
+      addAll(sorted);
     }
   }
 
   private static final Comments comments = new Comments();
-  private static final Map<WebGoatUser, Comments> userComments = new HashMap<>();
+  private static final Map<WebGoatUser, Comments> userComments = new ConcurrentHashMap<>();
   private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss");
 
   public CommentsCache() {
@@ -88,9 +93,7 @@ public class CommentsCache {
     if (visibleForAllUsers) {
       comments.add(comment);
     } else {
-      var comments = userComments.getOrDefault(user.getUsername(), new Comments());
-      comments.add(comment);
-      userComments.put(user, comments);
+      userComments.computeIfAbsent(user, k -> new Comments()).add(comment);
     }
   }
 

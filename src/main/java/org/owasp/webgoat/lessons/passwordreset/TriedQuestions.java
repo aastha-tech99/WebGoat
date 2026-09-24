@@ -4,8 +4,8 @@
  */
 package org.owasp.webgoat.lessons.passwordreset;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
@@ -13,7 +13,7 @@ import org.springframework.web.context.annotation.SessionScope;
 @SessionScope
 public class TriedQuestions {
 
-  private Set<String> answeredQuestions = new HashSet<>();
+  private final Set<String> answeredQuestions = ConcurrentHashMap.newKeySet();
 
   public void incr(String question) {
     answeredQuestions.add(question);

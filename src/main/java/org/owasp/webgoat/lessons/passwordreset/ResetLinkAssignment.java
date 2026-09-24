@@ -8,11 +8,10 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 import static org.springframework.util.StringUtils.hasText;
 
-import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.owasp.webgoat.container.CurrentUsername;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
@@ -44,9 +43,9 @@ public class ResetLinkAssignment implements AssignmentEndpoint {
   static final String PASSWORD_TOM_9 =
       "somethingVeryRandomWhichNoOneWillEverTypeInAsPasswordForTom";
   static final String TOM_EMAIL = "tom@webgoat-cloud.org";
-  static Map<String, String> userToTomResetLink = new HashMap<>();
-  static Map<String, String> usersToTomPassword = Maps.newHashMap();
-  static List<String> resetLinks = new ArrayList<>();
+  static Map<String, String> userToTomResetLink = new ConcurrentHashMap<>();
+  static Map<String, String> usersToTomPassword = new ConcurrentHashMap<>();
+  static List<String> resetLinks = new CopyOnWriteArrayList<>();
 
   static final String TEMPLATE =
       """

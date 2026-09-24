@@ -4,22 +4,23 @@
  */
 package org.owasp.webgoat.lessons.authbypass;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Created by appsec on 7/18/17. */
 public class AccountVerificationHelper {
 
   // simulating database storage of verification credentials
   private static final Integer verifyUserId = 1223445;
-  private static final Map<String, String> userSecQuestions = new HashMap<>();
+  private static final Map<String, String> userSecQuestions = new ConcurrentHashMap<>();
 
   static {
     userSecQuestions.put("secQuestion0", "Dr. Watson");
     userSecQuestions.put("secQuestion1", "Baker Street");
   }
 
-  private static final Map<Integer, Map<String, String>> secQuestionStore = new HashMap<>();
+  private static final Map<Integer, Map<String, String>> secQuestionStore =
+      new ConcurrentHashMap<>();
 
   static {
     secQuestionStore.put(verifyUserId, userSecQuestions);

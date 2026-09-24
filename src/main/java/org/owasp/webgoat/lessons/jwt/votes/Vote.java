@@ -45,12 +45,12 @@ public class Vote {
     this.average = calculateStars(totalVotes);
   }
 
-  public void incrementNumberOfVotes(int totalVotes) {
+  public synchronized void incrementNumberOfVotes(int totalVotes) {
     this.numberOfVotes = this.numberOfVotes + 1;
     this.average = calculateStars(totalVotes);
   }
 
-  public void reset() {
+  public synchronized void reset() {
     this.numberOfVotes = 1;
     this.average = 1;
   }

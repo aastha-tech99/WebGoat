@@ -5,8 +5,8 @@
 package org.owasp.webgoat.lessons.challenges.challenge8;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class Assignment8 implements AssignmentEndpoint {
 
-  private static final Map<Integer, Integer> votes = new HashMap<>();
+  private static final Map<Integer, Integer> votes = new ConcurrentHashMap<>();
 
   static {
     votes.put(1, 400);
@@ -48,8 +48,7 @@ public class Assignment8 implements AssignmentEndpoint {
           Map.of("error", true, "message", "Sorry but you need to login first in order to vote");
       return ResponseEntity.status(200).body(json);
     }
-    Integer allVotesForStar = votes.getOrDefault(nrOfStars, 0);
-    votes.put(nrOfStars, allVotesForStar + 1);
+    votes.merge(nrOfStars, 1, Integer::sum);
     return ResponseEntity.ok()
         .header("X-FlagController", "Thanks for voting, your flag is: " + flags.getFlag(8))
         .build();

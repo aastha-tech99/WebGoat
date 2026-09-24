@@ -85,7 +85,7 @@ class HijackSessionAuthenticationProviderTest {
   void testMaxSessions() {
     for (int i = 0; i <= HijackSessionAuthenticationProvider.MAX_SESSIONS + 1; i++) {
       provider.authorizedUserAutoLogin();
-      provider.addSession(null);
+      provider.addSession("session-" + i);
     }
 
     assertThat(provider.getSessionsSize(), is(HijackSessionAuthenticationProvider.MAX_SESSIONS));
