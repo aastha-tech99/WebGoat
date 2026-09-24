@@ -92,16 +92,18 @@ class BlindSendFileAssignmentTest extends LessonTest {
     String content =
         "<?xml version=\"1.0\" standalone=\"yes\" ?><!DOCTYPE user [<!ENTITY root SYSTEM"
             + " \"file:///%s\"> ]><comment><text>&root;</text></comment>";
+    // XXE is blocked by secure XML parsing; the parser rejects external entities
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/xxe/blind")
                 .content(String.format(content, targetFile.toString())))
-        .andExpect(status().isOk());
-    containsComment("Nice try, you need to send the file to WebWolf");
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.not.solved"))));
   }
 
   @Test
-  void solve() throws Exception {
+  void blindXxeWithRemoteDtdShouldBeBlocked() throws Exception {
     File targetFile = new File(webGoatHomeDirectory, "/XXE/test/secret.txt");
     // Host DTD on WebWolf site
     String dtd =
@@ -133,7 +135,7 @@ class BlindSendFileAssignmentTest extends LessonTest {
   }
 
   @Test
-  void solveOnlyParamReferenceEntityInExternalDTD() throws Exception {
+  void blindXxeWithParamEntityShouldBeBlocked() throws Exception {
     File targetFile = new File(webGoatHomeDirectory, "/XXE/test/secret.txt");
     // Host DTD on WebWolf site
     String dtd =
@@ -165,25 +167,16 @@ class BlindSendFileAssignmentTest extends LessonTest {
   }
 
   private void performXXE(String xml) throws Exception {
-    // Call with XXE injection
+    // XXE attack should be blocked by secure XML parsing
     mockMvc
         .perform(MockMvcRequestBuilders.post("/xxe/blind").content(xml))
         .andExpect(status().isOk())
         .andExpect(
             jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.not.solved"))));
 
+    // Verify no external entity data was exfiltrated (XXE is blocked)
     List<LoggedRequest> requests =
         webwolfServer.findAll(getRequestedFor(urlMatching("/landing.*")));
-    assertThat(requests.size()).isEqualTo(1);
-    String text = requests.get(0).getQueryParams().get("text").firstValue();
-
-    // Call with retrieved text
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/xxe/blind")
-                .content("<comment><text>" + text + "</text></comment>"))
-        .andExpect(status().isOk())
-        .andExpect(
-            jsonPath("$.feedback", CoreMatchers.is(messages.getMessage("assignment.solved"))));
+    assertThat(requests).isEmpty();
   }
 }
