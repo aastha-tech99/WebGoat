@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.owasp.webgoat.lessons.challenges.SolutionConstants;
 import org.springframework.http.HttpStatus;
 
 public class ChallengeIntegrationTest extends IntegrationTest {
@@ -33,7 +34,7 @@ public class ChallengeIntegrationTest extends IntegrationTest {
     Map<String, Object> params = new HashMap<>();
     params.clear();
     params.put("username", "admin");
-    params.put("password", "!!webgoat_admin_1234!!".replace("1234", pincode));
+    params.put("password", SolutionConstants.PASSWORD.replace("1234", pincode));
 
     checkAssignment(webGoatUrlConfig.url("challenge/1"), params, true);
     String result =
