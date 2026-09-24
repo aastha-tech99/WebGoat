@@ -17,6 +17,7 @@ import io.jsonwebtoken.Jwts;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import org.jose4j.jwk.JsonWebKeySet;
@@ -62,6 +63,28 @@ class JWTHeaderJKUEndpointTest extends LessonTest {
         .perform(MockMvcRequestBuilders.post("/JWT/jku/delete").param("token", token).content(""))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.lessonCompleted", is(true)));
+  }
+
+  @Test
+  @DisplayName("Token with 'none' algorithm should be rejected")
+  void shouldRejectNoneAlgorithm() throws Exception {
+    String header =
+        Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString("{\"alg\":\"none\",\"typ\":\"JWT\"}".getBytes());
+    String payload =
+        Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString("{\"username\":\"Tom\"}".getBytes());
+    String noneToken = header + "." + payload + ".";
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/JWT/jku/delete")
+                .param("token", noneToken)
+                .content(""))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.lessonCompleted", is(false)));
   }
 
   @Test
