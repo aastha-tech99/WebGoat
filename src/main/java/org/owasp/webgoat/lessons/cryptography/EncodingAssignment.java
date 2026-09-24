@@ -49,7 +49,10 @@ public class EncodingAssignment implements AssignmentEndpoint {
       HttpServletRequest request,
       @RequestParam String answer_user,
       @RequestParam String answer_pwd) {
-    String basicAuth = (String) request.getSession().getAttribute("basicAuth");
+    String basicAuth;
+    synchronized (request.getSession()) {
+      basicAuth = (String) request.getSession().getAttribute("basicAuth");
+    }
     if (basicAuth != null
         && answer_user != null
         && answer_pwd != null

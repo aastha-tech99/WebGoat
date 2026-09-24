@@ -9,7 +9,6 @@ import jakarta.xml.bind.JAXBException;
 import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,11 +26,7 @@ public class CommentsCache {
 
   static class Comments extends CopyOnWriteArrayList<Comment> {
     void sort() {
-      var sorted = new ArrayList<>(this);
-      sorted.sort(Comparator.comparing(Comment::getDateTime).reversed());
-      // atomic bulk replace
-      clear();
-      addAll(sorted);
+      super.sort(Comparator.comparing(Comment::getDateTime).reversed());
     }
   }
 

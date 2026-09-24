@@ -68,8 +68,12 @@ public class HashingAssignment implements AssignmentEndpoint {
       @RequestParam String answer_pwd1,
       @RequestParam String answer_pwd2) {
 
-    String md5Secret = (String) request.getSession().getAttribute("md5Secret");
-    String sha256Secret = (String) request.getSession().getAttribute("sha256Secret");
+    String md5Secret;
+    String sha256Secret;
+    synchronized (request.getSession()) {
+      md5Secret = (String) request.getSession().getAttribute("md5Secret");
+      sha256Secret = (String) request.getSession().getAttribute("sha256Secret");
+    }
 
     if (answer_pwd1 != null && answer_pwd2 != null) {
       if (answer_pwd1.equals(md5Secret) && answer_pwd2.equals(sha256Secret)) {

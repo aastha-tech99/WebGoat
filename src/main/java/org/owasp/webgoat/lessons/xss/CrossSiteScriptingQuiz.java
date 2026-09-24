@@ -66,7 +66,7 @@ public class CrossSiteScriptingQuiz implements AssignmentEndpoint {
 
   @GetMapping("/CrossSiteScripting/quiz")
   @ResponseBody
-  public boolean[] getResults() {
+  public synchronized boolean[] getResults() {
     return this.guesses.clone();
   }
 }
