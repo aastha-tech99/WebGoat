@@ -57,4 +57,10 @@ COPY --from=jre /jre ${JAVA_HOME}
 
 RUN chmod +x /config/start_webgoat.sh /config/start_zap.sh
 
+# Create non-root user and set file permissions
+RUN groupadd -r webgoat && useradd -r -g webgoat -d /config -s /bin/bash webgoat \
+    && chown -R webgoat:webgoat /config
+
+USER webgoat
+
 WORKDIR /config/Desktop
