@@ -27,9 +27,7 @@ public class LessonConnectionInvocationHandler implements InvocationHandler {
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     var authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null && authentication.getPrincipal() instanceof WebGoatUser user) {
-      try (var statement = targetConnection.createStatement()) {
-        statement.execute("SET SCHEMA \"" + user.getUsername() + "\"");
-      }
+      targetConnection.setSchema(user.getUsername());
     }
     try {
       return method.invoke(targetConnection, args);
