@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.hamcrest.CoreMatchers;
@@ -29,6 +31,17 @@ public class JWTRefreshEndpointTest extends LessonTest {
   @BeforeEach
   void setup() {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+  }
+
+  private String createExpiredTomToken() {
+    return Jwts.builder()
+        .setIssuedAt(Date.from(Instant.parse("2018-05-12T12:30:11Z")))
+        .setExpiration(Date.from(Instant.parse("2018-05-13T12:30:11Z")))
+        .claim("admin", "false")
+        .claim("user", "Tom")
+        .signWith(
+            io.jsonwebtoken.SignatureAlgorithm.HS512, JWTRefreshEndpoint.JWT_PASSWORD)
+        .compact();
   }
 
   @Test
@@ -51,8 +64,7 @@ public class JWTRefreshEndpointTest extends LessonTest {
 
     // Now create a new refresh token for Tom based on Toms old access token and send the refresh
     // token of Jerry
-    String accessTokenTom =
-        "eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1MjYxMzE0MTEsImV4cCI6MTUyNjIxNzgxMSwiYWRtaW4iOiJmYWxzZSIsInVzZXIiOiJUb20ifQ.DCoaq9zQkyDH25EcVWKcdbyVfUL4c9D4jRvsqOqvi9iAd4QuqmKcchfbU8FNzeBNF9tLeFXHZLU4yRkq-bjm7Q";
+    String accessTokenTom = createExpiredTomToken();
     Map<String, Object> refreshJson = new HashMap<>();
     refreshJson.put("refresh_token", refreshToken);
     result =
@@ -97,8 +109,7 @@ public class JWTRefreshEndpointTest extends LessonTest {
 
   @Test
   void checkoutWithTomsTokenFromAccessLogShouldFail() throws Exception {
-    String accessTokenTom =
-        "eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1MjYxMzE0MTEsImV4cCI6MTUyNjIxNzgxMSwiYWRtaW4iOiJmYWxzZSIsInVzZXIiOiJUb20ifQ.DCoaq9zQkyDH25EcVWKcdbyVfUL4c9D4jRvsqOqvi9iAd4QuqmKcchfbU8FNzeBNF9tLeFXHZLU4yRkq-bjm7Q";
+    String accessTokenTom = createExpiredTomToken();
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/JWT/refresh/checkout")
@@ -110,7 +121,11 @@ public class JWTRefreshEndpointTest extends LessonTest {
   @Test
   void checkoutWitRandomTokenShouldFail() throws Exception {
     String accessTokenTom =
-        "eyJhbGciOiJIUzUxMiJ9.eyJpLXQiOjE1MjYxMzE0MTEsImV4cCI6MTUyNjIxNzgxMSwiYWRtaW4iOiJmYWxzZSIsInVzZXIiOiJUb20ifQ.DCoaq9zQkyDH25EcVWKcdbyVfUL4c9D4jRvsqOqvi9iAd4QuqmKcchfbU8FNzeBNF9tLeFXHZLU4yRkq-bjm7Q";
+        Jwts.builder()
+            .claim("admin", "false")
+            .claim("user", "Tom")
+            .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, "wrong_key")
+            .compact();
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/JWT/refresh/checkout")
