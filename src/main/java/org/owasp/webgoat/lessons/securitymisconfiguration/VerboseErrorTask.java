@@ -26,7 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class VerboseErrorTask implements AssignmentEndpoint {
 
-  static final String LEAKED_TOKEN = "STAGING-TOKEN-42";
+  static final String LEAKED_TOKEN =
+      System.getenv().getOrDefault("VERBOSE_ERROR_TOKEN", "change-me");
 
   @GetMapping(value = "/SecurityMisconfiguration/task2/trigger", produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> triggerError() {

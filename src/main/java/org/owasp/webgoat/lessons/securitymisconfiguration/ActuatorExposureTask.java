@@ -25,7 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class ActuatorExposureTask implements AssignmentEndpoint {
 
-  static final String LEAKED_API_KEY = "INTERNAL-API-KEY-987";
+  static final String LEAKED_API_KEY =
+      System.getenv().getOrDefault("ACTUATOR_API_KEY", "change-me");
 
   @GetMapping(
       value = "/SecurityMisconfiguration/task3/actuator/env",
