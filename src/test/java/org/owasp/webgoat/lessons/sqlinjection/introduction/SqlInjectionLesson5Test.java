@@ -4,6 +4,9 @@
  */
 package org.owasp.webgoat.lessons.sqlinjection.introduction;
 
+import static org.hamcrest.Matchers.hasLength;
+import static org.hamcrest.Matchers.lessThan;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,7 +38,8 @@ public class SqlInjectionLesson5Test extends LessonTest {
             MockMvcRequestBuilders.post("/SqlInjection/attack5")
                 .param("query", "grant select on grant_rights to unauthorized_user"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(true)));
+        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(true)))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 
   @Test
@@ -45,7 +49,8 @@ public class SqlInjectionLesson5Test extends LessonTest {
             MockMvcRequestBuilders.post("/SqlInjection/attack5")
                 .param("query", "grant select on users to unauthorized_user"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(false)));
+        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(false)))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 
   @Test
@@ -55,6 +60,7 @@ public class SqlInjectionLesson5Test extends LessonTest {
             MockMvcRequestBuilders.post("/SqlInjection/attack5")
                 .param("query", "select * from grant_rights"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(false)));
+        .andExpect(jsonPath("$.lessonCompleted", CoreMatchers.is(false)))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 }

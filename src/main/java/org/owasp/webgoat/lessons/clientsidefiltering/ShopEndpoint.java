@@ -5,6 +5,8 @@
 package org.owasp.webgoat.lessons.clientsidefiltering;
 
 import com.google.common.collect.Lists;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -25,7 +27,13 @@ public class ShopEndpoint {
     @Getter private List<CheckoutCode> codes;
 
     public Optional<CheckoutCode> get(String code) {
-      return codes.stream().filter(c -> c.getCode().equals(code)).findFirst();
+      return codes.stream()
+          .filter(
+              c ->
+                  MessageDigest.isEqual(
+                      c.getCode().getBytes(StandardCharsets.UTF_8),
+                      code.getBytes(StandardCharsets.UTF_8)))
+          .findFirst();
     }
   }
 
@@ -48,7 +56,9 @@ public class ShopEndpoint {
 
   @GetMapping(value = "/coupons/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
   public CheckoutCode getDiscountCode(@PathVariable String code) {
-    if (ClientSideFilteringFreeAssignment.SUPER_COUPON_CODE.equals(code)) {
+    if (MessageDigest.isEqual(
+        ClientSideFilteringFreeAssignment.SUPER_COUPON_CODE.getBytes(StandardCharsets.UTF_8),
+        code.getBytes(StandardCharsets.UTF_8))) {
       return new CheckoutCode(ClientSideFilteringFreeAssignment.SUPER_COUPON_CODE, 100);
     }
     return checkoutCodes.get(code).orElse(new CheckoutCode("no", 0));

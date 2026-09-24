@@ -7,11 +7,11 @@ function login(user) {
         type: 'POST',
         url: 'JWT/refresh/login',
         contentType: "application/json",
-        data: JSON.stringify({user: user, password: "bm5nhSkxCXZkKRy4"})
+        data: JSON.stringify({user: user, password: "change-me"})
     }).success(
         function (response) {
-            localStorage.setItem('access_token', response['access_token']);
-            localStorage.setItem('refresh_token', response['refresh_token']);
+            sessionStorage.setItem('access_token', response['access_token']);
+            sessionStorage.setItem('refresh_token', response['refresh_token']);
         }
     )
 }
@@ -19,24 +19,24 @@ function login(user) {
 //Dev comment: Pass token as header as we had an issue with tokens ending up in the access_log
 webgoat.customjs.addBearerToken = function () {
     var headers_to_set = {};
-    headers_to_set['Authorization'] = 'Bearer ' + localStorage.getItem('access_token');
+    headers_to_set['Authorization'] = 'Bearer ' + sessionStorage.getItem('access_token');
     return headers_to_set;
 }
 
 //Dev comment: Temporarily disabled from page we need to work out the refresh token flow but for now we can go live with the checkout page
 function newToken() {
-    localStorage.getItem('refreshToken');
+    sessionStorage.getItem('refreshToken');
     $.ajax({
         headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+            'Authorization': 'Bearer ' + sessionStorage.getItem('access_token')
         },
         type: 'POST',
         url: 'JWT/refresh/newToken',
-        data: JSON.stringify({refresh_token: localStorage.getItem('refresh_token')})
+        data: JSON.stringify({refresh_token: sessionStorage.getItem('refresh_token')})
     }).success(
         function () {
-            localStorage.setItem('access_token', apiToken);
-            localStorage.setItem('refresh_token', refreshToken);
+            sessionStorage.setItem('access_token', apiToken);
+            sessionStorage.setItem('refresh_token', refreshToken);
         }
     )
 }

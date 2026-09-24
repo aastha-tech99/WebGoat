@@ -7,8 +7,8 @@ package org.owasp.webgoat.lessons.passwordreset;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AttackResult;
 import org.springframework.http.MediaType;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class QuestionsAssignment implements AssignmentEndpoint {
 
-  private static final Map<String, String> COLORS = new HashMap<>();
+  private static final Map<String, String> COLORS = new ConcurrentHashMap<>();
 
   static {
     COLORS.put("admin", "green");

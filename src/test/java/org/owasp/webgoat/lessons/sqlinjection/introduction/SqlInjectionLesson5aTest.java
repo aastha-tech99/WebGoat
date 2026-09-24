@@ -6,6 +6,9 @@ package org.owasp.webgoat.lessons.sqlinjection.introduction;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasLength;
+import static org.hamcrest.Matchers.lessThan;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,7 +30,8 @@ public class SqlInjectionLesson5aTest extends LessonTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("lessonCompleted", is(false)))
         .andExpect(jsonPath("$.feedback", is(messages.getMessage("assignment.not.solved"))))
-        .andExpect(jsonPath("$.output", containsString("<p>USERID, FIRST_NAME")));
+        .andExpect(jsonPath("$.output", containsString("<p>USERID, FIRST_NAME")))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 
   @Disabled
@@ -56,7 +60,8 @@ public class SqlInjectionLesson5aTest extends LessonTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("lessonCompleted", is(true)))
         .andExpect(jsonPath("$.feedback", containsString("You have succeed")))
-        .andExpect(jsonPath("$.output").exists());
+        .andExpect(jsonPath("$.output").exists())
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 
   @Test
@@ -76,6 +81,7 @@ public class SqlInjectionLesson5aTest extends LessonTest {
                 "$.output",
                 is(
                     "malformed string: '1''<br> Your query was: SELECT * FROM user_data WHERE"
-                        + " first_name = 'John' and last_name = 'Smith' OR '1' = '1''")));
+                        + " first_name = 'John' and last_name = 'Smith' OR '1' = '1''")))
+        .andExpect(content().string(hasLength(lessThan(50000))));
   }
 }

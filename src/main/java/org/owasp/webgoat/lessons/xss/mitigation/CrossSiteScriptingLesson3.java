@@ -7,6 +7,9 @@ package org.owasp.webgoat.lessons.xss.mitigation;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
@@ -52,10 +55,14 @@ public class CrossSiteScriptingLesson3 implements AssignmentEndpoint {
           && include.contains("%>")) {
         includeCorrect = true;
       }
-      if (fistNameElement.equals("${e:forHtml(param.first_name)}")) {
+      if (MessageDigest.isEqual(
+          fistNameElement.getBytes(StandardCharsets.UTF_8),
+          "${e:forHtml(param.first_name)}".getBytes(StandardCharsets.UTF_8))) {
         firstNameCorrect = true;
       }
-      if (lastNameElement.equals("${e:forHtml(param.last_name)}")) {
+      if (MessageDigest.isEqual(
+          lastNameElement.getBytes(StandardCharsets.UTF_8),
+          "${e:forHtml(param.last_name)}".getBytes(StandardCharsets.UTF_8))) {
         lastNameCorrect = true;
       }
 

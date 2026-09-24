@@ -22,13 +22,13 @@ public class Vote {
   private final String imageBig;
 
   @JsonView(Views.UserView.class)
-  private int numberOfVotes;
+  private volatile int numberOfVotes;
 
   @JsonView(Views.UserView.class)
-  private boolean votingAllowed = true;
+  private volatile boolean votingAllowed = true;
 
   @JsonView(Views.UserView.class)
-  private long average = 0;
+  private volatile long average = 0;
 
   public Vote(
       String title,
@@ -45,12 +45,12 @@ public class Vote {
     this.average = calculateStars(totalVotes);
   }
 
-  public void incrementNumberOfVotes(int totalVotes) {
+  public synchronized void incrementNumberOfVotes(int totalVotes) {
     this.numberOfVotes = this.numberOfVotes + 1;
     this.average = calculateStars(totalVotes);
   }
 
-  public void reset() {
+  public synchronized void reset() {
     this.numberOfVotes = 1;
     this.average = 1;
   }

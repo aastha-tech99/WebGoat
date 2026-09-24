@@ -12,11 +12,11 @@ import com.google.common.collect.Lists;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.owasp.webgoat.container.CurrentUsername;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
@@ -31,10 +31,10 @@ import org.springframework.web.bind.annotation.RestController;
 @AssignmentHints({"csrf-review-hint1", "csrf-review-hint2", "csrf-review-hint3"})
 public class ForgedReviews implements AssignmentEndpoint {
 
-  private static DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss");
+  private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss");
 
-  private static final Map<String, List<Review>> userReviews = new HashMap<>();
-  private static final List<Review> REVIEWS = new ArrayList<>();
+  private static final Map<String, List<Review>> userReviews = new ConcurrentHashMap<>();
+  private static final List<Review> REVIEWS = new CopyOnWriteArrayList<>();
   private static final String weakAntiCSRF = "2aa14227b9a13d0bede0388a7fba9aa9";
 
   static {
@@ -85,9 +85,7 @@ public class ForgedReviews implements AssignmentEndpoint {
     review.setDateTime(LocalDateTime.now().format(fmt));
     review.setUser(username);
     review.setStars(stars);
-    var reviews = userReviews.getOrDefault(username, new ArrayList<>());
-    reviews.add(review);
-    userReviews.put(username, reviews);
+    userReviews.computeIfAbsent(username, k -> new CopyOnWriteArrayList<>()).add(review);
     // short-circuit
     if (validateReq == null || !validateReq.equals(weakAntiCSRF)) {
       return failed(this).feedback("csrf-you-forgot-something").build();

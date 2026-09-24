@@ -8,8 +8,8 @@ import static java.util.Optional.of;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.informationMessage;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AttackResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +25,7 @@ public class SecurityQuestionAssignment implements AssignmentEndpoint {
   private static Map<String, String> questions;
 
   static {
-    questions = new HashMap<>();
+    questions = new ConcurrentHashMap<>();
     questions.put(
         "What is your favorite animal?",
         "The answer can easily be guessed and figured out through social media.");

@@ -22,11 +22,11 @@ public class CrossSiteScriptingQuiz implements AssignmentEndpoint {
   private static final String[] solutions = {
     "Solution 4", "Solution 3", "Solution 1", "Solution 2", "Solution 4"
   };
-  boolean[] guesses = new boolean[solutions.length];
+  private volatile boolean[] guesses = new boolean[solutions.length];
 
   @PostMapping("/CrossSiteScripting/quiz")
   @ResponseBody
-  public AttackResult completed(
+  public synchronized AttackResult completed(
       @RequestParam String[] question_0_solution,
       @RequestParam String[] question_1_solution,
       @RequestParam String[] question_2_solution,
@@ -34,6 +34,7 @@ public class CrossSiteScriptingQuiz implements AssignmentEndpoint {
       @RequestParam String[] question_4_solution)
       throws IOException {
     int correctAnswers = 0;
+    boolean[] localGuesses = new boolean[solutions.length];
 
     String[] givenAnswers = {
       question_0_solution[0],
@@ -47,12 +48,14 @@ public class CrossSiteScriptingQuiz implements AssignmentEndpoint {
       if (givenAnswers[i].contains(solutions[i])) {
         // answer correct
         correctAnswers++;
-        guesses[i] = true;
+        localGuesses[i] = true;
       } else {
         // answer incorrect
-        guesses[i] = false;
+        localGuesses[i] = false;
       }
     }
+
+    guesses = localGuesses;
 
     if (correctAnswers == solutions.length) {
       return success(this).build();
@@ -63,7 +66,7 @@ public class CrossSiteScriptingQuiz implements AssignmentEndpoint {
 
   @GetMapping("/CrossSiteScripting/quiz")
   @ResponseBody
-  public boolean[] getResults() {
-    return this.guesses;
+  public synchronized boolean[] getResults() {
+    return this.guesses.clone();
   }
 }

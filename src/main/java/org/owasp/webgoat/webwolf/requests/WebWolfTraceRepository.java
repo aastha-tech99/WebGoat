@@ -56,7 +56,7 @@ public class WebWolfTraceRepository implements HttpExchangeRepository {
           contains("/mail"));
 
   @Override
-  public List<HttpExchange> findAll() {
+  public synchronized List<HttpExchange> findAll() {
     return new ArrayList<>(traces);
   }
 
@@ -65,7 +65,7 @@ public class WebWolfTraceRepository implements HttpExchangeRepository {
   }
 
   @Override
-  public void add(HttpExchange httpTrace) {
+  public synchronized void add(HttpExchange httpTrace) {
     var path = httpTrace.getRequest().getUri().getPath();
     if (!isInExclusionList(path)) {
       traces.add(httpTrace);

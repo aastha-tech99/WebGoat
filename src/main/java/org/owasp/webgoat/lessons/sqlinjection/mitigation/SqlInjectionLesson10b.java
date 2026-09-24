@@ -98,7 +98,7 @@ public class SqlInjectionLesson10b implements AssignmentEndpoint {
         compiler.getTask(null, fileManager, diagnosticsCollector, null, null, fileObjects);
     Boolean result = task.call();
     List<Diagnostic> diagnostics = diagnosticsCollector.getDiagnostics();
-    return diagnostics;
+    return diagnostics.size() > 100 ? diagnostics.subList(0, 100) : diagnostics;
   }
 
   private SimpleJavaFileObject getJavaFileContentsAsString(String s) {

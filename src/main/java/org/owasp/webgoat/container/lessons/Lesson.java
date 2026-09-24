@@ -4,8 +4,8 @@
  */
 package org.owasp.webgoat.container.lessons;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 public abstract class Lesson {
 
-  private List<Assignment> assignments = new ArrayList<>();
+  private List<Assignment> assignments = new CopyOnWriteArrayList<>();
 
   public void addAssignment(Assignment assignment) {
     this.assignments.add(assignment);

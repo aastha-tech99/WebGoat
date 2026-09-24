@@ -1,10 +1,23 @@
 $(document).ready(function () {
+    function encodeHtmlEntities(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
     $("#postComment").on("click", function () {
         var commentInput = $("#commentInput").val();
+        if (!commentInput || !commentInput.trim()) {
+            return;
+        }
+        var sanitizedInput = encodeHtmlEntities(commentInput.trim());
+        if (sanitizedInput.length > 4000) {
+            return;
+        }
         $.ajax({
             type: 'POST',
             url: 'CrossSiteScriptingStored/stored-xss',
-            data: JSON.stringify({text: commentInput}),
+            data: JSON.stringify({text: sanitizedInput}),
             contentType: "application/json",
             dataType: 'json'
         }).then(

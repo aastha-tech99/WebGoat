@@ -4,14 +4,14 @@
  */
 package org.owasp.webgoat.container.lessons;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class LessonMenuItem {
 
   private String name;
   private LessonMenuItemType type;
-  private List<LessonMenuItem> children = new ArrayList<>();
+  private List<LessonMenuItem> children = new CopyOnWriteArrayList<>();
   private boolean complete;
   private String link;
   private int ranking;

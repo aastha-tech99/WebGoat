@@ -4,16 +4,17 @@
  */
 package org.owasp.webgoat.container.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * This class is responsible for managing user session data within a lesson. It uses a HashMap to
- * store key-value pairs representing session data.
+ * This class is responsible for managing user session data within a lesson. It uses a
+ * ConcurrentHashMap to store key-value pairs representing session data, ensuring thread-safe access
+ * from concurrent request threads in singleton Spring beans.
  */
 public class LessonSession {
 
-  private Map<String, Object> userSessionData = new HashMap<>();
+  private final Map<String, Object> userSessionData = new ConcurrentHashMap<>();
 
   /** Default constructor initializing an empty session. */
   public LessonSession() {}
@@ -25,10 +26,6 @@ public class LessonSession {
    * @return the value associated with the key, or null if the key does not exist
    */
   public Object getValue(String key) {
-    if (!userSessionData.containsKey(key)) {
-      return null;
-    }
-    // else
     return userSessionData.get(key);
   }
 
@@ -39,10 +36,6 @@ public class LessonSession {
    * @param value the value to be associated with the key
    */
   public void setValue(String key, Object value) {
-    if (userSessionData.containsKey(key)) {
-      userSessionData.replace(key, value);
-    } else {
-      userSessionData.put(key, value);
-    }
+    userSessionData.put(key, value);
   }
 }

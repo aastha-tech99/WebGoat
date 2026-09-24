@@ -8,8 +8,8 @@ import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.Random;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AttackResult;
 import org.springframework.http.MediaType;
@@ -30,15 +30,17 @@ public class EncodingAssignment implements AssignmentEndpoint {
   @ResponseBody
   public String getBasicAuth(HttpServletRequest request) {
 
-    String basicAuth = (String) request.getSession().getAttribute("basicAuth");
-    String username = request.getUserPrincipal().getName();
-    if (basicAuth == null) {
-      String password =
-          HashingAssignment.SECRETS[new Random().nextInt(HashingAssignment.SECRETS.length)];
-      basicAuth = getBasicAuth(username, password);
-      request.getSession().setAttribute("basicAuth", basicAuth);
+    synchronized (request.getSession()) {
+      String basicAuth = (String) request.getSession().getAttribute("basicAuth");
+      String username = request.getUserPrincipal().getName();
+      if (basicAuth == null) {
+        String password =
+            HashingAssignment.SECRETS[new SecureRandom().nextInt(HashingAssignment.SECRETS.length)];
+        basicAuth = getBasicAuth(username, password);
+        request.getSession().setAttribute("basicAuth", basicAuth);
+      }
+      return "Authorization: Basic ".concat(basicAuth);
     }
-    return "Authorization: Basic ".concat(basicAuth);
   }
 
   @PostMapping("/crypto/encoding/basic-auth")
@@ -47,7 +49,10 @@ public class EncodingAssignment implements AssignmentEndpoint {
       HttpServletRequest request,
       @RequestParam String answer_user,
       @RequestParam String answer_pwd) {
-    String basicAuth = (String) request.getSession().getAttribute("basicAuth");
+    String basicAuth;
+    synchronized (request.getSession()) {
+      basicAuth = (String) request.getSession().getAttribute("basicAuth");
+    }
     if (basicAuth != null
         && answer_user != null
         && answer_pwd != null

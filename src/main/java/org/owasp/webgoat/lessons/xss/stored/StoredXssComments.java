@@ -13,12 +13,12 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.owasp.webgoat.container.CurrentUsername;
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AttackResult;
@@ -35,8 +35,8 @@ public class StoredXssComments implements AssignmentEndpoint {
 
   private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss");
 
-  private static final Map<String, List<Comment>> userComments = new HashMap<>();
-  private static final List<Comment> comments = new ArrayList<>();
+  private static final Map<String, List<Comment>> userComments = new ConcurrentHashMap<>();
+  private static final List<Comment> comments = new CopyOnWriteArrayList<>();
   private static final String phoneHomeString = "<script>webgoat.customjs.phoneHome()</script>";
 
   static {
@@ -76,12 +76,10 @@ public class StoredXssComments implements AssignmentEndpoint {
       @RequestBody String commentStr, @CurrentUsername String username) {
     Comment comment = parseJson(commentStr);
 
-    List<Comment> comments = userComments.getOrDefault(username, new ArrayList<>());
     comment.setDateTime(LocalDateTime.now().format(fmt));
     comment.setUser(username);
 
-    comments.add(comment);
-    userComments.put(username, comments);
+    userComments.computeIfAbsent(username, k -> new CopyOnWriteArrayList<>()).add(comment);
 
     if (comment.getText().contains(phoneHomeString)) {
       return (success(this).feedback("xss-stored-comment-success").build());

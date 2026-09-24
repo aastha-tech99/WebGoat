@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 public class LabelDebugger implements Serializable {
 
-  private boolean enabled = false;
+  private volatile boolean enabled = false;
 
   /**
    * isEnabled.

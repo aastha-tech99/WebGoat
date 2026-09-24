@@ -13,6 +13,7 @@ import java.util.Map;
 import lombok.Getter;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.owasp.webgoat.ServerUrlConfig;
@@ -126,7 +127,7 @@ public abstract class IntegrationTest {
   }
 
   public void checkAssignment(String url, Map<String, ?> params, boolean expectedResult) {
-    MatcherAssert.assertThat(
+    var response =
         RestAssured.given()
             .when()
             .relaxedHTTPSValidation()
@@ -136,12 +137,15 @@ public abstract class IntegrationTest {
             .then()
             .statusCode(200)
             .extract()
-            .path("lessonCompleted"),
-        CoreMatchers.is(expectedResult));
+            .response();
+    MatcherAssert.assertThat(
+        response.body().asString().length(), Matchers.lessThan(50000));
+    MatcherAssert.assertThat(
+        response.jsonPath().get("lessonCompleted"), CoreMatchers.is(expectedResult));
   }
 
   public void checkAssignmentWithPUT(String url, Map<String, ?> params, boolean expectedResult) {
-    MatcherAssert.assertThat(
+    var response =
         RestAssured.given()
             .when()
             .relaxedHTTPSValidation()
@@ -151,8 +155,11 @@ public abstract class IntegrationTest {
             .then()
             .statusCode(200)
             .extract()
-            .path("lessonCompleted"),
-        CoreMatchers.is(expectedResult));
+            .response();
+    MatcherAssert.assertThat(
+        response.body().asString().length(), Matchers.lessThan(50000));
+    MatcherAssert.assertThat(
+        response.jsonPath().get("lessonCompleted"), CoreMatchers.is(expectedResult));
   }
 
   public void checkResults(String lesson) {

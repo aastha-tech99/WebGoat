@@ -80,8 +80,7 @@ public class MissingFunctionACUsers {
   @ResponseBody
   public User addUser(@RequestBody User newUser) {
     try {
-      userRepository.save(newUser);
-      return newUser;
+      return userRepository.save(newUser);
     } catch (Exception ex) {
       log.error("Error creating new User", ex);
       return null;

@@ -43,7 +43,7 @@ public class Authentication {
 
   private static User login(Browser browser, User user) {
     if (user.loggedIn()) {
-      return user;
+      return new User(user.name, null, user.auth);
     }
     var page = browser.newContext(new Browser.NewContextOptions().setLocale("en-US")).newPage();
     RegistrationPage registrationPage = new RegistrationPage(page);
@@ -60,6 +60,6 @@ public class Authentication {
     webWolfLoginPage.login(user.name, user.password);
     assertThat(loginPage.getSignInButton()).not().isVisible();
 
-    return new User(user.name, user.password, page.context().storageState());
+    return new User(user.name, null, page.context().storageState());
   }
 }

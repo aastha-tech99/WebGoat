@@ -7,8 +7,8 @@ package org.owasp.webgoat.lessons.httpbasics;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed;
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.success;
 
+import java.security.SecureRandom;
 import java.util.Map;
-import java.util.Random;
 
 import org.owasp.webgoat.container.assignments.AssignmentEndpoint;
 import org.owasp.webgoat.container.assignments.AssignmentHints;
@@ -28,20 +28,21 @@ import jakarta.servlet.http.HttpServletRequest;
 @AssignmentHints({ "http-basics.hints.http_basics_external.1" })
 public class HttpBasicsExternal implements AssignmentEndpoint {
     private final LessonSession lessonSession;
-    private final Random random;
+    private final SecureRandom random;
 
     public HttpBasicsExternal(LessonSession lessonSession) {
         this.lessonSession = lessonSession;
-        this.random = new Random();
+        this.random = new SecureRandom();
     }
 
     @PostMapping("/HttpBasics/externalcheck")
     @ResponseBody
     public AttackResult completed(@RequestParam String code) {
-        if (lessonSession.getValue("external_http_secret") == null) {
+        Object secret = lessonSession.getValue("external_http_secret");
+        if (secret == null) {
             return failed(this)
                     .feedback("You need to send the right request to /HttpBasics/external to get the secret!").build();
-        } else if (!code.isBlank() && lessonSession.getValue("external_http_secret").equals(code)) {
+        } else if (!code.isBlank() && secret.equals(code)) {
             return success(this).build();
         } else {
             return failed(this).build();

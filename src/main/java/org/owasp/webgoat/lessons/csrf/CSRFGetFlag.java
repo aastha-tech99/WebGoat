@@ -5,9 +5,9 @@
 package org.owasp.webgoat.lessons.csrf;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import org.owasp.webgoat.container.i18n.PluginMessages;
 import org.owasp.webgoat.container.session.LessonSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,28 +36,31 @@ public class CSRFGetFlag {
 
     if (referer.equals("NULL")) {
       if ("true".equals(req.getParameter("csrf"))) {
-        Random random = new Random();
-        userSessionData.setValue("csrf-get-success", random.nextInt(65536));
+        SecureRandom random = new SecureRandom();
+        int flag = random.nextInt(65536);
+        userSessionData.setValue("csrf-get-success", flag);
         response.put("success", true);
         response.put("message", pluginMessages.getMessage("csrf-get-null-referer.success"));
-        response.put("flag", userSessionData.getValue("csrf-get-success"));
+        response.put("flag", flag);
       } else {
-        Random random = new Random();
-        userSessionData.setValue("csrf-get-success", random.nextInt(65536));
+        SecureRandom random = new SecureRandom();
+        int flag = random.nextInt(65536);
+        userSessionData.setValue("csrf-get-success", flag);
         response.put("success", true);
         response.put("message", pluginMessages.getMessage("csrf-get-other-referer.success"));
-        response.put("flag", userSessionData.getValue("csrf-get-success"));
+        response.put("flag", flag);
       }
     } else if (refererArr[2].equals(host)) {
       response.put("success", false);
       response.put("message", "Appears the request came from the original host");
       response.put("flag", null);
     } else {
-      Random random = new Random();
-      userSessionData.setValue("csrf-get-success", random.nextInt(65536));
+      SecureRandom random = new SecureRandom();
+      int flag = random.nextInt(65536);
+      userSessionData.setValue("csrf-get-success", flag);
       response.put("success", true);
       response.put("message", pluginMessages.getMessage("csrf-get-other-referer.success"));
-      response.put("flag", userSessionData.getValue("csrf-get-success"));
+      response.put("flag", flag);
     }
 
     return response;

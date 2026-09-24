@@ -23,7 +23,7 @@ public class TokenTest {
 
   @Test
   public void test() {
-    String key = "qwertyqwerty1234";
+    String key = JWTRefreshEndpoint.JWT_PASSWORD;
     Map<String, Object> claims =
         Map.of("username", "Jerry", "aud", "webgoat.org", "email", "jerry@webgoat.com");
     String token =
@@ -34,7 +34,7 @@ public class TokenTest {
             .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, key)
             .compact();
     log.debug(token);
-    Jwt jwt = Jwts.parser().setSigningKey("qwertyqwerty1234").parse(token);
+    Jwt jwt = Jwts.parser().setSigningKey(key).parse(token);
     jwt =
         Jwts.parser()
             .setSigningKeyResolver(
@@ -57,7 +57,7 @@ public class TokenTest {
     String token =
         Jwts.builder()
             .setClaims(claims)
-            .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, "bm5n3SkxCX4kKRy4")
+            .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, JWTRefreshEndpoint.JWT_PASSWORD)
             .compact();
     log.debug(token);
   }

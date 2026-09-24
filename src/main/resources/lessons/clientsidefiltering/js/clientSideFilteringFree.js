@@ -1,4 +1,7 @@
 $(document).ready(function () {
+    // Track used coupon codes to enforce single-use limit
+    var usedCoupons = {};
+
     //-- Click on detail
     $("ul.menu-items > li").on("click", function () {
         $("ul.menu-items > li").removeClass("active");
@@ -38,9 +41,17 @@ $(document).ready(function () {
     })
     $(".checkoutCode").on("blur", function () {
         var checkoutCode = $(".checkoutCode").val();
+        if (!checkoutCode) {
+            return;
+        }
+        if (usedCoupons[checkoutCode]) {
+            // Coupon already used — do not apply again
+            return;
+        }
         $.get("clientSideFiltering/challenge-store/coupons/" + checkoutCode, function (result, status) {
             var discount = result.discount;
             if (discount > 0) {
+                usedCoupons[checkoutCode] = true;
                 $('#discount').text(discount);
                 calculate();
             } else {

@@ -9,10 +9,10 @@ import jakarta.xml.bind.JAXBException;
 import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -24,14 +24,14 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class CommentsCache {
 
-  static class Comments extends ArrayList<Comment> {
+  static class Comments extends CopyOnWriteArrayList<Comment> {
     void sort() {
-      sort(Comparator.comparing(Comment::getDateTime).reversed());
+      super.sort(Comparator.comparing(Comment::getDateTime).reversed());
     }
   }
 
   private static final Comments comments = new Comments();
-  private static final Map<WebGoatUser, Comments> userComments = new HashMap<>();
+  private static final Map<WebGoatUser, Comments> userComments = new ConcurrentHashMap<>();
   private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss");
 
   public CommentsCache() {
@@ -70,11 +70,11 @@ public class CommentsCache {
     var jc = JAXBContext.newInstance(Comment.class);
     var xif = XMLInputFactory.newInstance();
 
-    // TODO fix me disabled for now.
-    if (securityEnabled) {
-      xif.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, ""); // Compliant
-      xif.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, ""); // compliant
-    }
+    // Always disable external entity processing to prevent XXE attacks
+    xif.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    xif.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+    xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+    xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 
     var xsr = xif.createXMLStreamReader(new StringReader(xml));
 
@@ -88,9 +88,7 @@ public class CommentsCache {
     if (visibleForAllUsers) {
       comments.add(comment);
     } else {
-      var comments = userComments.getOrDefault(user.getUsername(), new Comments());
-      comments.add(comment);
-      userComments.put(user, comments);
+      userComments.computeIfAbsent(user, k -> new Comments()).add(comment);
     }
   }
 

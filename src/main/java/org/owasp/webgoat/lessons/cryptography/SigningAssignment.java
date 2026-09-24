@@ -39,14 +39,16 @@ public class SigningAssignment implements AssignmentEndpoint {
   public String getPrivateKey(HttpServletRequest request)
       throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 
-    String privateKey = (String) request.getSession().getAttribute("privateKeyString");
-    if (privateKey == null) {
-      KeyPair keyPair = CryptoUtil.generateKeyPair();
-      privateKey = CryptoUtil.getPrivateKeyInPEM(keyPair);
-      request.getSession().setAttribute("privateKeyString", privateKey);
-      request.getSession().setAttribute("keyPair", keyPair);
+    synchronized (request.getSession()) {
+      String privateKey = (String) request.getSession().getAttribute("privateKeyString");
+      if (privateKey == null) {
+        KeyPair keyPair = CryptoUtil.generateKeyPair();
+        privateKey = CryptoUtil.getPrivateKeyInPEM(keyPair);
+        request.getSession().setAttribute("privateKeyString", privateKey);
+        request.getSession().setAttribute("keyPair", keyPair);
+      }
+      return privateKey;
     }
-    return privateKey;
   }
 
   @PostMapping("/crypto/signing/verify")
@@ -56,7 +58,10 @@ public class SigningAssignment implements AssignmentEndpoint {
 
     String tempModulus =
         modulus; /* used to validate the modulus of the public key but might need to be corrected */
-    KeyPair keyPair = (KeyPair) request.getSession().getAttribute("keyPair");
+    KeyPair keyPair;
+    synchronized (request.getSession()) {
+      keyPair = (KeyPair) request.getSession().getAttribute("keyPair");
+    }
     RSAPublicKey rsaPubKey = (RSAPublicKey) keyPair.getPublic();
     if (tempModulus.length() == 512) {
       tempModulus = "00".concat(tempModulus);

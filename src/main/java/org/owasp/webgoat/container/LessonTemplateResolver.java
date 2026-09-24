@@ -6,9 +6,9 @@ package org.owasp.webgoat.container;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ResourceLoader;
 import org.thymeleaf.IEngineConfiguration;
@@ -29,7 +29,7 @@ public class LessonTemplateResolver extends FileTemplateResolver {
 
   private static final String PREFIX = "lesson:";
   private final ResourceLoader resourceLoader;
-  private final Map<String, byte[]> resources = new HashMap<>();
+  private final Map<String, byte[]> resources = new ConcurrentHashMap<>();
 
   public LessonTemplateResolver(ResourceLoader resourceLoader) {
     this.resourceLoader = resourceLoader;
