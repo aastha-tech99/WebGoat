@@ -6,6 +6,7 @@ package org.owasp.webgoat.lessons.cryptography;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -34,6 +35,10 @@ public class CryptoUtil {
     BigInteger.valueOf(65537)
   };
 
+  // RFC 7468 PEM format identifiers (standard markers, not secret material)
+  private static final String PEM_KEY_HEADER = "-----BEGIN PRIVATE KEY-----";
+  private static final String PEM_KEY_FOOTER = "-----END PRIVATE KEY-----";
+
   public static KeyPair generateKeyPair()
       throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
     KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -46,15 +51,10 @@ public class CryptoUtil {
   }
 
   public static String getPrivateKeyInPEM(KeyPair keyPair) {
-    String encodedString = "-----BEGIN PRIVATE KEY-----\n";
-    encodedString =
-        encodedString
-            + new String(
-                Base64.getEncoder().encode(keyPair.getPrivate().getEncoded()),
-                Charset.forName("UTF-8"))
-            + "\n";
-    encodedString = encodedString + "-----END PRIVATE KEY-----\n";
-    return encodedString;
+    String base64Encoded =
+        Base64.getMimeEncoder(64, "\n".getBytes(StandardCharsets.UTF_8))
+            .encodeToString(keyPair.getPrivate().getEncoded());
+    return PEM_KEY_HEADER + "\n" + base64Encoded + "\n" + PEM_KEY_FOOTER + "\n";
   }
 
   public static String signMessage(String message, PrivateKey privateKey) {
@@ -134,8 +134,8 @@ public class CryptoUtil {
 
   public static PrivateKey getPrivateKeyFromPEM(String privateKeyPem)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
-    privateKeyPem = privateKeyPem.replace("-----BEGIN PRIVATE KEY-----", "");
-    privateKeyPem = privateKeyPem.replace("-----END PRIVATE KEY-----", "");
+    privateKeyPem = privateKeyPem.replace(PEM_KEY_HEADER, "");
+    privateKeyPem = privateKeyPem.replace(PEM_KEY_FOOTER, "");
     privateKeyPem = privateKeyPem.replace("\n", "").replace("\r", "");
 
     byte[] decoded = Base64.getDecoder().decode(privateKeyPem);
