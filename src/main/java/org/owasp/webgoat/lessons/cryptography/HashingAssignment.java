@@ -36,10 +36,7 @@ public class HashingAssignment implements AssignmentEndpoint {
 
       String secret = SECRETS[new Random().nextInt(SECRETS.length)];
 
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      md.update(secret.getBytes());
-      byte[] digest = md.digest();
-      md5Hash = DatatypeConverter.printHexBinary(digest).toUpperCase();
+      md5Hash = getHash(secret, "SHA-256");
       request.getSession().setAttribute("md5Hash", md5Hash);
       request.getSession().setAttribute("md5Secret", secret);
     }
