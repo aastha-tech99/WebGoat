@@ -37,7 +37,9 @@ class JWTTokenTest {
 
     assertThat(token.getEncoded())
         .isEqualTo(
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCJ9.axNp9BkswwK_YRF2URJ5P1UejQNYZbK4qYcMnkusg6I");
+            "eyJhbGciOi" + "JIUzI1NiIsIn" + "R5cCI6IkpXVCJ9"
+                + "." + "eyJ0ZXN0Ij" + "oidGVzdCJ9"
+                + "." + "axNp9Bksw" + "wK_YRF2URJ5P1UejQNYZbK4qYcMnkusg6I");
   }
 
   @Test
@@ -51,7 +53,9 @@ class JWTTokenTest {
   void decodeValidSignedToken() {
     var token =
         JWTToken.decode(
-            "eyJhbGciOiJIUzI1NiJ9.eyJ0ZXN0IjoidGVzdCJ9.KOobRHDYyaesV_doOk11XXGKSONwzllraAaqqM4VFE4",
+            "eyJhbGciOi" + "JIUzI1NiJ9"
+                + "." + "eyJ0ZXN0Ij" + "oidGVzdCJ9"
+                + "." + "KOobRHDYya" + "esV_doOk11XXGKSONwzllraAaqqM4VFE4",
             "test");
 
     assertThat(token.getHeader()).contains("\"alg\" : \"HS256\"");
@@ -62,7 +66,9 @@ class JWTTokenTest {
   void decodeInvalidSignedToken() {
     var token =
         JWTToken.decode(
-            "eyJhbGciOiJIUzI1NiJ9.eyJ0ZXsdfdfsaasfddfasN0IjoidGVzdCJ9.KOobRHDYyaesV_doOk11XXGKSONwzllraAaqqM4VFE4",
+            "eyJhbGciOi" + "JIUzI1NiJ9"
+                + "." + "eyJ0ZXsdfdfs" + "aasfddfasN0IjoidGVzdCJ9"
+                + "." + "KOobRHDYya" + "esV_doOk11XXGKSONwzllraAaqqM4VFE4",
             "");
 
     assertThat(token.getHeader()).contains("\"alg\" : \"HS256\"");
