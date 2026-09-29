@@ -42,6 +42,7 @@ function getVotings() {
     $("#votesList").empty();
     $.get("JWT/votings", function (result, status) {
         for (var i = 0; i < result.length; i++) {
+            if (!Object.prototype.hasOwnProperty.call(result, i)) continue;
             var voteTemplate = html.replace('IMAGE_SMALL', result[i].imageSmall);
             if (i === 0) {
                 voteTemplate = voteTemplate.replace('ACTIVE', 'active');

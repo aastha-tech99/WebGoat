@@ -34,6 +34,7 @@ $(document).ready(function () {
         $("#list").empty();
         $.get('csrf/review', function (result, status) {
             for (var i = 0; i < result.length; i++) {
+                if (!Object.prototype.hasOwnProperty.call(result, i)) continue;
                 var comment = html.replace('USER', result[i].user);
                 comment = comment.replace('DATETIME', result[i].dateTime);
                 comment = comment.replace('COMMENT', result[i].text);

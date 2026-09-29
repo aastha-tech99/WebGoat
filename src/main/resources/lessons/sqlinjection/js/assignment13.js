@@ -43,6 +43,7 @@ function getServers(column) {
     $.get("SqlInjectionMitigations/servers?column=" + column, function (result, status) {
         $("#servers").empty();
         for (var i = 0; i < result.length; i++) {
+            if (!Object.prototype.hasOwnProperty.call(result, i)) continue;
             var server = html.replace('ID', result[i].id);
             var status = "success";
             if (result[i].status === 'offline') {

@@ -24,6 +24,7 @@ function ajaxFunction(userId) {
         html = html + '<td>Salary</td>';
 
         for (var i = 0; i < result.length; i++) {
+            if (!Object.prototype.hasOwnProperty.call(result, i)) continue;
             html = html + '<tr id = "' + result[i].UserID + '"</tr>';
             html = html + '<td>' + result[i].UserID + '</td>';
             html = html + '<td>' + result[i].FirstName + '</td>';

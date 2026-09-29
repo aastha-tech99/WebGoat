@@ -41,6 +41,7 @@ define(['jquery',
 			var menuMarkup = '';
 			var menuUl = $('<ul>',{class:'nano-content'});
 			for(var i=0;i<items.length;i++) { //CATEGORY LEVEL
+				if (!Object.prototype.hasOwnProperty.call(items, i)) continue;
 				var catId, category, catLink, catArrow, catLinkText, lessonName, stageName;
 				var translatedCatName = polyglot.t(items[i].get('name'));
 				catId = GoatUtils.makeId(translatedCatName);
@@ -60,6 +61,7 @@ define(['jquery',
 				if (lessons) {
 					var categoryLessonList = $('<ul>',{class:'slideDown lessonsAndStages',id:catId}); //keepOpen
 					for (var j=0; j < lessons.length;j++) {
+						if (!Object.prototype.hasOwnProperty.call(lessons, j)) continue;
 						var lessonItem = $('<li>',{class:'lesson'});
 						var lessonName = polyglot.t(lessons[j].name);
 						var lessonId = catId + '-' + GoatUtils.makeId(lessonName);

@@ -50,6 +50,7 @@ function getFeedback(context) {
     }).done( (result) => {
         if (!result) return;
         for(let i=0; i<result.length; i++) {
+            if (!Object.prototype.hasOwnProperty.call(result, i)) continue;
             if (result[i] === true)
                 $("#q_container .quiz_question:nth-of-type(" + (i+1) + ")").removeClass("incorrect").addClass("correct");
             else if (result[i] === false)
