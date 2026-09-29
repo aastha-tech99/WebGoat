@@ -121,11 +121,14 @@ define(['jquery',
                 this.renderOutput(data.output || "");
 
                 //var submitData = (typeof webgoat.customjs[prepareDataFunctionName] === 'function') ? webgoat.customjs[prepareDataFunctionName]() : $(curForm).serialize();
-                var successCallbackFunction = (Object.prototype.hasOwnProperty.call(webgoat.customjs, successCallBackFunctionName) && typeof webgoat.customjs[successCallBackFunctionName] === 'function') ? webgoat.customjs[successCallBackFunctionName] : function () {
+                var successDesc = Object.getOwnPropertyDescriptor(webgoat.customjs, successCallBackFunctionName);
+                var successCallbackFunction = (successDesc && typeof successDesc.value === 'function') ? successDesc.value : function () {
                 };
-                var failureCallbackFunction = (Object.prototype.hasOwnProperty.call(webgoat.customjs, failureCallbackFunctionName) && typeof webgoat.customjs[failureCallbackFunctionName] === 'function') ? webgoat.customjs[failureCallbackFunctionName] : function () {
+                var failureDesc = Object.getOwnPropertyDescriptor(webgoat.customjs, failureCallbackFunctionName);
+                var failureCallbackFunction = (failureDesc && typeof failureDesc.value === 'function') ? failureDesc.value : function () {
                 };
-                var informationalCallbackFunction = (Object.prototype.hasOwnProperty.call(webgoat.customjs, informationalCallbackFunctionName) && typeof webgoat.customjs[informationalCallbackFunctionName] === 'function') ? webgoat.customjs[informationalCallbackFunctionName] : function () {
+                var informationalDesc = Object.getOwnPropertyDescriptor(webgoat.customjs, informationalCallbackFunctionName);
+                var informationalCallbackFunction = (informationalDesc && typeof informationalDesc.value === 'function') ? informationalDesc.value : function () {
                 };
                 if (data.attemptWasMade) {
                     if (data.lessonCompleted || data.assignmentCompleted) {
@@ -183,19 +186,15 @@ define(['jquery',
 
             showCurContentPage: function (pageNum) {
                 this.$contentPages.hide();
-                if (Object.prototype.hasOwnProperty.call(this.$contentPages, pageNum)) {
-                    this.$el.find(this.$contentPages[pageNum]).show();
-                }
+                this.$contentPages.eq(pageNum).show();
             },
 
             findAssigmentEndpointsOnPage: function (pageNumber) {
-                var contentPage = this.$contentPages[pageNumber];
+                var contentPage = this.$contentPages.eq(pageNumber);
                 var endpoints = []; //going to assume uniqueness since these are assignments
-                var pageForms = $(contentPage).find('form.attack-form');
-                for (var i = 0; i < pageForms.length; i++) {
-                    if (!Object.prototype.hasOwnProperty.call(pageForms, i)) continue;
-                    endpoints.push(pageForms[i].action);
-                }
+                contentPage.find('form.attack-form').each(function (idx, form) {
+                    endpoints.push(form.action);
+                });
                 return endpoints;
             },
 

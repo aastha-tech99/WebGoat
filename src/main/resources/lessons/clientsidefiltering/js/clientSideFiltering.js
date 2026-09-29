@@ -23,16 +23,15 @@ function ajaxFunction(userId) {
         html = html + '<td>SSN</td>';
         html = html + '<td>Salary</td>';
 
-        for (var i = 0; i < result.length; i++) {
-            if (!Object.prototype.hasOwnProperty.call(result, i)) continue;
-            html = html + '<tr id = "' + result[i].UserID + '"</tr>';
-            html = html + '<td>' + result[i].UserID + '</td>';
-            html = html + '<td>' + result[i].FirstName + '</td>';
-            html = html + '<td>' + result[i].LastName + '</td>';
-            html = html + '<td>' + result[i].SSN + '</td>';
-            html = html + '<td>' + result[i].Salary + '</td>';
+        result.forEach(function (item) {
+            html = html + '<tr id = "' + item.UserID + '"</tr>';
+            html = html + '<td>' + item.UserID + '</td>';
+            html = html + '<td>' + item.FirstName + '</td>';
+            html = html + '<td>' + item.LastName + '</td>';
+            html = html + '<td>' + item.SSN + '</td>';
+            html = html + '<td>' + item.Salary + '</td>';
             html = html + '</tr>';
-        }
+        });
         html = html + '</tr></table>';
 
         var newdiv = document.createElement("div");

@@ -40,10 +40,10 @@ define(['jquery',
 			items = this.collection.models; // top level items
 			var menuMarkup = '';
 			var menuUl = $('<ul>',{class:'nano-content'});
-			for(var i=0;i<items.length;i++) { //CATEGORY LEVEL
-				if (!Object.prototype.hasOwnProperty.call(items, i)) continue;
+			var self = this;
+			items.forEach(function(item) { //CATEGORY LEVEL
 				var catId, category, catLink, catArrow, catLinkText, lessonName, stageName;
-				var translatedCatName = polyglot.t(items[i].get('name'));
+				var translatedCatName = polyglot.t(item.get('name'));
 				catId = GoatUtils.makeId(translatedCatName);
 				category = $('<li>',{class:'sub-menu ng-scope'});
 				catLink = $('<a>',{'category':catId});
@@ -52,52 +52,49 @@ define(['jquery',
 
 				catLink.append(catArrow);
 				catLink.append(catLinkText);
-				var self = this;
-				catLink.click(_.bind(this.expandCategory,this,catId));
+				catLink.click(_.bind(self.expandCategory,self,catId));
 				category.append(catLink);
 				// lesson level (first children level)
-				//var lessons = new MenuItemView({items:items[i].get('children')}).render();
-				var lessons=items[i].get('children');
+				var lessons = item.get('children');
 				if (lessons) {
 					var categoryLessonList = $('<ul>',{class:'slideDown lessonsAndStages',id:catId}); //keepOpen
-					for (var j=0; j < lessons.length;j++) {
-						if (!Object.prototype.hasOwnProperty.call(lessons, j)) continue;
+					lessons.forEach(function(lesson) {
 						var lessonItem = $('<li>',{class:'lesson'});
-						var lessonName = polyglot.t(lessons[j].name);
+						var lessonName = polyglot.t(lesson.name);
 						var lessonId = catId + '-' + GoatUtils.makeId(lessonName);
-						if (this.curLessonLinkId === lessonId) {
+						if (self.curLessonLinkId === lessonId) {
 							lessonItem.addClass('selected');
 						}
-						var lessonLink = $('<a>',{href:lessons[j].link,text:lessonName,id:lessonId});
-						lessonLink.click(_.bind(this.onLessonClick,this,lessonId));
+						var lessonLink = $('<a>',{href:lesson.link,text:lessonName,id:lessonId});
+						lessonLink.click(_.bind(self.onLessonClick,self,lessonId));
 						lessonItem.append(lessonLink);
 						//check for lab/stages
 						categoryLessonList.append(lessonItem);
-						if (lessons[j].complete) {
+						if (lesson.complete) {
 							lessonItem.append($('<span>',{class:'glyphicon glyphicon-check lesson-complete'}));
 						}
-						var stages = lessons[j].children;
-						for (k=0; k < stages.length; k++) {
+						var stages = lesson.children;
+						stages.forEach(function(stage, k) {
 							var stageItem = $('<li>',{class:'stage'});
-							var stageName = stages[k].name;
+							var stageName = stage.name;
 							var stageId = lessonId +  '-stage' + k;
-							if (this.curLessonLinkId === stageId) {
+							if (self.curLessonLinkId === stageId) {
 								stageItem.addClass('selected');
 							}
-							var stageLink = $('<a>',{href:stages[k].link,text:stageName,id:stageId});
-							stageLink.click(_.bind(this.onLessonClick,this,stageId));
+							var stageLink = $('<a>',{href:stage.link,text:stageName,id:stageId});
+							stageLink.click(_.bind(self.onLessonClick,self,stageId));
 							stageItem.append(stageLink);
 							categoryLessonList.append(stageItem);
-							if (stages[k].complete) {
+							if (stage.complete) {
 								stageItem.append($('<span>',{class:'glyphicon glyphicon-check lesson-complete'}));
 							}
-						}
-					}
+						});
+					});
 					category.append(categoryLessonList);
 				}
 
 				menuUl.append(category);
-			}
+			});
 			this.$el.html(menuUl);
 			//if we need to keep a menu open
 			if (this.openMenu) {
