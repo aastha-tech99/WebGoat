@@ -41,27 +41,27 @@ var html = '<a href="#" class="list-group-item ACTIVE">' +
 function getVotings() {
     $("#votesList").empty();
     $.get("JWT/votings", function (result, status) {
-        for (var i = 0; i < result.length; i++) {
-            var voteTemplate = html.replace('IMAGE_SMALL', result[i].imageSmall);
-            if (i === 0) {
+        result.forEach(function (item, idx) {
+            var voteTemplate = html.replace('IMAGE_SMALL', item.imageSmall);
+            if (idx === 0) {
                 voteTemplate = voteTemplate.replace('ACTIVE', 'active');
                 voteTemplate = voteTemplate.replace('BUTTON', 'btn-default');
             } else {
                 voteTemplate = voteTemplate.replace('ACTIVE', '');
                 voteTemplate = voteTemplate.replace('BUTTON', 'btn-primary');
             }
-            voteTemplate = voteTemplate.replace(/TITLE/g, result[i].title);
-            voteTemplate = voteTemplate.replace('INFORMATION', result[i].information || '');
-            voteTemplate = voteTemplate.replace('NO_VOTES', result[i].numberOfVotes || '');
-            voteTemplate = voteTemplate.replace('AVERAGE', result[i].average || '');
+            voteTemplate = voteTemplate.replace(/TITLE/g, item.title);
+            voteTemplate = voteTemplate.replace('INFORMATION', item.information || '');
+            voteTemplate = voteTemplate.replace('NO_VOTES', item.numberOfVotes || '');
+            voteTemplate = voteTemplate.replace('AVERAGE', item.average || '');
 
-            var hidden = (result[i].numberOfVotes === undefined ? 'hidden' : '');
+            var hidden = (item.numberOfVotes === undefined ? 'hidden' : '');
             voteTemplate = voteTemplate.replace(/HIDDEN_VIEW_VOTES/g, hidden);
-            hidden = (result[i].average === undefined ? 'hidden' : '');
+            hidden = (item.average === undefined ? 'hidden' : '');
             voteTemplate = voteTemplate.replace(/HIDDEN_VIEW_RATING/g, hidden);
 
             $("#votesList").append(voteTemplate);
-        }
+        });
     })
 }
 

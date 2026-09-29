@@ -33,13 +33,12 @@ $(document).ready(function () {
     function getChallenges() {
         $("#list").empty();
         $.get('CrossSiteScriptingStored/stored-xss', function (result, status) {
-            for (var i = 0; i < result.length; i++) {
-                var comment = html.replace('USER', result[i].user);
-                comment = comment.replace('DATETIME', result[i].dateTime);
-                comment = comment.replace('COMMENT', result[i].text);
+            result.forEach(function (item) {
+                var comment = html.replace('USER', item.user);
+                comment = comment.replace('DATETIME', item.dateTime);
+                comment = comment.replace('COMMENT', item.text);
                 $("#list").append(comment);
-            }
-
+            });
         });
     }
 })

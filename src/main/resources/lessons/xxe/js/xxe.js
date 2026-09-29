@@ -71,12 +71,11 @@ var html = '<li class="comment">' +
 function getComments(field) {
     $.get("xxe/comments", function (result, status) {
         $(field).empty();
-        for (var i = 0; i < result.length; i++) {
-            var comment = html.replace('USER', result[i].user);
-            comment = comment.replace('DATETIME', result[i].dateTime);
-            comment = comment.replace('COMMENT', result[i].text);
+        result.forEach(function (item) {
+            var comment = html.replace('USER', item.user);
+            comment = comment.replace('DATETIME', item.dateTime);
+            comment = comment.replace('COMMENT', item.text);
             $(field).append(comment);
-        }
-
+        });
     });
 }

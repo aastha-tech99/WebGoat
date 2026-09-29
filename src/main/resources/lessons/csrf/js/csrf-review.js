@@ -33,14 +33,13 @@ $(document).ready(function () {
     function getChallenges() {
         $("#list").empty();
         $.get('csrf/review', function (result, status) {
-            for (var i = 0; i < result.length; i++) {
-                var comment = html.replace('USER', result[i].user);
-                comment = comment.replace('DATETIME', result[i].dateTime);
-                comment = comment.replace('COMMENT', result[i].text);
-                comment = comment.replace('STARS', result[i].stars)
+            result.forEach(function (item) {
+                var comment = html.replace('USER', item.user);
+                comment = comment.replace('DATETIME', item.dateTime);
+                comment = comment.replace('COMMENT', item.text);
+                comment = comment.replace('STARS', item.stars);
                 $("#list").append(comment);
-            }
-
+            });
         });
     }
 })
